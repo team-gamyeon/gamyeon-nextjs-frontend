@@ -1,0 +1,9 @@
+addReviewers: true
+addAssignees: false
+
+reviewers:
+  - needgreen
+  - christina-ahn
+  - Decseung
+
+numberOfReviewers: 2

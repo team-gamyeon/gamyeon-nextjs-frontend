@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Mic, SkipForward, CheckCircle2 } from 'lucide-react'
-import { CircularTimer } from '@/featured/interview/components/circular-timer'
+import { CircularTimer } from '@/featured/interview/components/CircularTimer'
 import type { Phase } from '@/featured/interview/types'
 import { QUESTIONS, TOTAL_THINK_TIME, TOTAL_ANSWER_TIME } from '@/featured/interview/types'
 

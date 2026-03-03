@@ -26,7 +26,6 @@ export const useGazeTracker = () => {
       })
       setLandmarker(instance)
     }
-
     initIdx()
   }, [])
 

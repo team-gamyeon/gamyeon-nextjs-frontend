@@ -18,11 +18,16 @@ export function useInterviewSession() {
   const [questionRevealed, setQuestionRevealed] = useState(false)
   const [showSetup, setShowSetup] = useState(true)
   const [interviewTitle, setInterviewTitle] = useState('AI 모의 면접')
-
   const phaseRef = useRef(phase)
-  phaseRef.current = phase
   const currentQuestionRef = useRef(currentQuestion)
-  currentQuestionRef.current = currentQuestion
+
+  useEffect(() => {
+    phaseRef.current = phase
+  }, [phase])
+
+  useEffect(() => {
+    currentQuestionRef.current = currentQuestion
+  }, [currentQuestion])
 
   const handleSetupComplete = (config: { title?: string }) => {
     setInterviewTitle(config.title || 'AI 모의 면접')

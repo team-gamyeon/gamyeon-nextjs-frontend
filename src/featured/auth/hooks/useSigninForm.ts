@@ -1,26 +1,26 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/featured/auth/store";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/featured/auth/store'
 
 export function useSigninForm() {
-  const router = useRouter();
-  const { signin } = useAuthStore();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter()
+  const { signin } = useAuthStore()
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleSignin = (e: React.FormEvent) => {
-    e.preventDefault();
-    signin();
-    router.push("/dashboard");
-  };
+    e.preventDefault()
+    signin()
+    router.push('/dashboard')
+  }
 
   const handleSocialSignin = () => {
-    signin();
-    router.push("/dashboard");
-  };
+    signin()
+    router.push('/dashboard')
+  }
 
   return {
     showPassword,
@@ -31,5 +31,5 @@ export function useSigninForm() {
     setPassword,
     handleSignin,
     handleSocialSignin,
-  };
+  }
 }

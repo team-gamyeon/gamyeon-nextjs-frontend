@@ -1,42 +1,40 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion'
 
 interface RadarChartProps {
-  data: { label: string; value: number }[];
-  size?: number;
+  data: { label: string; value: number }[]
+  size?: number
 }
 
 export function RadarChart({ data, size = 280 }: RadarChartProps) {
-  const center = size / 2;
-  const radius = size / 2 - 40;
-  const levels = 5;
-  const angleStep = (2 * Math.PI) / data.length;
+  const center = size / 2
+  const radius = size / 2 - 40
+  const levels = 5
+  const angleStep = (2 * Math.PI) / data.length
 
   const getPoint = (index: number, value: number) => {
-    const angle = angleStep * index - Math.PI / 2;
+    const angle = angleStep * index - Math.PI / 2
     return {
       x: center + radius * (value / 100) * Math.cos(angle),
       y: center + radius * (value / 100) * Math.sin(angle),
-    };
-  };
+    }
+  }
 
-  const dataPoints = data.map((d, i) => getPoint(i, d.value));
-  const pathData = dataPoints
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ") + " Z";
+  const dataPoints = data.map((d, i) => getPoint(i, d.value))
+  const pathData = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {/* Grid */}
       {Array.from({ length: levels }).map((_, level) => {
-        const levelRadius = (radius * (level + 1)) / levels;
+        const levelRadius = (radius * (level + 1)) / levels
         const points = data
           .map((_, i) => {
-            const angle = angleStep * i - Math.PI / 2;
-            return `${center + levelRadius * Math.cos(angle)},${center + levelRadius * Math.sin(angle)}`;
+            const angle = angleStep * i - Math.PI / 2
+            return `${center + levelRadius * Math.cos(angle)},${center + levelRadius * Math.sin(angle)}`
           })
-          .join(" ");
+          .join(' ')
         return (
           <polygon
             key={level}
@@ -46,12 +44,12 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
             strokeWidth={0.5}
             className="text-border"
           />
-        );
+        )
       })}
 
       {/* Axes */}
       {data.map((_, i) => {
-        const angle = angleStep * i - Math.PI / 2;
+        const angle = angleStep * i - Math.PI / 2
         return (
           <line
             key={i}
@@ -63,7 +61,7 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
             strokeWidth={0.5}
             className="text-border"
           />
-        );
+        )
       })}
 
       {/* Data area */}
@@ -74,7 +72,7 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
         strokeWidth={2}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         style={{ transformOrigin: `${center}px ${center}px` }}
       />
 
@@ -96,10 +94,10 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
 
       {/* Labels */}
       {data.map((d, i) => {
-        const angle = angleStep * i - Math.PI / 2;
-        const labelRadius = radius + 24;
-        const x = center + labelRadius * Math.cos(angle);
-        const y = center + labelRadius * Math.sin(angle);
+        const angle = angleStep * i - Math.PI / 2
+        const labelRadius = radius + 24
+        const x = center + labelRadius * Math.cos(angle)
+        const y = center + labelRadius * Math.sin(angle)
         return (
           <text
             key={i}
@@ -111,8 +109,8 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
           >
             {d.label}
           </text>
-        );
+        )
       })}
     </svg>
-  );
+  )
 }

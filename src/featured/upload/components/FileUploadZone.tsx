@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
-import { Progress } from "@/shared/ui/progress";
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Button } from '@/shared/ui/button'
+import { Card, CardContent, CardHeader } from '@/shared/ui/card'
+import { Badge } from '@/shared/ui/badge'
+import { Progress } from '@/shared/ui/progress'
 import {
   Upload,
   FileText,
@@ -15,12 +15,21 @@ import {
   Loader2,
   ArrowRight,
   File,
-} from "lucide-react";
-import { useFileUpload } from "@/featured/upload/hooks/useFileUpload";
+} from 'lucide-react'
+import { useFileUpload } from '@/featured/upload/hooks/useFileUpload'
 
 export function FileUploadZone() {
-  const { state, progress, fileName, fileSize, parsed, handleDrop, handleFileInput, reset, setDragging } =
-    useFileUpload();
+  const {
+    state,
+    progress,
+    fileName,
+    fileSize,
+    parsed,
+    handleDrop,
+    handleFileInput,
+    reset,
+    setDragging,
+  } = useFileUpload()
 
   return (
     <motion.div
@@ -28,11 +37,11 @@ export function FileUploadZone() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card className="border-border/50 shadow-lg shadow-primary/5">
+      <Card className="border-border/50 shadow-primary/5 shadow-lg">
         <CardContent className="p-6">
           <AnimatePresence mode="wait">
             {/* 업로드 존 */}
-            {(state === "idle" || state === "dragging") && (
+            {(state === 'idle' || state === 'dragging') && (
               <motion.div
                 key="upload-zone"
                 initial={{ opacity: 0 }}
@@ -40,30 +49,33 @@ export function FileUploadZone() {
                 exit={{ opacity: 0 }}
               >
                 <div
-                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setDragging(true)
+                  }}
                   onDragLeave={() => setDragging(false)}
                   onDrop={handleDrop}
                   className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all ${
-                    state === "dragging"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50 hover:bg-muted/30"
+                    state === 'dragging'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
                   }`}
                 >
                   <div
                     className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl transition-colors ${
-                      state === "dragging" ? "bg-primary/10" : "bg-muted"
+                      state === 'dragging' ? 'bg-primary/10' : 'bg-muted'
                     }`}
                   >
                     <Upload
                       className={`h-7 w-7 transition-colors ${
-                        state === "dragging" ? "text-primary" : "text-muted-foreground"
+                        state === 'dragging' ? 'text-primary' : 'text-muted-foreground'
                       }`}
                     />
                   </div>
                   <p className="mb-1 text-base font-medium">
                     이력서 파일을 드래그하거나 클릭하여 업로드
                   </p>
-                  <p className="mb-4 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mb-4 text-sm">
                     PDF, DOCX, HWP 파일 지원 (최대 10MB)
                   </p>
                   <Button variant="outline" size="sm" asChild>
@@ -89,7 +101,7 @@ export function FileUploadZone() {
             )}
 
             {/* 업로드 중 */}
-            {state === "uploading" && (
+            {state === 'uploading' && (
               <motion.div
                 key="uploading"
                 initial={{ opacity: 0, y: 10 }}
@@ -97,13 +109,16 @@ export function FileUploadZone() {
                 exit={{ opacity: 0 }}
                 className="flex flex-col items-center py-8"
               >
-                <div className="mb-6 flex items-center gap-3 rounded-xl bg-muted/50 px-4 py-3">
-                  <FileText className="h-5 w-5 text-primary" />
+                <div className="bg-muted/50 mb-6 flex items-center gap-3 rounded-xl px-4 py-3">
+                  <FileText className="text-primary h-5 w-5" />
                   <div className="text-left">
                     <p className="text-sm font-medium">{fileName}</p>
-                    <p className="text-xs text-muted-foreground">{fileSize}</p>
+                    <p className="text-muted-foreground text-xs">{fileSize}</p>
                   </div>
-                  <button onClick={reset} className="ml-4 text-muted-foreground hover:text-foreground">
+                  <button
+                    onClick={reset}
+                    className="text-muted-foreground hover:text-foreground ml-4"
+                  >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -118,7 +133,7 @@ export function FileUploadZone() {
             )}
 
             {/* 처리 중 */}
-            {state === "processing" && (
+            {state === 'processing' && (
               <motion.div
                 key="processing"
                 initial={{ opacity: 0, y: 10 }}
@@ -128,17 +143,17 @@ export function FileUploadZone() {
               >
                 <motion.div
                   animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
                 >
-                  <Loader2 className="h-10 w-10 text-primary" />
+                  <Loader2 className="text-primary h-10 w-10" />
                 </motion.div>
                 <p className="mt-4 text-base font-medium">AI가 이력서를 분석하고 있습니다...</p>
-                <p className="mt-1 text-sm text-muted-foreground">잠시만 기다려주세요</p>
+                <p className="text-muted-foreground mt-1 text-sm">잠시만 기다려주세요</p>
               </motion.div>
             )}
 
             {/* 완료 */}
-            {state === "done" && parsed && (
+            {state === 'done' && parsed && (
               <motion.div
                 key="done"
                 initial={{ opacity: 0, y: 10 }}
@@ -149,7 +164,9 @@ export function FileUploadZone() {
                 <div className="flex items-center gap-3 rounded-xl bg-green-50 p-4">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-medium text-green-800">이력서 분석이 완료되었습니다</p>
+                    <p className="text-sm font-medium text-green-800">
+                      이력서 분석이 완료되었습니다
+                    </p>
                     <p className="text-xs text-green-600">
                       {fileName} ({fileSize})
                     </p>
@@ -162,21 +179,21 @@ export function FileUploadZone() {
                 <Card className="border-border/50">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
-                      <File className="h-4 w-4 text-primary" />
+                      <File className="text-primary h-4 w-4" />
                       <h3 className="text-sm font-semibold">분석 결과 미리보기</h3>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4 pt-0">
                     <div>
-                      <p className="mb-1 text-xs font-medium text-muted-foreground">이름</p>
+                      <p className="text-muted-foreground mb-1 text-xs font-medium">이름</p>
                       <p className="text-sm">{parsed.name}</p>
                     </div>
                     <div>
-                      <p className="mb-1 text-xs font-medium text-muted-foreground">이메일</p>
+                      <p className="text-muted-foreground mb-1 text-xs font-medium">이메일</p>
                       <p className="text-sm">{parsed.email}</p>
                     </div>
                     <div>
-                      <p className="mb-2 text-xs font-medium text-muted-foreground">보유 기술</p>
+                      <p className="text-muted-foreground mb-2 text-xs font-medium">보유 기술</p>
                       <div className="flex flex-wrap gap-1.5">
                         {parsed.skills.map((skill) => (
                           <Badge key={skill} variant="secondary" className="text-xs">
@@ -186,7 +203,7 @@ export function FileUploadZone() {
                       </div>
                     </div>
                     <div>
-                      <p className="mb-2 text-xs font-medium text-muted-foreground">경력 사항</p>
+                      <p className="text-muted-foreground mb-2 text-xs font-medium">경력 사항</p>
                       <ul className="space-y-1">
                         {parsed.experience.map((exp) => (
                           <li key={exp} className="text-sm">
@@ -209,5 +226,5 @@ export function FileUploadZone() {
         </CardContent>
       </Card>
     </motion.div>
-  );
+  )
 }

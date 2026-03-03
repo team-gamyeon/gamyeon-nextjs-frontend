@@ -1,10 +1,10 @@
-import { DashboardSidebar } from "@/shared/components/dashboard-sidebar";
-import { UploadHeader } from "@/featured/upload/components/UploadHeader";
-import { FileUploadZone } from "@/featured/upload/components/FileUploadZone";
+import { DashboardSidebar } from '@/shared/components/dashboard-sidebar'
+import { UploadHeader } from '@/featured/upload/components/UploadHeader'
+import { FileUploadZone } from '@/featured/upload/components/FileUploadZone'
 
 export default function UploadPage() {
   return (
-    <div className="flex h-screen bg-muted/20">
+    <div className="bg-muted/20 flex h-screen">
       <DashboardSidebar />
 
       <main className="flex-1 overflow-y-auto">
@@ -14,5 +14,5 @@ export default function UploadPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

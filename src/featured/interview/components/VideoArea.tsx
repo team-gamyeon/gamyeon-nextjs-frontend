@@ -110,7 +110,10 @@ export function VideoArea({ cameraOn, micOn, phase }: VideoAreaProps) {
         // 1. EAR (눈 깜빡임) — 픽셀 좌표 기준으로 계산
         const scaleX = video.videoWidth
         const scaleY = video.videoHeight
-        const avgEAR = (calculateEAR(landmarks, LEFT_EYE, scaleX, scaleY) + calculateEAR(landmarks, RIGHT_EYE, scaleX, scaleY)) / 2
+        const avgEAR =
+          (calculateEAR(landmarks, LEFT_EYE, scaleX, scaleY) +
+            calculateEAR(landmarks, RIGHT_EYE, scaleX, scaleY)) /
+          2
         if (avgEAR < EAR_THRESHOLD) {
           if (!isBlinkingRef.current) {
             blinkCountRef.current += 1

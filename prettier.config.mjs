@@ -2,13 +2,13 @@
 const config = {
   semi: false,
   singleQuote: true,
-  trailingComma: "all",
+  trailingComma: 'all',
   tabWidth: 2,
   printWidth: 100,
   bracketSameLine: false,
-  arrowParens: "always",
+  arrowParens: 'always',
   bracketSpacing: true,
-  plugins: ["prettier-plugin-tailwindcss"],
-};
+  plugins: ['prettier-plugin-tailwindcss'],
+}
 
-export default config;
+export default config

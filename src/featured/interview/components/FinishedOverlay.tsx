@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/shared/ui/button";
-import { CheckCircle2, ChevronRight } from "lucide-react";
-import type { Phase } from "@/featured/interview/types";
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Button } from '@/shared/ui/button'
+import { CheckCircle2, ChevronRight } from 'lucide-react'
+import type { Phase } from '@/featured/interview/types'
 
 interface FinishedOverlayProps {
-  phase: Phase;
+  phase: Phase
 }
 
 export function FinishedOverlay({ phase }: FinishedOverlayProps) {
   return (
     <AnimatePresence>
-      {phase === "finished" && (
+      {phase === 'finished' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -26,7 +26,9 @@ export function FinishedOverlay({ phase }: FinishedOverlayProps) {
             </div>
             <div>
               <p className="text-xl font-bold text-green-300">면접이 완료되었습니다</p>
-              <p className="mt-1 text-sm text-white/50">수고하셨습니다! AI가 결과를 분석 중입니다.</p>
+              <p className="mt-1 text-sm text-white/50">
+                수고하셨습니다! AI가 결과를 분석 중입니다.
+              </p>
             </div>
             <Button size="lg" className="mt-2 gap-2 px-8" asChild>
               <Link href="/result">
@@ -38,5 +40,5 @@ export function FinishedOverlay({ phase }: FinishedOverlayProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

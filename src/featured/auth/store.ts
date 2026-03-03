@@ -12,7 +12,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isLoggedIn: false,
-      login: (u: User = MOCK_USER) => {
+      signin: (u: User = MOCK_USER) => {
         set({ user: u, isLoggedIn: true });
       },
       logout: () => {

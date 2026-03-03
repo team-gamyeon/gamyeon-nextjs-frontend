@@ -220,7 +220,7 @@ export function SignupForm() {
 
             <p className="text-center text-sm text-muted-foreground">
               이미 계정이 있으신가요?{" "}
-              <Link href="/login" className="font-medium text-primary hover:underline">
+              <Link href="/signin" className="font-medium text-primary hover:underline">
                 로그인
               </Link>
             </p>

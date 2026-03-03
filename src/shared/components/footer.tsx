@@ -1,19 +1,19 @@
-import Link from "next/link";
-import { BrainCircuit } from "lucide-react";
+import Link from 'next/link'
+import { BrainCircuit } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-muted/30">
+    <footer className="border-border/50 bg-muted/30 border-t">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <BrainCircuit className="h-5 w-5 text-primary-foreground" />
+              <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
+                <BrainCircuit className="text-primary-foreground h-5 w-5" />
               </div>
               <span className="text-lg font-bold">InterviewAI</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               AI 기반 면접 시뮬레이터로
               <br />
               합격의 가능성을 높이세요.
@@ -22,37 +22,69 @@ export function Footer() {
 
           <div className="space-y-3">
             <h4 className="text-sm font-semibold">서비스</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-foreground">AI 면접 연습</Link></li>
-              <li><Link href="#" className="hover:text-foreground">이력서 분석</Link></li>
-              <li><Link href="#" className="hover:text-foreground">피드백 리포트</Link></li>
+            <ul className="text-muted-foreground space-y-2 text-sm">
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  AI 면접 연습
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  이력서 분석
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  피드백 리포트
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div className="space-y-3">
             <h4 className="text-sm font-semibold">고객지원</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-foreground">자주 묻는 질문</Link></li>
-              <li><Link href="#" className="hover:text-foreground">이용가이드</Link></li>
-              <li><Link href="#" className="hover:text-foreground">문의하기</Link></li>
+            <ul className="text-muted-foreground space-y-2 text-sm">
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  자주 묻는 질문
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  이용가이드
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  문의하기
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div className="space-y-3">
             <h4 className="text-sm font-semibold">법적 고지</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-foreground">이용약관</Link></li>
-              <li><Link href="#" className="hover:text-foreground">개인정보 처리방침</Link></li>
+            <ul className="text-muted-foreground space-y-2 text-sm">
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  이용약관
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-foreground">
+                  개인정보 처리방침
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-border/50 pt-6">
-          <p className="text-center text-xs text-muted-foreground">
+        <div className="border-border/50 mt-10 border-t pt-6">
+          <p className="text-muted-foreground text-center text-xs">
             &copy; 2026 InterviewAI. All rights reserved.
           </p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

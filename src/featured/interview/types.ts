@@ -22,4 +22,4 @@ export const QUESTIONS = [
 ] as const
 
 export const TOTAL_THINK_TIME = 10
-export const TOTAL_ANSWER_TIME = 120
+export const TOTAL_ANSWER_TIME = 60

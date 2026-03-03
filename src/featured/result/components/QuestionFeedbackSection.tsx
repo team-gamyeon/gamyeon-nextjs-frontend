@@ -1,21 +1,21 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
-import type { FeedbackItem } from "@/featured/result/types";
+import { motion } from 'framer-motion'
+import { Card, CardContent } from '@/shared/ui/card'
+import { Badge } from '@/shared/ui/badge'
+import type { FeedbackItem } from '@/featured/result/types'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: 'easeOut' as const },
   }),
-};
+}
 
 interface QuestionFeedbackSectionProps {
-  feedbacks: FeedbackItem[];
+  feedbacks: FeedbackItem[]
 }
 
 export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionProps) {
@@ -60,21 +60,21 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${
                       fb.score >= 80
-                        ? "bg-green-100 text-green-700"
+                        ? 'bg-green-100 text-green-700'
                         : fb.score >= 70
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-amber-100 text-amber-700"
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-amber-100 text-amber-700'
                     }`}
                   >
                     {fb.score}
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">{fb.feedback}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{fb.feedback}</p>
               </CardContent>
             </Card>
           </motion.div>
         ))}
       </div>
     </motion.div>
-  );
+  )
 }

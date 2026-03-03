@@ -1,22 +1,22 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/shared/ui/card";
-import { TrendingUp, BarChart3, Clock } from "lucide-react";
+import { motion } from 'framer-motion'
+import { Card, CardContent } from '@/shared/ui/card'
+import { TrendingUp, BarChart3, Clock } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: 'easeOut' as const },
   }),
-};
+}
 
 export function StatusSection() {
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
         나의 현황
       </h2>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -27,7 +27,7 @@ export function StatusSection() {
             </div>
             <div>
               <p className="text-2xl font-bold">76</p>
-              <p className="text-xs text-muted-foreground">최근 점수</p>
+              <p className="text-muted-foreground text-xs">최근 점수</p>
             </div>
           </CardContent>
         </Card>
@@ -38,7 +38,7 @@ export function StatusSection() {
             </div>
             <div>
               <p className="text-2xl font-bold">5</p>
-              <p className="text-xs text-muted-foreground">총 면접 횟수</p>
+              <p className="text-muted-foreground text-xs">총 면접 횟수</p>
             </div>
           </CardContent>
         </Card>
@@ -49,11 +49,11 @@ export function StatusSection() {
             </div>
             <div>
               <p className="text-2xl font-bold">1:45</p>
-              <p className="text-xs text-muted-foreground">평균 답변 시간</p>
+              <p className="text-muted-foreground text-xs">평균 답변 시간</p>
             </div>
           </CardContent>
         </Card>
       </div>
     </motion.div>
-  );
+  )
 }

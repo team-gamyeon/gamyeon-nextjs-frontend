@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { Button } from "@/shared/ui/button";
+import Link from 'next/link'
+import { Button } from '@/shared/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/shared/ui/dialog";
+} from '@/shared/ui/dialog'
 
 interface EndDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function EndDialog({ open, onOpenChange }: EndDialogProps) {
@@ -40,5 +40,5 @@ export function EndDialog({ open, onOpenChange }: EndDialogProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

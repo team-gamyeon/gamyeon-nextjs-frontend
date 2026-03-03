@@ -1,92 +1,92 @@
-"use client";
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import type { Phase } from "@/featured/interview/types";
-import { QUESTIONS, TOTAL_THINK_TIME, TOTAL_ANSWER_TIME } from "@/featured/interview/types";
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Phase } from '@/featured/interview/types'
+import { QUESTIONS, TOTAL_THINK_TIME, TOTAL_ANSWER_TIME } from '@/featured/interview/types'
 
 export function useInterviewSession() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [phase, setPhase] = useState<Phase>("ready");
-  const [timeLeft, setTimeLeft] = useState(TOTAL_THINK_TIME);
-  const [micOn, setMicOn] = useState(true);
-  const [cameraOn, setCameraOn] = useState(true);
-  const [showEndDialog, setShowEndDialog] = useState(false);
-  const [typingKey, setTypingKey] = useState(0);
-  const [questionRevealed, setQuestionRevealed] = useState(false);
-  const [showSetup, setShowSetup] = useState(true);
-  const [interviewTitle, setInterviewTitle] = useState("AI 모의 면접");
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [phase, setPhase] = useState<Phase>('ready')
+  const [timeLeft, setTimeLeft] = useState(TOTAL_THINK_TIME)
+  const [micOn, setMicOn] = useState(true)
+  const [cameraOn, setCameraOn] = useState(true)
+  const [showEndDialog, setShowEndDialog] = useState(false)
+  const [typingKey, setTypingKey] = useState(0)
+  const [questionRevealed, setQuestionRevealed] = useState(false)
+  const [showSetup, setShowSetup] = useState(true)
+  const [interviewTitle, setInterviewTitle] = useState('AI 모의 면접')
 
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
-  const currentQuestionRef = useRef(currentQuestion);
-  currentQuestionRef.current = currentQuestion;
+  const phaseRef = useRef(phase)
+  phaseRef.current = phase
+  const currentQuestionRef = useRef(currentQuestion)
+  currentQuestionRef.current = currentQuestion
 
   const handleSetupComplete = (config: { title?: string }) => {
-    setInterviewTitle(config.title || "AI 모의 면접");
-    setShowSetup(false);
-    setTypingKey((prev) => prev + 1);
-    setQuestionRevealed(false);
-    setPhase("thinking");
-    setTimeLeft(TOTAL_THINK_TIME);
-  };
+    setInterviewTitle(config.title || 'AI 모의 면접')
+    setShowSetup(false)
+    setTypingKey((prev) => prev + 1)
+    setQuestionRevealed(false)
+    setPhase('thinking')
+    setTimeLeft(TOTAL_THINK_TIME)
+  }
 
   const handleSetupCancel = () => {
-    router.push("/dashboard");
-  };
+    router.push('/dashboard')
+  }
 
   const handleNext = useCallback(() => {
-    const q = currentQuestionRef.current;
+    const q = currentQuestionRef.current
     if (q < QUESTIONS.length - 1) {
-      setPhase("transition");
+      setPhase('transition')
       setTimeout(() => {
-        setCurrentQuestion((prev) => prev + 1);
-        setTypingKey((prev) => prev + 1);
-        setQuestionRevealed(false);
-        setPhase("thinking");
-        setTimeLeft(TOTAL_THINK_TIME);
-      }, 600);
+        setCurrentQuestion((prev) => prev + 1)
+        setTypingKey((prev) => prev + 1)
+        setQuestionRevealed(false)
+        setPhase('thinking')
+        setTimeLeft(TOTAL_THINK_TIME)
+      }, 600)
     } else {
-      setPhase("finished");
+      setPhase('finished')
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    if (phase !== "thinking" && phase !== "answering") return;
+    if (phase !== 'thinking' && phase !== 'answering') return
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          if (phaseRef.current === "thinking") {
-            setPhase("answering");
-            return TOTAL_ANSWER_TIME;
+          if (phaseRef.current === 'thinking') {
+            setPhase('answering')
+            return TOTAL_ANSWER_TIME
           } else {
-            handleNext();
-            return 0;
+            handleNext()
+            return 0
           }
         }
-        return prev - 1;
-      });
-    }, 1000);
+        return prev - 1
+      })
+    }, 1000)
 
-    return () => clearInterval(interval);
-  }, [phase, handleNext]);
+    return () => clearInterval(interval)
+  }, [phase, handleNext])
 
   const startInterview = () => {
-    setTypingKey((prev) => prev + 1);
-    setQuestionRevealed(false);
-    setPhase("thinking");
-    setTimeLeft(TOTAL_THINK_TIME);
-  };
+    setTypingKey((prev) => prev + 1)
+    setQuestionRevealed(false)
+    setPhase('thinking')
+    setTimeLeft(TOTAL_THINK_TIME)
+  }
 
   const startAnswering = () => {
-    setPhase("answering");
-    setTimeLeft(TOTAL_ANSWER_TIME);
-  };
+    setPhase('answering')
+    setTimeLeft(TOTAL_ANSWER_TIME)
+  }
 
-  const isActive = phase === "thinking" || phase === "answering";
+  const isActive = phase === 'thinking' || phase === 'answering'
 
   return {
     currentQuestion,
@@ -109,5 +109,5 @@ export function useInterviewSession() {
     handleNext,
     startInterview,
     startAnswering,
-  };
+  }
 }

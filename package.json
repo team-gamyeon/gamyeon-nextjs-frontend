@@ -1,12 +1,14 @@
 {
-  "name": "ai-interview-v4",
+  "name": "Gamyeon-v1",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,mjs}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,mjs}\""
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.32",

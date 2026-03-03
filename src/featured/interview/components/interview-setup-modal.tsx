@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent } from "@/shared/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -304,7 +304,8 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onCancel(); }}>
-      <DialogContent showCloseButton={false} className="max-w-7xl overflow-hidden p-0 min-w-4xl" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+      <DialogContent showCloseButton={false} className="max-w-7xl overflow-hidden p-0 min-w-4xl" aria-describedby={undefined} onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        <DialogTitle className="sr-only">면접 환경 설정</DialogTitle>
         <div className="flex min-h-155">
           <aside className="flex w-64 shrink-0 flex-col border-r border-border/60 bg-muted/30">
             <div className="border-b border-border/50 px-5 py-5">

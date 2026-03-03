@@ -4,21 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/featured/auth/store";
 
-export function useLoginForm() {
+export function useSigninForm() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { signin } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignin = (e: React.FormEvent) => {
     e.preventDefault();
-    login();
+    signin();
     router.push("/dashboard");
   };
 
-  const handleSocialLogin = () => {
-    login();
+  const handleSocialSignin = () => {
+    signin();
     router.push("/dashboard");
   };
 
@@ -29,7 +29,7 @@ export function useLoginForm() {
     setEmail,
     password,
     setPassword,
-    handleLogin,
-    handleSocialLogin,
+    handleSignin,
+    handleSocialSignin,
   };
 }

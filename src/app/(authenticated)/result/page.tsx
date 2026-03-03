@@ -1,33 +1,31 @@
-import Link from "next/link";
-import { Button } from "@/shared/ui/button";
-import { ArrowRight } from "lucide-react";
-import { ResultHeader } from "@/featured/result/components/ResultHeader";
-import { ScoreSummaryCard } from "@/featured/result/components/ScoreSummaryCard";
-import { RadarChartSection } from "@/featured/result/components/RadarChartSection";
-import { StrengthsImprovementsSection } from "@/featured/result/components/StrengthsImprovementsSection";
-import { QuestionFeedbackSection } from "@/featured/result/components/QuestionFeedbackSection";
-import { NextActionsSection } from "@/featured/result/components/NextActionsSection";
+import Link from 'next/link'
+import { Button } from '@/shared/ui/button'
+import { ArrowRight } from 'lucide-react'
+import { ResultHeader } from '@/featured/result/components/ResultHeader'
+import { ScoreSummaryCard } from '@/featured/result/components/ScoreSummaryCard'
+import { RadarChartSection } from '@/featured/result/components/RadarChartSection'
+import { StrengthsImprovementsSection } from '@/featured/result/components/StrengthsImprovementsSection'
+import { QuestionFeedbackSection } from '@/featured/result/components/QuestionFeedbackSection'
+import { NextActionsSection } from '@/featured/result/components/NextActionsSection'
 import {
   MOCK_RADAR_DATA,
   MOCK_FEEDBACKS,
   MOCK_STRENGTHS,
   MOCK_IMPROVEMENTS,
   MOCK_NEXT_ACTIONS,
-} from "@/featured/result/types";
+} from '@/featured/result/types'
 
-const OVERALL_SCORE = 76;
+const OVERALL_SCORE = 76
 
 export default function ResultPage() {
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="bg-muted/20 min-h-screen">
       <ResultHeader />
 
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold sm:text-3xl">면접 결과 리포트</h1>
-          <p className="mt-2 text-muted-foreground">
-            2026년 2월 25일 · 프론트엔드 개발자 직무
-          </p>
+          <p className="text-muted-foreground mt-2">2026년 2월 25일 · 프론트엔드 개발자 직무</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -37,10 +35,7 @@ export default function ResultPage() {
           <RadarChartSection data={MOCK_RADAR_DATA} />
         </div>
 
-        <StrengthsImprovementsSection
-          strengths={MOCK_STRENGTHS}
-          improvements={MOCK_IMPROVEMENTS}
-        />
+        <StrengthsImprovementsSection strengths={MOCK_STRENGTHS} improvements={MOCK_IMPROVEMENTS} />
 
         <QuestionFeedbackSection feedbacks={MOCK_FEEDBACKS} />
 
@@ -56,5 +51,5 @@ export default function ResultPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

@@ -7,11 +7,11 @@ export interface User {
 export interface AuthState {
   user: User | null;
   isLoggedIn: boolean;
-  login: (user?: User) => void;
+  signin: (user?: User) => void;
   logout: () => void;
 }
 
-export interface LoginFormData {
+export interface SigninFormData {
   email: string;
   password: string;
 }

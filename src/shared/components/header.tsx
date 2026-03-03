@@ -56,7 +56,7 @@ export function Header() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <BrainCircuit className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold tracking-tight">InterviewAI</span>
+          <span className="text-lg font-bold tracking-tight">가상면접</span>
         </Link>
 
         {/* 데스크탑 네비게이션 */}
@@ -122,7 +122,7 @@ export function Header() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">로그인</Link>
+                <Link href="/signin">로그인</Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/signup">무료로 시작하기</Link>
@@ -178,7 +178,7 @@ export function Header() {
                 ) : (
                   <>
                     <Button variant="outline" asChild>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>로그인</Link>
+                      <Link href="/signin" onClick={() => setIsOpen(false)}>로그인</Link>
                     </Button>
                     <Button asChild>
                       <Link href="/signup" onClick={() => setIsOpen(false)}>무료로 시작하기</Link>

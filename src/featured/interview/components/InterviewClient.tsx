@@ -1,6 +1,5 @@
 'use client'
 
-import { InterviewSetupModal } from '@/featured/interview/components/interview-setup-modal'
 import { InterviewTopBar } from '@/featured/interview/components/InterviewTopBar'
 import { QuestionBanner } from '@/featured/interview/components/QuestionBanner'
 import { VideoArea } from '@/featured/interview/components/VideoArea'
@@ -10,6 +9,7 @@ import { FinishedOverlay } from '@/featured/interview/components/FinishedOverlay
 import { ControlBar } from '@/featured/interview/components/ControlBar'
 import { EndDialog } from '@/featured/interview/components/EndDialog'
 import { useInterviewSession } from '@/featured/interview/hooks/useInterviewSession'
+import { InterviewSetupModal } from './InterviewSetupModal'
 
 export function InterviewClient() {
   const session = useInterviewSession()
@@ -33,7 +33,7 @@ export function InterviewClient() {
       />
 
       <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
-        <VideoArea cameraOn={session.cameraOn} micOn={session.micOn} phase={session.phase} />
+        <VideoArea cameraOn={session.cameraOn} micOn={session.micOn} phase={session.phase} basePose={session.basePose} />
 
         <TimerOverlay
           isActive={session.isActive}

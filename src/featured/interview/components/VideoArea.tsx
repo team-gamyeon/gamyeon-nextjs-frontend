@@ -32,8 +32,8 @@ const extractEulerAngles = (matrix: number[] | Float32Array) => {
   try {
     const RAD_TO_DEG = 180 / Math.PI
     // MediaPipe의 4x4 변환 행렬에서 회전 정보 추출
-    const pitch = Math.atan2(-matrix[6], matrix[10]) * RAD_TO_DEG
-    const yaw = Math.asin(matrix[2]) * RAD_TO_DEG
+    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG // 상하 반전 보정
+    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG // 좌우 반전 보정
 
     // NaN 방지 처리
     return {
@@ -62,9 +62,10 @@ interface VideoAreaProps {
   cameraOn: boolean
   micOn: boolean
   phase: Phase
+  basePose?: { pitch: number; yaw: number } | null
 }
 
-export function VideoArea({ cameraOn, micOn, phase }: VideoAreaProps) {
+export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) {
   const landmarker = useGazeTracker()
   const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
@@ -135,12 +136,14 @@ export function VideoArea({ cameraOn, micOn, phase }: VideoAreaProps) {
           yaw = angles.yaw
         }
 
-        // 3. 시선 집중도
+        // 3. 시선 집중도 (basePose 기준으로 상대 판단)
+        const baseYaw = basePose?.yaw ?? 0
+        const basePitch = basePose?.pitch ?? 0
         let currentFocus: 'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' = 'CENTER'
-        if (yaw > 15) currentFocus = 'LEFT'
-        else if (yaw < -15) currentFocus = 'RIGHT'
-        else if (pitch > 15) currentFocus = 'DOWN'
-        else if (pitch < -10) currentFocus = 'UP'
+        if (yaw - baseYaw > 15) currentFocus = 'LEFT'
+        else if (yaw - baseYaw < -15) currentFocus = 'RIGHT'
+        else if (pitch - basePitch > 15) currentFocus = 'DOWN'
+        else if (pitch - basePitch < -10) currentFocus = 'UP'
 
         // 4. UI 상태 업데이트
         if (now - lastStateUpdateRef.current >= STATE_INTERVAL_MS) {
@@ -314,7 +317,7 @@ export function VideoArea({ cameraOn, micOn, phase }: VideoAreaProps) {
               <AlertTriangle className="h-4 w-4 text-orange-400" />
               이상 감지 로그 (Event-driven)
             </h3>
-            <div className="mt-2 flex h-[140px] flex-col gap-2 overflow-y-auto pr-1">
+            <div className="mt-2 flex h-35 flex-col gap-2 overflow-y-auto pr-1">
               {backendLogs.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-xs text-slate-500">
                   특이점 발생 대기 중...

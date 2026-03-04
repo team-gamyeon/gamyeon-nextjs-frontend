@@ -18,6 +18,7 @@ export function useInterviewSession() {
   const [questionRevealed, setQuestionRevealed] = useState(false)
   const [showSetup, setShowSetup] = useState(true)
   const [interviewTitle, setInterviewTitle] = useState('AI 모의 면접')
+  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
   const phaseRef = useRef(phase)
   const currentQuestionRef = useRef(currentQuestion)
 
@@ -29,8 +30,9 @@ export function useInterviewSession() {
     currentQuestionRef.current = currentQuestion
   }, [currentQuestion])
 
-  const handleSetupComplete = (config: { title?: string }) => {
+  const handleSetupComplete = (config: { title?: string; basePose?: { pitch: number; yaw: number } | null }) => {
     setInterviewTitle(config.title || 'AI 모의 면접')
+    setBasePose(config.basePose ?? null)
     setShowSetup(false)
     setTypingKey((prev) => prev + 1)
     setQuestionRevealed(false)
@@ -108,6 +110,7 @@ export function useInterviewSession() {
     setQuestionRevealed,
     showSetup,
     interviewTitle,
+    basePose,
     isActive,
     handleSetupComplete,
     handleSetupCancel,

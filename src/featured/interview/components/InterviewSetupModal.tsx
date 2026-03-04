@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dialog, DialogContent } from '@/shared/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import {
@@ -18,9 +18,25 @@ import {
   FolderOpen,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
+
+const ALIGN_THRESHOLD = 12 // degrees
+const ALIGN_DURATION_MS = 3000 // 3초
+
+const extractEulerAngles = (matrix: number[] | Float32Array) => {
+  try {
+    const RAD_TO_DEG = 180 / Math.PI
+    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG // 상하 반전 보정
+    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG // 좌우 반전 보정
+    return { pitch: isNaN(pitch) ? 0 : pitch, yaw: isNaN(yaw) ? 0 : yaw }
+  } catch {
+    return { pitch: 0, yaw: 0 }
+  }
+}
 
 export interface InterviewSetupConfig {
   title: string
+  basePose: { pitch: number; yaw: number } | null
 }
 
 interface Props {
@@ -34,9 +50,9 @@ type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
 
 const STEPS = [
   { id: 1, label: '면접 제목', icon: FileText },
-  { id: 2, label: '카메라 권한', icon: Video },
-  { id: 3, label: '마이크 권한', icon: Mic },
-  { id: 4, label: '문서 업로드', icon: FolderOpen },
+  { id: 2, label: '문서 업로드', icon: FolderOpen },
+  { id: 3, label: '카메라 권한', icon: Video },
+  { id: 4, label: '마이크 권한', icon: Mic },
 ] as const
 
 function VuMeter({ level }: { level: number }) {
@@ -123,6 +139,12 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     'pending',
   ])
 
+  const landmarker = useGazeTracker()
+  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
+  const [alignProgress, setAlignProgress] = useState(0)
+  const [faceDetected, setFaceDetected] = useState(false)
+  const poseDetectRef = useRef<number | null>(null)
+
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
   const doneCount = statuses.filter((s) => s === 'done').length
   const allDone = doneCount === 4
@@ -185,7 +207,74 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     if (title.trim()) completeStep(1)
   }
 
+  useEffect(() => {
+    if (cameraStatus !== 'granted' || !landmarker || basePose) return
+
+    const video = cameraVideoRef.current
+    if (!video) return
+
+    let alignStart: number | null = null
+
+    const detect = () => {
+      if (video.readyState !== 4) {
+        poseDetectRef.current = requestAnimationFrame(detect)
+        return
+      }
+      try {
+        const now = performance.now()
+        const result = landmarker.detectForVideo(video, now)
+
+        if (!result.faceLandmarks?.length) {
+          alignStart = null
+          setAlignProgress(0)
+          setFaceDetected(false)
+          poseDetectRef.current = requestAnimationFrame(detect)
+          return
+        }
+
+        setFaceDetected(true)
+
+        const matrixes = result.facialTransformationMatrixes
+        if (!matrixes?.length) {
+          poseDetectRef.current = requestAnimationFrame(detect)
+          return
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
+        const { pitch, yaw } = extractEulerAngles(rawMatrix)
+        const inPosition = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
+
+        if (inPosition) {
+          if (alignStart === null) alignStart = now
+          const elapsed = now - alignStart
+          const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
+          setAlignProgress(progress)
+
+          if (elapsed >= ALIGN_DURATION_MS) {
+            setBasePose({ pitch: Math.round(pitch), yaw: Math.round(yaw) })
+            return // 루프 종료
+          }
+        } else {
+          alignStart = null
+          setAlignProgress(0)
+        }
+      } catch {
+        // ignore
+      }
+      poseDetectRef.current = requestAnimationFrame(detect)
+    }
+
+    poseDetectRef.current = requestAnimationFrame(detect)
+    return () => {
+      if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
+    }
+  }, [cameraStatus, landmarker, basePose])
+
   const requestCamera = async () => {
+    setBasePose(null)
+    setAlignProgress(0)
+    setFaceDetected(false)
     setCameraStatus('requesting')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
@@ -197,9 +286,10 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
   }
 
   const confirmCamera = () => {
+    if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
     cameraStream?.getTracks().forEach((t) => t.stop())
     setCameraStream(null)
-    completeStep(2)
+    completeStep(3)
   }
 
   const requestMic = async () => {
@@ -226,7 +316,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     micStreamRef.current?.getTracks().forEach((t) => t.stop())
     micStreamRef.current = null
     setAudioLevel(0)
-    completeStep(3)
+    completeStep(4)
   }
 
   const makeFileHandler =
@@ -269,124 +359,6 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           </div>
         )
       case 2:
-        return (
-          <div className="space-y-5">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <Video className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">카메라 권한 요청 및 테스트</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                면접 영상 녹화를 위해 카메라 접근 권한이 필요합니다.
-              </p>
-            </div>
-            {cameraStatus === 'idle' && (
-              <Button variant="outline" className="gap-2" onClick={requestCamera}>
-                <Video className="h-4 w-4" />
-                카메라 권한 요청하기
-              </Button>
-            )}
-            {cameraStatus === 'requesting' && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                권한 요청 중...
-              </p>
-            )}
-            {cameraStatus === 'granted' && (
-              <div className="space-y-3">
-                <div className="aspect-video overflow-hidden rounded-xl bg-slate-900">
-                  <video
-                    ref={cameraVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    className="h-full w-full -scale-x-100 object-cover"
-                  />
-                </div>
-                <p className="flex items-center gap-1.5 text-xs text-green-600">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  카메라가 정상적으로 감지되었습니다
-                </p>
-                <Button size="sm" className="gap-2" onClick={confirmCamera}>
-                  확인 완료
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
-            {cameraStatus === 'denied' && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  카메라 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setCameraStatus('idle')}>
-                    다시 시도
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => completeStep(2)}>
-                    건너뛰기
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      case 3:
-        return (
-          <div className="space-y-5">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <Mic className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">마이크 권한 요청 및 테스트</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                답변 인식을 위해 마이크 접근 권한이 필요합니다.
-              </p>
-            </div>
-            {micStatus === 'idle' && (
-              <Button variant="outline" className="gap-2" onClick={requestMic}>
-                <Mic className="h-4 w-4" />
-                마이크 권한 요청하기
-              </Button>
-            )}
-            {micStatus === 'requesting' && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                권한 요청 중...
-              </p>
-            )}
-            {micStatus === 'granted' && (
-              <div className="space-y-3">
-                <VuMeter level={audioLevel} />
-                <p className="flex items-center gap-1.5 text-xs text-green-600">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  마이크가 감지되었습니다. 말해보세요!
-                </p>
-                <Button size="sm" className="gap-2" onClick={confirmMic}>
-                  확인 완료
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
-            {micStatus === 'denied' && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  마이크 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setMicStatus('idle')}>
-                    다시 시도
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => completeStep(3)}>
-                    건너뛰기
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      case 4:
         return (
           <div className="space-y-5">
             <div>
@@ -440,15 +412,182 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                 size="sm"
                 disabled={!hasAnyDoc}
                 className="gap-2"
-                onClick={() => completeStep(4)}
+                onClick={() => completeStep(2)}
               >
                 완료
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => completeStep(4)}>
+              <Button variant="ghost" size="sm" onClick={() => completeStep(2)}>
                 건너뛰기
               </Button>
             </div>
+          </div>
+        )
+      case 3:
+        return (
+          <div className="space-y-5">
+            <div>
+              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Video className="text-primary h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">카메라 권한 요청 및 테스트</h3>
+              <p className="text-muted-foreground mt-1 text-sm">
+                면접 영상 녹화를 위해 카메라 접근 권한이 필요합니다.
+              </p>
+            </div>
+            {cameraStatus === 'idle' && (
+              <Button variant="outline" className="gap-2" onClick={requestCamera}>
+                <Video className="h-4 w-4" />
+                카메라 권한 요청하기
+              </Button>
+            )}
+            {cameraStatus === 'requesting' && (
+              <p className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                권한 요청 중...
+              </p>
+            )}
+            {cameraStatus === 'granted' && (
+              <div className="space-y-3">
+                <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-900">
+                  <video
+                    ref={cameraVideoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="h-full w-full -scale-x-100 object-cover"
+                  />
+
+                  {/* AI 엔진 로딩 중 */}
+                  {!landmarker && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+                      <p className="animate-pulse text-xs text-white">AI 분석 준비 중...</p>
+                    </div>
+                  )}
+
+                  {/* 카메라 가이드라인 이미지 */}
+                  {landmarker && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src="/images/camera_guide_line.png"
+                      alt=""
+                      className="pointer-events-none absolute inset-0 h-full w-full scale-[1.3] object-contain"
+                      style={{
+                        opacity: basePose ? 1 : alignProgress > 0 ? 0.8 : 0.45,
+                        transition: 'opacity 0.3s',
+                      }}
+                    />
+                  )}
+
+                  {/* 상태 안내 텍스트 */}
+                  {landmarker && (
+                    <div className="absolute inset-x-0 bottom-3 flex justify-center">
+                      {basePose ? (
+                        <div className="flex items-center gap-1.5 rounded-full bg-green-500/80 px-3 py-1 text-xs text-white backdrop-blur">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          기준 자세 설정 완료
+                        </div>
+                      ) : alignProgress > 0 ? (
+                        <div className="flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs text-white backdrop-blur">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          자세 유지 중 ({Math.ceil(3 * (1 - alignProgress / 100))}초)
+                        </div>
+                      ) : (
+                        <div className="rounded-full bg-black/50 px-3 py-1 text-xs text-white/80 backdrop-blur">
+                          {faceDetected ? '가이드 안에 얼굴을 맞춰주세요' : '얼굴을 화면에 맞춰주세요'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 정렬 진행 바 */}
+                {landmarker && !basePose && (
+                  <div className="h-1 overflow-hidden rounded-full bg-border">
+                    <div
+                      className="h-full rounded-full bg-blue-500 transition-all duration-200"
+                      style={{ width: `${alignProgress}%` }}
+                    />
+                  </div>
+                )}
+
+                <Button size="sm" className="gap-2" disabled={!basePose} onClick={confirmCamera}>
+                  확인 완료
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            {cameraStatus === 'denied' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  카메라 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setCameraStatus('idle')}>
+                    다시 시도
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => completeStep(3)}>
+                    건너뛰기
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      case 4:
+        return (
+          <div className="space-y-5">
+            <div>
+              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Mic className="text-primary h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">마이크 권한 요청 및 테스트</h3>
+              <p className="text-muted-foreground mt-1 text-sm">
+                답변 인식을 위해 마이크 접근 권한이 필요합니다.
+              </p>
+            </div>
+            {micStatus === 'idle' && (
+              <Button variant="outline" className="gap-2" onClick={requestMic}>
+                <Mic className="h-4 w-4" />
+                마이크 권한 요청하기
+              </Button>
+            )}
+            {micStatus === 'requesting' && (
+              <p className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                권한 요청 중...
+              </p>
+            )}
+            {micStatus === 'granted' && (
+              <div className="space-y-3">
+                <VuMeter level={audioLevel} />
+                <p className="flex items-center gap-1.5 text-xs text-green-600">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  마이크가 감지되었습니다. 말해보세요!
+                </p>
+                <Button size="sm" className="gap-2" onClick={confirmMic}>
+                  확인 완료
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            {micStatus === 'denied' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  마이크 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setMicStatus('idle')}>
+                    다시 시도
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => completeStep(4)}>
+                    건너뛰기
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )
       default:
@@ -477,6 +616,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
+        <DialogTitle className="sr-only">면접 환경 설정</DialogTitle>
         <div className="flex min-h-155">
           <aside className="border-border/60 bg-muted/30 flex w-64 shrink-0 flex-col border-r">
             <div className="border-border/50 border-b px-5 py-5">
@@ -516,7 +656,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
               </Button>
               <Button
                 disabled={!allDone}
-                onClick={() => onComplete({ title: title.trim() || '모의 면접' })}
+                onClick={() => onComplete({ title: title.trim() || '모의 면접', basePose })}
                 className="gap-2"
               >
                 면접 시작하기

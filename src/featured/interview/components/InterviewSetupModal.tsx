@@ -20,7 +20,7 @@ import {
 import { cn } from '@/shared/lib/utils'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 
-const ALIGN_THRESHOLD = 15 // 정면 판정 각도 기준 (15도 이내면 정면으로 인정)
+const ALIGN_THRESHOLD = 8 // 정면 판정 각도 기준 (15도 이내면 정면으로 인정)
 const ALIGN_DURATION_MS = 3000 // 3초
 
 const extractEulerAngles = (matrix: number[] | Float32Array) => {
@@ -143,11 +143,11 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
   const { landmarker } = useGazeTracker()
 
   // 💡 UI 업데이트를 위해 useRef 대신 useState를 사용합니다.
-  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
+  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null) //상하좌우 각도를 저장
 
-  const [alignProgress, setAlignProgress] = useState(0)
-  const [faceDetected, setFaceDetected] = useState(false)
-  const poseDetectRef = useRef<number | null>(null)
+  const [alignProgress, setAlignProgress] = useState(0) // 파란색 게이지
+  const [faceDetected, setFaceDetected] = useState(false) // 얼굴 인식 여부
+  const poseDetectRef = useRef<number | null>(null) // 캡처된 각도 데이터
 
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
   const doneCount = statuses.filter((s) => s === 'done').length
@@ -213,7 +213,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
 
   // 🎯 [체크포인트 1] 베이스 포인트 캡처 핵심 로직
   useEffect(() => {
-    // 이미 베이스 포인트를 찍었거나, 권한이 없으면 이 함수는 아예 돌지 않습니다 (방어막)
+    // 1. 방어막 (일찍 종료시키기)
     if (cameraStatus !== 'granted' || !landmarker || basePose) return
 
     const video = cameraVideoRef.current
@@ -245,18 +245,19 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           poseDetectRef.current = requestAnimationFrame(detect)
           return
         }
-
+        // 2. 각도 추출
         const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
         const { pitch, yaw } = extractEulerAngles(rawMatrix)
 
-        // 정면(15도 이내)을 보고 있는지 확인
+        // 3. 정면 판정 (15도 이내)
         const inPosition = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
 
+        // 4. 타이머 및 캡처
         if (inPosition) {
-          if (alignStart === null) alignStart = now
-          const elapsed = now - alignStart
+          if (alignStart === null) alignStart = now // 처음 정면을 본 시간 기록
+          const elapsed = now - alignStart // 지난 시간 계산
           const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
-          setAlignProgress(progress)
+          setAlignProgress(progress) // 파란 게이지 증가
 
           // 🎯 3초(3000ms)가 지난 바로 그 순간!
           if (elapsed >= ALIGN_DURATION_MS) {
@@ -502,6 +503,12 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           기준 자세 설정 완료
                         </div>
+                      ) : faceDetected && !alignProgress ? (
+                        // 🎯 [수정됨] 얼굴은 인식됐지만 정면이 아닐 때 (게이지가 0일 때) 빨간색 경고
+                        <div className="flex animate-pulse items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          가이드 안에 얼굴을 똑바로 맞춰주세요
+                        </div>
                       ) : alignProgress > 0 ? (
                         <div className="flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs text-white backdrop-blur">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -509,9 +516,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                         </div>
                       ) : (
                         <div className="rounded-full bg-black/50 px-3 py-1 text-xs text-white/80 backdrop-blur">
-                          {faceDetected
-                            ? '가이드 안에 얼굴을 맞춰주세요'
-                            : '얼굴을 화면에 맞춰주세요'}
+                          얼굴을 화면에 맞춰주세요
                         </div>
                       )}
                     </div>

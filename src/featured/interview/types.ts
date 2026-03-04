@@ -13,6 +13,26 @@ export interface InterviewSession {
   showSetup: boolean
 }
 
+export type FocusState =
+  | 'CENTER'
+  | 'LEFT'
+  | 'RIGHT'
+  | 'TOP'
+  | 'BOTTOM'
+  | 'TOP-LEFT'
+  | 'TOP-RIGHT'
+  | 'BOTTOM-LEFT'
+  | 'BOTTOM-RIGHT'
+
+export interface BackendPayload {
+  timestamp: string
+  focusState: FocusState
+  blinkCount: number
+  pitch: string
+  yaw: string
+  eventType: 'ANOMALY' | 'RECOVERY' // 백엔드 분류용 태그
+}
+
 export const QUESTIONS = [
   '자기소개를 부탁드립니다. 본인의 핵심 역량과 지원 동기를 중심으로 말씀해주세요.',
   '이전 프로젝트에서 가장 어려웠던 기술적 도전은 무엇이었고, 어떻게 해결하셨나요?',

@@ -20,14 +20,14 @@ import {
 import { cn } from '@/shared/lib/utils'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 
-const ALIGN_THRESHOLD = 12 // degrees
+const ALIGN_THRESHOLD = 8 // 정면 판정 각도 기준 (15도 이내면 정면으로 인정)
 const ALIGN_DURATION_MS = 3000 // 3초
 
 const extractEulerAngles = (matrix: number[] | Float32Array) => {
   try {
     const RAD_TO_DEG = 180 / Math.PI
-    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG // 상하 반전 보정
-    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG // 좌우 반전 보정
+    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
+    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
     return { pitch: isNaN(pitch) ? 0 : pitch, yaw: isNaN(yaw) ? 0 : yaw }
   } catch {
     return { pitch: 0, yaw: 0 }
@@ -139,11 +139,15 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     'pending',
   ])
 
-  const landmarker = useGazeTracker()
-  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
-  const [alignProgress, setAlignProgress] = useState(0)
-  const [faceDetected, setFaceDetected] = useState(false)
-  const poseDetectRef = useRef<number | null>(null)
+  // 1. AI 엔진(landmarker)을 가져옵니다.
+  const { landmarker } = useGazeTracker()
+
+  // 💡 UI 업데이트를 위해 useRef 대신 useState를 사용합니다.
+  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null) //상하좌우 각도를 저장
+
+  const [alignProgress, setAlignProgress] = useState(0) // 파란색 게이지
+  const [faceDetected, setFaceDetected] = useState(false) // 얼굴 인식 여부
+  const poseDetectRef = useRef<number | null>(null) // 캡처된 각도 데이터
 
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
   const doneCount = statuses.filter((s) => s === 'done').length
@@ -207,7 +211,9 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     if (title.trim()) completeStep(1)
   }
 
+  // 🎯 [체크포인트 1] 베이스 포인트 캡처 핵심 로직
   useEffect(() => {
+    // 1. 방어막 (일찍 종료시키기)
     if (cameraStatus !== 'granted' || !landmarker || basePose) return
 
     const video = cameraVideoRef.current
@@ -239,23 +245,35 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           poseDetectRef.current = requestAnimationFrame(detect)
           return
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // 2. 각도 추출
         const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
         const { pitch, yaw } = extractEulerAngles(rawMatrix)
+
+        // 3. 정면 판정 (15도 이내)
         const inPosition = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
 
+        // 4. 타이머 및 캡처
         if (inPosition) {
-          if (alignStart === null) alignStart = now
-          const elapsed = now - alignStart
+          if (alignStart === null) alignStart = now // 처음 정면을 본 시간 기록
+          const elapsed = now - alignStart // 지난 시간 계산
           const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
-          setAlignProgress(progress)
+          setAlignProgress(progress) // 파란 게이지 증가
 
+          // 🎯 3초(3000ms)가 지난 바로 그 순간!
           if (elapsed >= ALIGN_DURATION_MS) {
-            setBasePose({ pitch: Math.round(pitch), yaw: Math.round(yaw) })
-            return // 루프 종료
+            const finalPitch = Math.round(pitch)
+            const finalYaw = Math.round(yaw)
+
+            // 콘솔창에 딱 한 번만 로그를 찍습니다.
+            console.log('✅ 베이스 포인트 캡처 완료:', { pitch: finalPitch, yaw: finalYaw })
+
+            // 상태를 저장합니다. (저장되는 순간 위쪽 방어막에 의해 이 루프는 두 번 다시 실행되지 않음)
+            setBasePose({ pitch: finalPitch, yaw: finalYaw })
+
+            return // 애니메이션 프레임 루프를 완벽하게 종료시킵니다.
           }
         } else {
+          // 고개를 돌리면 3초 타이머 초기화
           alignStart = null
           setAlignProgress(0)
         }
@@ -266,6 +284,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     }
 
     poseDetectRef.current = requestAnimationFrame(detect)
+
     return () => {
       if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
     }
@@ -458,14 +477,12 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                     className="h-full w-full -scale-x-100 object-cover"
                   />
 
-                  {/* AI 엔진 로딩 중 */}
                   {!landmarker && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
                       <p className="animate-pulse text-xs text-white">AI 분석 준비 중...</p>
                     </div>
                   )}
 
-                  {/* 카메라 가이드라인 이미지 */}
                   {landmarker && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -479,13 +496,18 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                     />
                   )}
 
-                  {/* 상태 안내 텍스트 */}
                   {landmarker && (
                     <div className="absolute inset-x-0 bottom-3 flex justify-center">
                       {basePose ? (
                         <div className="flex items-center gap-1.5 rounded-full bg-green-500/80 px-3 py-1 text-xs text-white backdrop-blur">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           기준 자세 설정 완료
+                        </div>
+                      ) : faceDetected && !alignProgress ? (
+                        // 🎯 [수정됨] 얼굴은 인식됐지만 정면이 아닐 때 (게이지가 0일 때) 빨간색 경고
+                        <div className="flex animate-pulse items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          가이드 안에 얼굴을 똑바로 맞춰주세요
                         </div>
                       ) : alignProgress > 0 ? (
                         <div className="flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs text-white backdrop-blur">
@@ -494,7 +516,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                         </div>
                       ) : (
                         <div className="rounded-full bg-black/50 px-3 py-1 text-xs text-white/80 backdrop-blur">
-                          {faceDetected ? '가이드 안에 얼굴을 맞춰주세요' : '얼굴을 화면에 맞춰주세요'}
+                          얼굴을 화면에 맞춰주세요
                         </div>
                       )}
                     </div>
@@ -503,7 +525,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
 
                 {/* 정렬 진행 바 */}
                 {landmarker && !basePose && (
-                  <div className="h-1 overflow-hidden rounded-full bg-border">
+                  <div className="bg-border h-1 overflow-hidden rounded-full">
                     <div
                       className="h-full rounded-full bg-blue-500 transition-all duration-200"
                       style={{ width: `${alignProgress}%` }}

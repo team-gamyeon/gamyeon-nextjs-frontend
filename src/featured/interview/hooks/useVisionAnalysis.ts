@@ -23,8 +23,8 @@ interface UseVisionParams {
   canvasRef?: React.RefObject<HTMLCanvasElement | null>
 }
 
-export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseVisionParams) {
-  const landmarker = useGazeTracker()
+export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams) {
+  const { landmarker } = useGazeTracker()
   const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
 
@@ -143,12 +143,17 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
           // TOP 대각선: 45° 섹터, BOTTOM 대각선: 60° 섹터
           // TOP: 50° 섹터, BOTTOM: 20° 섹터 (타이트)
           if (angle > -20 && angle <= 20) currentFocus = 'RIGHT'
-          else if (angle > 20 && angle <= 65) currentFocus = 'TOP-RIGHT'   // 45°
-          else if (angle > 65 && angle <= 115) currentFocus = 'TOP'        // 50°
-          else if (angle > 115 && angle <= 160) currentFocus = 'TOP-LEFT'  // 45°
+          else if (angle > 20 && angle <= 65)
+            currentFocus = 'TOP-RIGHT' // 45°
+          else if (angle > 65 && angle <= 115)
+            currentFocus = 'TOP' // 50°
+          else if (angle > 115 && angle <= 160)
+            currentFocus = 'TOP-LEFT' // 45°
           else if (angle > 160 || angle <= -160) currentFocus = 'LEFT'
-          else if (angle > -160 && angle <= -100) currentFocus = 'BOTTOM-LEFT'  // 60°
-          else if (angle > -100 && angle <= -80) currentFocus = 'BOTTOM'        // 20°
+          else if (angle > -160 && angle <= -100)
+            currentFocus = 'BOTTOM-LEFT' // 60°
+          else if (angle > -100 && angle <= -80)
+            currentFocus = 'BOTTOM' // 20°
           else currentFocus = 'BOTTOM-RIGHT' // -80° ~ -20° (60°)
         }
 

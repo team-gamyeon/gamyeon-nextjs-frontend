@@ -29,7 +29,7 @@ export function QuestionBanner({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="absolute top-[57px] right-0 left-0 z-30 flex justify-center px-4 pt-3"
+          className="absolute top-14.25 right-0 left-0 z-30 flex justify-center px-4 pt-3"
         >
           <div className="flex w-full max-w-2xl items-start gap-3 rounded-2xl border border-white/10 bg-slate-800/90 px-5 py-4 shadow-2xl backdrop-blur-md">
             <span className="bg-primary mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white">

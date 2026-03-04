@@ -1,15 +1,12 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, VideoOff, Activity, AlertTriangle } from 'lucide-react'
+import { Mic, MicOff, VideoOff, Activity, AlertTriangle, ScanFace } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
 import Webcam from 'react-webcam'
-import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'  
-import {
-  EAR_THRESHOLD,
-  YAW_THRESHOLD,
-  PITCH_THRESHOLD,
-} from '@/featured/interview/utils/visionUtils'
+import { useRef, useState } from 'react'
+import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
+import { EAR_THRESHOLD, YAW_THRESHOLD, PITCH_THRESHOLD } from '@/featured/interview/utils/visionUtils'
 
 interface VideoAreaProps {
   cameraOn: boolean
@@ -19,10 +16,13 @@ interface VideoAreaProps {
 }
 
 export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) {
+  const [showMesh, setShowMesh] = useState(true)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { backendLogs, realtimeStats, webcamRef, landmarker } = useVisionAnalysis({
     cameraOn,
     phase,
     basePose,
+    canvasRef,
   })
 
   return (
@@ -44,6 +44,13 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
             <VideoOff className="mx-auto mb-2 h-14 w-14" />
             <p className="text-sm">카메라 꺼짐</p>
           </div>
+        )}
+
+        {cameraOn && phase === 'answering' && showMesh && (
+          <canvas
+            ref={canvasRef}
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          />
         )}
 
         {cameraOn && !landmarker && (
@@ -73,12 +80,19 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute top-3 left-3"
+              className="absolute top-3 left-3 flex items-center gap-2"
             >
               <div className="flex items-center gap-1.5 rounded-full bg-red-500/80 px-3 py-1 text-xs font-medium text-white backdrop-blur">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-white" />
                 답변 분석 중
               </div>
+              <button
+                onClick={() => setShowMesh((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium backdrop-blur transition-colors ${showMesh ? 'bg-emerald-500/80 text-white' : 'bg-slate-700/80 text-slate-300'}`}
+              >
+                <ScanFace className="h-3 w-3" />
+                {showMesh ? 'Mesh ON' : 'Mesh OFF'}
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -86,7 +100,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
 
       {/* 아랫부분: 실시간 수치 및 백엔드 전송 로그 영역 */}
       {phase === 'answering' && (
-        <div className="grid grid-cols-2 gap-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white shadow-xl">
+        <div className="grid grid-cols-2 items-stretch gap-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white shadow-xl">
           {/* 좌측 패널 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
@@ -125,6 +139,20 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
               <div className="rounded bg-slate-900 p-2">
                 <p className="text-slate-400">Blink Count</p>
                 <p className="font-mono text-lg text-blue-400">{realtimeStats.blinkCount}</p>
+              </div>
+              <div className="col-span-3 grid grid-cols-2 gap-2">
+                <div className="rounded bg-slate-900 p-2">
+                  <p className="text-slate-400">L Eye (x, y)</p>
+                  <p className="font-mono text-sm text-purple-400">
+                    ({realtimeStats.leftGazeX}, {realtimeStats.leftGazeY})
+                  </p>
+                </div>
+                <div className="rounded bg-slate-900 p-2">
+                  <p className="text-slate-400">R Eye (x, y)</p>
+                  <p className="font-mono text-sm text-purple-400">
+                    ({realtimeStats.rightGazeX}, {realtimeStats.rightGazeY})
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -173,12 +201,12 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
           </div>
 
           {/* 우측 패널: 이벤트 기반 로그 */}
-          <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
+          <div className="flex min-h-0 flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <AlertTriangle className="h-4 w-4 text-orange-400" />
               이상 감지 로그 (Event-driven)
             </h3>
-            <div className="mt-2 flex h-35 flex-col gap-2 overflow-y-auto pr-1">
+            <div className="mt-2 flex flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {backendLogs.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-xs text-slate-500">
                   특이점 발생 대기 중...
@@ -187,18 +215,23 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                 backendLogs.map((log, idx) => (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between rounded border p-2 font-mono text-[10px] ${log.eventType === 'RECOVERY' ? 'border-emerald-700/50 bg-emerald-900/20' : 'border-orange-700/50 bg-orange-900/20'}`}
+                    className={`flex flex-col gap-1 rounded border p-2 font-mono text-[10px] ${log.eventType === 'RECOVERY' ? 'border-emerald-700/50 bg-emerald-900/20' : 'border-orange-700/50 bg-orange-900/20'}`}
                   >
-                    <span className="w-16 text-slate-400">{log.timestamp}</span>
-                    <span
-                      className={`w-14 font-bold ${log.focusState === 'CENTER' ? 'text-emerald-400' : 'text-orange-400'}`}
-                    >
-                      {log.eventType === 'RECOVERY' ? '정상복귀' : log.focusState}
-                    </span>
-                    <span className="text-slate-300">Blinks: {log.blinkCount}</span>
-                    <span className="w-20 truncate text-right text-[9px] text-slate-500">
-                      P:{log.pitch} Y:{log.yaw}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">{log.timestamp}</span>
+                      <span
+                        className={`font-bold ${log.focusState === 'CENTER' ? 'text-emerald-400' : 'text-orange-400'}`}
+                      >
+                        {log.eventType === 'RECOVERY' ? '정상복귀' : log.focusState}
+                      </span>
+                      <span className="text-slate-300">Blinks: {log.blinkCount}</span>
+                    </div>
+                    <div className="text-[9px] text-slate-500">
+                      L: ({log.leftGazeX}, {log.leftGazeY}) R: ({log.rightGazeX}, {log.rightGazeY})
+                    </div>
+                    <div className="text-[9px] text-slate-500">
+                      head: pitch:{log.pitch} yaw:{log.yaw} roll:{log.roll}
+                    </div>
                   </div>
                 ))
               )}

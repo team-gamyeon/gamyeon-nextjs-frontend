@@ -30,6 +30,11 @@ export interface BackendPayload {
   blinkCount: number
   pitch: string
   yaw: string
+  roll: string
+  leftGazeX: string
+  leftGazeY: string
+  rightGazeX: string
+  rightGazeY: string
   eventType: 'ANOMALY' | 'RECOVERY' // 백엔드 분류용 태그
 }
 

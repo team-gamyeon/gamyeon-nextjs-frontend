@@ -18,7 +18,7 @@ interface VideoAreaProps {
 export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) {
   const [showMesh, setShowMesh] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { backendLogs, realtimeStats, webcamRef, landmarker } = useVisionAnalysis({
+  const { uiLogs, realtimeStats, webcamRef, landmarker } = useVisionAnalysis({
     cameraOn,
     phase,
     basePose,
@@ -206,13 +206,13 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
               <AlertTriangle className="h-4 w-4 text-orange-400" />
               이상 감지 로그 (Event-driven)
             </h3>
-            <div className="mt-2 flex flex-1 flex-col gap-2 overflow-y-auto pr-1">
-              {backendLogs.length === 0 ? (
+            <div className="mt-2 flex h-35 flex-col gap-2 overflow-y-auto pr-1">
+              {uiLogs.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-xs text-slate-500">
                   특이점 발생 대기 중...
                 </div>
               ) : (
-                backendLogs.map((log, idx) => (
+                uiLogs.map((log, idx) => (
                   <div
                     key={idx}
                     className={`flex flex-col gap-1 rounded border p-2 font-mono text-[10px] ${log.eventType === 'RECOVERY' ? 'border-emerald-700/50 bg-emerald-900/20' : 'border-orange-700/50 bg-orange-900/20'}`}

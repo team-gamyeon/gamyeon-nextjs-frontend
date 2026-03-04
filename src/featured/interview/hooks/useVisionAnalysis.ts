@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 import Webcam from 'react-webcam'
-import { BackendPayload, FocusState, type Phase } from '@/featured/interview/types'
+import {
+  InterviewBatchPayload,
+  BackendPayload,
+  FocusState,
+  type Phase,
+} from '@/featured/interview/types'
 import {
   calculateEAR,
   extractEulerAngles,
@@ -14,6 +19,7 @@ import {
   EAR_HISTORY_SIZE,
   YAW_THRESHOLD,
   PITCH_THRESHOLD,
+  calculateFocus,
 } from '@/featured/interview/utils/visionUtils'
 
 interface UseVisionParams {
@@ -23,10 +29,18 @@ interface UseVisionParams {
   canvasRef?: React.RefObject<HTMLCanvasElement | null>
 }
 
-export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams) {
+export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseVisionParams) {
   const { landmarker } = useGazeTracker()
   const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
+
+  const rawDataRef = useRef<InterviewBatchPayload['raw_data']>([])
+  const eventsRef = useRef<InterviewBatchPayload['events']>([])
+  const segmentSequenceRef = useRef(1)
+
+  const lastSampleTimeRef = useRef(0)
+  const lastBatchTimeRef = useRef(0)
+  const lastLoggedStateRef = useRef<FocusState>('CENTER')
 
   const [realtimeStats, setRealtimeStats] = useState({
     pitch: 0,
@@ -40,30 +54,77 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
     rightGazeX: 0,
     rightGazeY: 0,
   })
+  const [uiLogs, setUiLogs] = useState<any[]>([])
 
-  const [backendLogs, setBackendLogs] = useState<BackendPayload[]>([])
+  const [backendLogs, setBackendLogs] = useState<InterviewBatchPayload>()
 
   const blinkCountRef = useRef(0)
-  // 눈 깜빡임 감지 상태 머신
   const earHistoryRef = useRef<number[]>([]) // EAR 롤링 평균 버퍼
   const eyeClosedFramesRef = useRef(0) // threshold 아래 유지된 연속 프레임 수
   const eyeClosedAtRef = useRef<number | null>(null) // 눈 감긴 시점 (ms)
   const eyeCurrentlyClosedRef = useRef(false) // 현재 눈 감김 상태
-  const lastDetectTimeRef = useRef(0)
-  const lastStateUpdateRef = useRef(0)
-  const lastLogTimeRef = useRef(0)
-  const lastLoggedStateRef = useRef<FocusState>('CENTER')
-
-  const DETECT_INTERVAL_MS = 50
-  const STATE_INTERVAL_MS = 100
 
   useEffect(() => {
+    const updateUiLogs = (
+      currentFocus: FocusState,
+      type: 'AWAY_START' | 'AWAY_END',
+      pitch: number,
+      yaw: number,
+    ) => {
+      setUiLogs((prev) => {
+        const newLog = {
+          timestamp: new Date().toLocaleTimeString([], {
+            hour12: false,
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+          focusState: currentFocus,
+          blinkCount: blinkCountRef.current,
+          pitch: pitch.toFixed(1),
+          yaw: yaw.toFixed(1),
+          eventType: type === 'AWAY_END' ? 'RECOVERY' : 'ANOMALY',
+        }
+        return [newLog, ...prev].slice(0, 5) // 최신 5개 유지
+      })
+    }
+
+    // 서버 전송 : 추후 명세 나오면 utils로 분리 예정
+    const sendBatchData = () => {
+      if (rawDataRef.current.length === 0) return
+      const payload: InterviewBatchPayload = {
+        meta: {
+          interviewId: 'int_99', //실제 ID 필요
+          questionId: 'q_05', //실제 ID 필요
+          timestamp: Date.now(),
+          segmentSequence: segmentSequenceRef.current,
+        },
+        metrics_summary: {
+          average_concentration: 0, // 로직에 따라 계산
+          blink_count: blinkCountRef.current,
+          is_away_detected: eventsRef.current.some((e) => e.type === 'AWAY_START'),
+        },
+        raw_data: [...rawDataRef.current],
+        events: [...eventsRef.current],
+      }
+
+      // 배치 데이터 콘솔 출력
+      console.group(`[BATCH #${segmentSequenceRef.current}] - 10초치 데이터 전송`)
+      console.log('최종 페이로드:', payload)
+      console.log('수집된 Raw 데이터 수:', rawDataRef.current.length)
+      console.log('발생한 이벤트 수:', eventsRef.current.length)
+      console.groupEnd()
+      console.log('[BATCH SEND]', payload)
+
+      rawDataRef.current = []
+      eventsRef.current = []
+      segmentSequenceRef.current += 1
+      lastBatchTimeRef.current = performance.now()
+    }
+
     const detectGaze = () => {
       requestRef.current = requestAnimationFrame(detectGaze)
 
       const now = performance.now()
-      if (now - lastDetectTimeRef.current < DETECT_INTERVAL_MS) return
-      lastDetectTimeRef.current = now
 
       const video = webcamRef.current?.video
       if (!landmarker || !video || video.readyState !== 4) return
@@ -71,10 +132,9 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
       try {
         const result = landmarker.detectForVideo(video, now)
         if (!result.faceLandmarks?.length) return
-
         const landmarks = result.faceLandmarks[0]
 
-        // 1. EAR (눈 깜빡임) — 픽셀 좌표 기준으로 계산
+        // 눈 깜빡임
         const scaleX = video.videoWidth
         const scaleY = video.videoHeight
         const rawEAR =
@@ -111,7 +171,7 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
           }
         }
 
-        // 2. Head Pose (고개 각도)
+        // 고개 각도
         let pitch = 0,
           yaw = 0,
           roll = 0
@@ -124,38 +184,8 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
           roll = angles.roll
         }
 
-        // 3. 시선 집중도 (basePose 기준, 정규화 벡터 + atan2 각도 기반 9방향)
-        const baseYaw = basePose?.yaw ?? 0
-        const basePitch = basePose?.pitch ?? 0
-        const deltaYaw = yaw - baseYaw
-        const deltaPitch = pitch - basePitch
-
-        // 각 축의 임계값으로 정규화 → 타원형 영역을 원형으로 변환
-        const normYaw = deltaYaw / YAW_THRESHOLD
-        const normPitch = deltaPitch / PITCH_THRESHOLD
-        const magnitude = Math.sqrt(normYaw * normYaw + normPitch * normPitch)
-
-        let currentFocus: FocusState = 'CENTER'
-        if (magnitude >= 1) {
-          // angle 기준: 0°=RIGHT, 90°=TOP, ±180°=LEFT, -90°=BOTTOM
-          const angle = Math.atan2(-normPitch, -normYaw) * (180 / Math.PI)
-          // RIGHT·LEFT: 40° 섹터 (±20°, 타이트)
-          // TOP 대각선: 45° 섹터, BOTTOM 대각선: 60° 섹터
-          // TOP: 50° 섹터, BOTTOM: 20° 섹터 (타이트)
-          if (angle > -20 && angle <= 20) currentFocus = 'RIGHT'
-          else if (angle > 20 && angle <= 65)
-            currentFocus = 'TOP-RIGHT' // 45°
-          else if (angle > 65 && angle <= 115)
-            currentFocus = 'TOP' // 50°
-          else if (angle > 115 && angle <= 160)
-            currentFocus = 'TOP-LEFT' // 45°
-          else if (angle > 160 || angle <= -160) currentFocus = 'LEFT'
-          else if (angle > -160 && angle <= -100)
-            currentFocus = 'BOTTOM-LEFT' // 60°
-          else if (angle > -100 && angle <= -80)
-            currentFocus = 'BOTTOM' // 20°
-          else currentFocus = 'BOTTOM-RIGHT' // -80° ~ -20° (60°)
-        }
+        // 머리 방향
+        const currentFocus = calculateFocus(pitch, yaw, basePose)
 
         // 4. Face Mesh 드로잉 — Grid Renderer 스타일 (MediaPipe Studio 동일)
         const canvas = canvasRef?.current
@@ -191,11 +221,12 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
             // y_out = (vh*scale/ch)*y_in + offsetY
             ctx.save()
             ctx.setTransform(
-              -(vw * scale) / cw,   // a: x 스케일 (음수 = 미러)
-              0, 0,
-              (vh * scale) / ch,    // d: y 스케일
+              -(vw * scale) / cw, // a: x 스케일 (음수 = 미러)
+              0,
+              0,
+              (vh * scale) / ch, // d: y 스케일
               vw * scale + offsetX, // e: x 이동
-              offsetY,              // f: y 이동
+              offsetY, // f: y 이동
             )
             const drawingUtils = new DrawingUtils(ctx)
             // DrawingUtils가 normalized(0~1) 좌표를 canvas.width/height로 스케일하는 것을 이용
@@ -247,7 +278,6 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
             ctx.restore()
           }
         }
-
         // 5. Gaze (x, y) — 각 iris 중심 (정규화 좌표 0~1, 미러 반전)
         // left iris center: 468, right iris center: 473
         const leftIris = landmarks[468]
@@ -257,9 +287,15 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
         const rightGazeX = rightIris ? Number((1 - rightIris.x).toFixed(3)) : 0
         const rightGazeY = rightIris ? Number(rightIris.y.toFixed(3)) : 0
 
-        // 5. UI 상태 업데이트
-        if (now - lastStateUpdateRef.current >= STATE_INTERVAL_MS) {
-          lastStateUpdateRef.current = now
+        // raw_data 쌓기
+        if (now - lastSampleTimeRef.current >= 100) {
+          rawDataRef.current.push({
+            offset_ms: Math.floor(now),
+            gaze: { left: { x: 33, y: 44 }, right: { x: 55, y: 66 } },
+            head: { pitch, yaw, roll },
+          })
+          lastSampleTimeRef.current = now
+
           setRealtimeStats({
             pitch: Math.round(pitch),
             yaw: Math.round(yaw),
@@ -267,65 +303,33 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
             ear: Number(avgEAR.toFixed(3)),
             blinkCount: blinkCountRef.current,
             focusState: currentFocus,
-            leftGazeX,
-            leftGazeY,
-            rightGazeX,
-            rightGazeY,
+            leftGazeX: 0,
+            leftGazeY: 0,
+            rightGazeX: 0,
+            rightGazeY: 0,
           })
+          if (rawDataRef.current.length % 20 === 0)
+            console.log(`데이터 쌓이는 중... ${rawDataRef.current.length}%`)
         }
 
-        // 5. 특이점 발생 시에만 백엔드 전송 (Event-driven)
-        const isAnomaly = currentFocus !== 'CENTER'
+        // events 쌓기
         const isStateChanged = currentFocus !== lastLoggedStateRef.current
-        const timeSinceLastLog = now - lastLogTimeRef.current
+        if (isStateChanged) {
+          const type = currentFocus === 'CENTER' ? 'AWAY_END' : 'AWAY_START'
+          eventsRef.current.push({
+            type,
+            offset_ms: Math.floor(now),
+            direction: currentFocus !== 'CENTER' ? currentFocus : 'CENTER',
+          })
 
-        // 조건 1: 시선 이탈이 감지되었고 (상태가 막 변했거나, 이탈한 지 2초가 지났을 때)
-        if (isAnomaly && (isStateChanged || timeSinceLastLog > 2000)) {
-          lastLogTimeRef.current = now
+          updateUiLogs(currentFocus, type, pitch, yaw)
           lastLoggedStateRef.current = currentFocus
-
-          setBackendLogs((prev) =>
-            [
-              {
-                timestamp: new Date().toISOString().split('T')[1].slice(0, 8),
-                focusState: currentFocus,
-                blinkCount: blinkCountRef.current,
-                pitch: pitch.toFixed(1),
-                yaw: yaw.toFixed(1),
-                roll: roll.toFixed(1),
-                leftGazeX: leftGazeX.toFixed(3),
-                leftGazeY: leftGazeY.toFixed(3),
-                rightGazeX: rightGazeX.toFixed(3),
-                rightGazeY: rightGazeY.toFixed(3),
-                eventType: 'ANOMALY' as const,
-              },
-              ...prev,
-            ].slice(0, 5),
-          )
+          console.warn(`상태 변경: ${lastLoggedStateRef.current} -> ${currentFocus}`)
         }
-        // 조건 2: 시선이 이탈했다가 다시 정면('CENTER')으로 복귀했을 때 (1회성 기록)
-        else if (!isAnomaly && isStateChanged) {
-          lastLogTimeRef.current = now
-          lastLoggedStateRef.current = 'CENTER'
 
-          setBackendLogs((prev) =>
-            [
-              {
-                timestamp: new Date().toISOString().split('T')[1].slice(0, 8),
-                focusState: 'CENTER' as const,
-                blinkCount: blinkCountRef.current,
-                pitch: pitch.toFixed(1),
-                yaw: yaw.toFixed(1),
-                roll: roll.toFixed(1),
-                leftGazeX: leftGazeX.toFixed(3),
-                leftGazeY: leftGazeY.toFixed(3),
-                rightGazeX: rightGazeX.toFixed(3),
-                rightGazeY: rightGazeY.toFixed(3),
-                eventType: 'RECOVERY' as const,
-              },
-              ...prev,
-            ].slice(0, 5),
-          )
+        // 10초마다 배치 전송
+        if (now - lastBatchTimeRef.current >= 10000) {
+          sendBatchData()
         }
       } catch (error) {
         console.error('MediaPipe Error:', error)
@@ -333,16 +337,17 @@ export function useVisionAnalysis({ cameraOn, phase, basePose }: UseVisionParams
     }
 
     if (landmarker && cameraOn && phase === 'answering') {
+      lastBatchTimeRef.current = performance.now()
       requestRef.current = requestAnimationFrame(detectGaze)
     }
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)
     }
-  }, [landmarker, cameraOn, phase])
+  }, [landmarker, cameraOn, phase, basePose])
 
   return {
-    backendLogs,
+    uiLogs,
     realtimeStats,
     webcamRef,
     landmarker,

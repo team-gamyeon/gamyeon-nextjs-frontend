@@ -1,57 +1,11 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, VideoOff, Activity, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Mic, MicOff, VideoOff, Activity, AlertTriangle } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
 import Webcam from 'react-webcam'
-import { useGazeTracker } from '../hooks/useGazeTracker'
-import { useEffect, useRef, useState } from 'react'
-
-// --- 1. 비전 연산 유틸리티 함수 ---
-
-const getDistance = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
-  return Math.hypot(p1.x - p2.x, p1.y - p2.y)
-}
-
-const calculateEAR = (landmarks: any[], indices: number[], scaleX: number, scaleY: number) => {
-  const pts = indices.map((i) => ({
-    x: landmarks[i].x * scaleX,
-    y: landmarks[i].y * scaleY,
-  }))
-  const v1 = getDistance(pts[1], pts[5])
-  const v2 = getDistance(pts[2], pts[4])
-  const h = getDistance(pts[0], pts[3])
-  if (h === 0) return 1
-  return (v1 + v2) / (2.0 * h)
-}
-
-const extractEulerAngles = (matrix: number[] | Float32Array) => {
-  try {
-    const RAD_TO_DEG = 180 / Math.PI
-    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
-    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
-
-    return {
-      pitch: isNaN(pitch) ? 0 : pitch,
-      yaw: isNaN(yaw) ? 0 : yaw,
-    }
-  } catch (e) {
-    return { pitch: 0, yaw: 0 }
-  }
-}
-
-const LEFT_EYE = [33, 160, 158, 133, 153, 144]
-const RIGHT_EYE = [362, 385, 387, 263, 373, 380]
-const EAR_THRESHOLD = 0.22
-
-interface BackendPayload {
-  timestamp: string
-  focusState: 'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN'
-  blinkCount: number
-  pitch: string
-  yaw: string
-  eventType: 'ANOMALY' | 'RECOVERY'
-}
+import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
+import { EAR_THRESHOLD, YAW_THRESHOLD, PITCH_THRESHOLD } from '@/featured/interview/utils/visionUtils'
 
 interface VideoAreaProps {
   cameraOn: boolean
@@ -61,152 +15,11 @@ interface VideoAreaProps {
 }
 
 export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) {
-  // 🎯 [핵심 수정] 도구 상자에서 landmarker만 쏙 꺼내옵니다.
-  const { landmarker } = useGazeTracker()
-
-  const webcamRef = useRef<Webcam>(null)
-  const requestRef = useRef<number | null>(null)
-
-  const [realtimeStats, setRealtimeStats] = useState({
-    pitch: 0,
-    yaw: 0,
-    ear: 0,
-    focusState: 'CENTER',
+  const { backendLogs, realtimeStats, webcamRef, landmarker } = useVisionAnalysis({
+    cameraOn,
+    phase,
+    basePose,
   })
-
-  const [backendLogs, setBackendLogs] = useState<BackendPayload[]>([])
-
-  const blinkCountRef = useRef(0)
-  const isBlinkingRef = useRef(false)
-  const lastDetectTimeRef = useRef(0)
-  const lastStateUpdateRef = useRef(0)
-  const lastLogTimeRef = useRef(0)
-
-  const lastLoggedStateRef = useRef<'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN'>('CENTER')
-
-  const DETECT_INTERVAL_MS = 50
-  const STATE_INTERVAL_MS = 100
-
-  useEffect(() => {
-    const detectGaze = () => {
-      requestRef.current = requestAnimationFrame(detectGaze)
-
-      const now = performance.now()
-      if (now - lastDetectTimeRef.current < DETECT_INTERVAL_MS) return
-      lastDetectTimeRef.current = now
-
-      const video = webcamRef.current?.video
-      if (!landmarker || !video || video.readyState !== 4) return
-
-      try {
-        const result = landmarker.detectForVideo(video, now)
-        if (!result.faceLandmarks?.length) return
-
-        const landmarks = result.faceLandmarks[0]
-
-        // 1. EAR (눈 깜빡임)
-        const scaleX = video.videoWidth
-        const scaleY = video.videoHeight
-        const avgEAR =
-          (calculateEAR(landmarks, LEFT_EYE, scaleX, scaleY) +
-            calculateEAR(landmarks, RIGHT_EYE, scaleX, scaleY)) /
-          2
-        if (avgEAR < EAR_THRESHOLD) {
-          if (!isBlinkingRef.current) {
-            blinkCountRef.current += 1
-            isBlinkingRef.current = true
-          }
-        } else {
-          isBlinkingRef.current = false
-        }
-
-        // 2. Head Pose (고개 각도)
-        let pitch = 0,
-          yaw = 0
-        const matrixes = result.facialTransformationMatrixes
-        if (matrixes && matrixes.length > 0) {
-          const rawMatrix = matrixes[0].data || matrixes[0]
-          const angles = extractEulerAngles(rawMatrix)
-          pitch = angles.pitch
-          yaw = angles.yaw
-        }
-
-        // 3. 시선 집중도 (모달창에서 잡은 basePose 기준으로 상대 판단!)
-        const baseYaw = basePose?.yaw ?? 0
-        const basePitch = basePose?.pitch ?? 0
-        let currentFocus: 'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' = 'CENTER'
-
-        if (yaw - baseYaw > 15) currentFocus = 'LEFT'
-        else if (yaw - baseYaw < -15) currentFocus = 'RIGHT'
-        else if (pitch - basePitch > 15) currentFocus = 'DOWN'
-        else if (pitch - basePitch < -10) currentFocus = 'UP'
-
-        // 4. UI 상태 업데이트
-        if (now - lastStateUpdateRef.current >= STATE_INTERVAL_MS) {
-          lastStateUpdateRef.current = now
-          setRealtimeStats({
-            pitch: Math.round(pitch),
-            yaw: Math.round(yaw),
-            ear: Number(avgEAR.toFixed(2)),
-            focusState: currentFocus,
-          })
-        }
-
-        // 5. 백엔드 로그 전송 (Event-driven)
-        const isAnomaly = currentFocus !== 'CENTER'
-        const isStateChanged = currentFocus !== lastLoggedStateRef.current
-        const timeSinceLastLog = now - lastLogTimeRef.current
-
-        if (isAnomaly && (isStateChanged || timeSinceLastLog > 2000)) {
-          lastLogTimeRef.current = now
-          lastLoggedStateRef.current = currentFocus
-
-          setBackendLogs((prev) =>
-            [
-              {
-                timestamp: new Date().toISOString().split('T')[1].slice(0, 8),
-                focusState: currentFocus,
-                blinkCount: blinkCountRef.current,
-                pitch: pitch.toFixed(1),
-                yaw: yaw.toFixed(1),
-                eventType: 'ANOMALY' as const,
-              },
-              ...prev,
-            ].slice(0, 5),
-          )
-          blinkCountRef.current = 0
-        } else if (!isAnomaly && isStateChanged) {
-          lastLogTimeRef.current = now
-          lastLoggedStateRef.current = 'CENTER'
-
-          setBackendLogs((prev) =>
-            [
-              {
-                timestamp: new Date().toISOString().split('T')[1].slice(0, 8),
-                focusState: 'CENTER' as const,
-                blinkCount: blinkCountRef.current,
-                pitch: pitch.toFixed(1),
-                yaw: yaw.toFixed(1),
-                eventType: 'RECOVERY' as const,
-              },
-              ...prev,
-            ].slice(0, 5),
-          )
-          blinkCountRef.current = 0
-        }
-      } catch (error) {
-        console.error('MediaPipe Error:', error)
-      }
-    }
-
-    if (landmarker && cameraOn && phase === 'answering') {
-      requestRef.current = requestAnimationFrame(detectGaze)
-    }
-
-    return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current)
-    }
-  }, [landmarker, cameraOn, phase])
 
   return (
     <div className="flex w-full max-w-175 flex-col gap-4">
@@ -270,12 +83,13 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
       {/* 아랫부분: 실시간 수치 및 백엔드 전송 로그 영역 */}
       {phase === 'answering' && (
         <div className="grid grid-cols-2 gap-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white shadow-xl">
+          {/* 좌측 패널 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <Activity className="h-4 w-4 text-emerald-400" />
               실시간 비전 데이터 (60fps)
             </h3>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
               <div className="rounded bg-slate-900 p-2">
                 <p className="text-slate-400">Pitch (상하)</p>
                 <p className="font-mono text-lg">{realtimeStats.pitch}°</p>
@@ -285,7 +99,11 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                 <p className="font-mono text-lg">{realtimeStats.yaw}°</p>
               </div>
               <div className="rounded bg-slate-900 p-2">
-                <p className="text-slate-400">EAR (눈 깜빡임)</p>
+                <p className="text-slate-400">Roll (기울기)</p>
+                <p className="font-mono text-lg">{realtimeStats.roll}°</p>
+              </div>
+              <div className="rounded bg-slate-900 p-2">
+                <p className="text-slate-400">EAR (눈 감김)</p>
                 <p
                   className={`font-mono text-lg ${realtimeStats.ear < EAR_THRESHOLD ? 'text-red-400' : ''}`}
                 >
@@ -300,6 +118,53 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                   {realtimeStats.focusState}
                 </p>
               </div>
+              <div className="rounded bg-slate-900 p-2">
+                <p className="text-slate-400">Blink Count</p>
+                <p className="font-mono text-lg text-blue-400">{realtimeStats.blinkCount}</p>
+              </div>
+            </div>
+
+            {/* Base Pose 기준값 */}
+            <div className="mt-1 rounded bg-slate-950/60 px-3 py-2 text-xs">
+              <p className="mb-1 text-slate-500">Base Pose (기준 자세)</p>
+              {basePose ? (
+                <div className="flex gap-4 font-mono text-slate-400">
+                  <span>
+                    Pitch: <span className="text-slate-300">{basePose.pitch}°</span>
+                  </span>
+                  <span>
+                    Yaw: <span className="text-slate-300">{basePose.yaw}°</span>
+                  </span>
+                  <span>
+                    ΔP:{' '}
+                    <span
+                      className={
+                        Math.abs(realtimeStats.pitch - basePose.pitch) > PITCH_THRESHOLD
+                          ? 'text-orange-400'
+                          : 'text-slate-300'
+                      }
+                    >
+                      {realtimeStats.pitch - basePose.pitch > 0 ? '+' : ''}
+                      {realtimeStats.pitch - basePose.pitch}°
+                    </span>
+                  </span>
+                  <span>
+                    ΔY:{' '}
+                    <span
+                      className={
+                        Math.abs(realtimeStats.yaw - basePose.yaw) > YAW_THRESHOLD
+                          ? 'text-orange-400'
+                          : 'text-slate-300'
+                      }
+                    >
+                      {realtimeStats.yaw - basePose.yaw > 0 ? '+' : ''}
+                      {realtimeStats.yaw - basePose.yaw}°
+                    </span>
+                  </span>
+                </div>
+              ) : (
+                <p className="text-slate-600">미설정</p>
+              )}
             </div>
           </div>
 

@@ -1,5 +1,13 @@
 export type Phase = 'ready' | 'thinking' | 'answering' | 'transition' | 'finished'
 
+export type StepStatus = 'pending' | 'active' | 'done'
+export type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
+
+export interface InterviewSetupConfig {
+  title: string
+  basePose: { pitch: number; yaw: number } | null
+}
+
 export interface InterviewSession {
   currentQuestion: number
   phase: Phase

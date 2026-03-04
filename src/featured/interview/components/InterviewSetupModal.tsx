@@ -1,140 +1,23 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
-import {
-  CheckCircle2,
-  Video,
-  Mic,
-  ChevronRight,
-  Upload,
-  AlertCircle,
-  Loader2,
-  X,
-  FileText,
-  FolderOpen,
-} from 'lucide-react'
-import { cn } from '@/shared/lib/utils'
-import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
-
-const ALIGN_THRESHOLD = 8 // 정면 판정 각도 기준 (15도 이내면 정면으로 인정)
-const ALIGN_DURATION_MS = 3000 // 3초
-
-// [수정 후] 🎯 에러 나면 999도(완전 이탈)로 처리해서 절대 통과 못하게 막기 ✅
-const extractEulerAngles = (matrix: number[] | Float32Array) => {
-  try {
-    const RAD_TO_DEG = 180 / Math.PI
-    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
-    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
-
-    // 에러(NaN)가 발생하면 0이 아니라 999를 반환해서 무조건 이탈 처리!
-    if (isNaN(pitch) || isNaN(yaw)) {
-      return { pitch: 999, yaw: 999 }
-    }
-    return { pitch, yaw }
-  } catch {
-    return { pitch: 999, yaw: 999 }
-  }
-}
-
-export interface InterviewSetupConfig {
-  title: string
-  basePose: { pitch: number; yaw: number } | null
-}
+import { CheckCircle2, ChevronRight } from 'lucide-react'
+import { type StepStatus, type InterviewSetupConfig } from '@/featured/interview/types'
+import { useCameraSetup } from '@/featured/interview/hooks/useCameraSetup'
+import { useMicSetup } from '@/featured/interview/hooks/useMicSetup'
+import { SetupSidebar } from '@/featured/interview/components/setup/SetupSidebar'
+import { TitleStep } from '@/featured/interview/components/setup/TitleStep'
+import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
+import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
+import { MicStep } from '@/featured/interview/components/setup/MicStep'
 
 interface Props {
   open: boolean
   onComplete: (config: InterviewSetupConfig) => void
   onCancel: () => void
-}
-
-type StepStatus = 'pending' | 'active' | 'done'
-type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
-
-const STEPS = [
-  { id: 1, label: '면접 제목', icon: FileText },
-  { id: 2, label: '문서 업로드', icon: FolderOpen },
-  { id: 3, label: '카메라 권한', icon: Video },
-  { id: 4, label: '마이크 권한', icon: Mic },
-] as const
-
-function VuMeter({ level }: { level: number }) {
-  const BARS = 22
-  return (
-    <div className="bg-muted flex h-9 items-end gap-0.5 rounded-xl px-3 py-2">
-      {Array.from({ length: BARS }, (_, i) => {
-        const threshold = i / BARS
-        const active = level > threshold
-        const color =
-          threshold < 0.6 ? 'bg-green-500' : threshold < 0.8 ? 'bg-yellow-400' : 'bg-red-500'
-        return (
-          <div
-            key={i}
-            className={cn(
-              'flex-1 rounded-sm transition-all duration-75',
-              active ? color : 'bg-muted-foreground/20',
-            )}
-            style={{ height: '100%' }}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-function SidebarStep({ step, status }: { step: (typeof STEPS)[number]; status: StepStatus }) {
-  const Icon = step.icon
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200',
-        status === 'active' && 'bg-primary/10',
-        status === 'pending' && 'opacity-40',
-      )}
-    >
-      <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-        {status === 'done' ? (
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
-        ) : (
-          <div
-            className={cn(
-              'flex h-6 w-6 items-center justify-center rounded-full border-2 text-[11px] font-bold',
-              status === 'active'
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-muted-foreground/30 text-muted-foreground/50',
-            )}
-          >
-            {step.id}
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-2">
-        <Icon
-          className={cn(
-            'h-4 w-4 shrink-0',
-            status === 'active'
-              ? 'text-primary'
-              : status === 'done'
-                ? 'text-green-500'
-                : 'text-muted-foreground/50',
-          )}
-        />
-        <span
-          className={cn(
-            'text-sm font-medium',
-            status === 'active' && 'text-primary',
-            status === 'done' && 'text-foreground',
-            status === 'pending' && 'text-muted-foreground',
-          )}
-        >
-          {step.label}
-        </span>
-      </div>
-    </div>
-  )
 }
 
 export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
@@ -144,35 +27,17 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     'pending',
     'pending',
   ])
+  const [title, setTitle] = useState('')
+  const [resume, setResume] = useState<File | null>(null)
+  const [portfolio, setPortfolio] = useState<File | null>(null)
+  const [selfIntro, setSelfIntro] = useState<File | null>(null)
 
-  // 1. AI 엔진(landmarker)을 가져옵니다.
-  const { landmarker } = useGazeTracker()
-
-  // 💡 UI 업데이트를 위해 useRef 대신 useState를 사용합니다.
-  const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null) //상하좌우 각도를 저장
-
-  const [alignProgress, setAlignProgress] = useState(0) // 파란색 게이지
-  const [faceDetected, setFaceDetected] = useState(false) // 얼굴 인식 여부
-  const poseDetectRef = useRef<number | null>(null) // 캡처된 각도 데이터
+  const camera = useCameraSetup()
+  const mic = useMicSetup()
 
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
   const doneCount = statuses.filter((s) => s === 'done').length
   const allDone = doneCount === 4
-
-  const [title, setTitle] = useState('')
-  const [cameraStatus, setCameraStatus] = useState<PermStatus>('idle')
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
-  const cameraVideoRef = useRef<HTMLVideoElement>(null)
-  const [micStatus, setMicStatus] = useState<PermStatus>('idle')
-  const [audioLevel, setAudioLevel] = useState(0)
-  const audioCtxRef = useRef<AudioContext | null>(null)
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const micStreamRef = useRef<MediaStream | null>(null)
-  const levelIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const [resume, setResume] = useState<File | null>(null)
-  const [portfolio, setPortfolio] = useState<File | null>(null)
-  const [selfIntro, setSelfIntro] = useState<File | null>(null)
-  const hasAnyDoc = !!(resume || portfolio || selfIntro)
 
   const completeStep = (step: number) => {
     setStatuses((prev) => {
@@ -183,464 +48,64 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     })
   }
 
-  useEffect(() => {
-    if (cameraStatus === 'granted' && cameraVideoRef.current && cameraStream) {
-      cameraVideoRef.current.srcObject = cameraStream
-    }
-  }, [cameraStatus, cameraStream])
-
-  useEffect(() => {
-    if (micStatus !== 'granted') return
-    levelIntervalRef.current = setInterval(() => {
-      if (!analyserRef.current) return
-      const data = new Uint8Array(analyserRef.current.frequencyBinCount)
-      analyserRef.current.getByteFrequencyData(data)
-      const avg = data.reduce((a, b) => a + b, 0) / data.length
-      setAudioLevel(Math.min(1, avg / 60))
-    }, 80)
-    return () => {
-      if (levelIntervalRef.current) clearInterval(levelIntervalRef.current)
-    }
-  }, [micStatus])
-
-  useEffect(() => {
-    return () => {
-      if (levelIntervalRef.current) clearInterval(levelIntervalRef.current)
-      audioCtxRef.current?.close()
-      micStreamRef.current?.getTracks().forEach((t) => t.stop())
-      cameraStream?.getTracks().forEach((t) => t.stop())
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleTitleConfirm = () => {
-    if (title.trim()) completeStep(1)
-  }
-
-  //  [체크포인트 1] 베이스 포인트 캡처 핵심 로직
-  useEffect(() => {
-    // 1. 방어막 (일찍 종료시키기)
-    if (cameraStatus !== 'granted' || !landmarker || basePose) return
-
-    const video = cameraVideoRef.current
-    if (!video) return
-
-    let alignStart: number | null = null
-
-    const detect = () => {
-      if (video.readyState !== 4) {
-        poseDetectRef.current = requestAnimationFrame(detect)
-        return
-      }
-      try {
-        const now = performance.now()
-        const result = landmarker.detectForVideo(video, now)
-
-        if (!result.faceLandmarks?.length) {
-          alignStart = null
-          setAlignProgress(0)
-          setFaceDetected(false)
-          poseDetectRef.current = requestAnimationFrame(detect)
-          return
-        }
-
-        setFaceDetected(true)
-
-        const matrixes = result.facialTransformationMatrixes
-        if (!matrixes?.length) {
-          poseDetectRef.current = requestAnimationFrame(detect)
-          return
-        }
-
-        //  [새로 추가] 거울 모드 버그를 해결한 '코 중앙 고정 + 얼굴 크기' 깐깐 검사법
-        const landmarks = result.faceLandmarks[0]
-        const noseTip = landmarks[1] // 코 끝
-        const leftCheek = landmarks[234] // 왼쪽 뺨
-        const rightCheek = landmarks[454] // 오른쪽 뺨
-
-        // 1) 코가 가이드라인 '정중앙'에 있는지 깐깐하게 검사 (오차 허용 범위 ±5%)
-        // 화면 정중앙은 무조건 0.5입니다. 코가 0.45 ~ 0.55 사이에 없으면 탈락!
-        const isNoseCentered =
-          noseTip.x > 0.45 && noseTip.x < 0.55 && noseTip.y > 0.4 && noseTip.y < 0.6
-
-        // 2) 얼굴 크기 검사 (가이드라인 밖으로 튀어나가거나 너무 멀리 있는지)
-        const faceWidth = Math.abs(leftCheek.x - rightCheek.x)
-        // 가이드라인 너비에 맞게 얼굴이 화면의 20% ~ 35% 사이일 때만 통과
-        const isProperSize = faceWidth > 0.2 && faceWidth < 0.35
-
-        // 3) 코와 양 뺨의 대칭 검사 (가짜 정면 차단)
-        const leftDist = Math.abs(noseTip.x - leftCheek.x)
-        const rightDist = Math.abs(rightCheek.x - noseTip.x)
-        const symmetryRatio = rightDist > 0 ? leftDist / rightDist : 0
-        const isSymmetric = symmetryRatio > 0.7 && symmetryRatio < 1.3 // 비율 깐깐하게 조임
-
-        // 4) 기존 각도 추출 및 정면 판정
-        const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
-        const { pitch, yaw } = extractEulerAngles(rawMatrix)
-        const isStraight = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
-
-        //  5) 최종 통과 조건: 중앙 고정 + 크기 일치 + 얼굴 대칭 + 각도 정면 (4박자!)
-        const inPosition = isNoseCentered && isProperSize && isSymmetric && isStraight
-
-        // 6. 타이머 및 캡처 (기존과 동일)
-        if (inPosition) {
-          if (alignStart === null) alignStart = now
-          const elapsed = now - alignStart
-          const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
-          setAlignProgress(progress) // 파란 게이지 증가
-
-          // 🎯 3초(3000ms)가 지난 바로 그 순간!
-          if (elapsed >= ALIGN_DURATION_MS) {
-            const finalPitch = Math.round(pitch)
-            const finalYaw = Math.round(yaw)
-
-            // 콘솔창에 딱 한 번만 로그를 찍습니다.
-            console.log('✅ 베이스 포인트 캡처 완료:', { pitch: finalPitch, yaw: finalYaw })
-
-            // 상태를 저장합니다. (저장되는 순간 위쪽 방어막에 의해 이 루프는 두 번 다시 실행되지 않음)
-            setBasePose({ pitch: finalPitch, yaw: finalYaw })
-
-            return // 애니메이션 프레임 루프를 완벽하게 종료시킵니다.
-          }
-        } else {
-          // 고개를 돌리면 3초 타이머 초기화
-          alignStart = null
-          setAlignProgress(0)
-        }
-      } catch {
-        // ignore
-      }
-      poseDetectRef.current = requestAnimationFrame(detect)
-    }
-
-    poseDetectRef.current = requestAnimationFrame(detect)
-
-    return () => {
-      if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
-    }
-  }, [cameraStatus, landmarker, basePose])
-
-  const requestCamera = async () => {
-    setBasePose(null)
-    setAlignProgress(0)
-    setFaceDetected(false)
-    setCameraStatus('requesting')
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      setCameraStream(stream)
-      setCameraStatus('granted')
-    } catch {
-      setCameraStatus('denied')
-    }
-  }
-
-  const confirmCamera = () => {
-    if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
-    cameraStream?.getTracks().forEach((t) => t.stop())
-    setCameraStream(null)
+  const handleCameraConfirm = () => {
+    camera.confirmCamera()
     completeStep(3)
   }
 
-  const requestMic = async () => {
-    setMicStatus('requesting')
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      micStreamRef.current = stream
-      const ctx = new AudioContext()
-      audioCtxRef.current = ctx
-      const analyser = ctx.createAnalyser()
-      analyserRef.current = analyser
-      analyser.fftSize = 256
-      ctx.createMediaStreamSource(stream).connect(analyser)
-      setMicStatus('granted')
-    } catch {
-      setMicStatus('denied')
-    }
-  }
-
-  const confirmMic = () => {
-    if (levelIntervalRef.current) clearInterval(levelIntervalRef.current)
-    audioCtxRef.current?.close()
-    audioCtxRef.current = null
-    micStreamRef.current?.getTracks().forEach((t) => t.stop())
-    micStreamRef.current = null
-    setAudioLevel(0)
+  const handleMicConfirm = () => {
+    mic.confirmMic()
     completeStep(4)
   }
 
-  const makeFileHandler =
-    (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setter(e.target.files?.[0] ?? null)
-    }
-
-  const renderContent = () => {
+  const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <FileText className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">면접 제목 입력</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                이번 면접의 제목이나 포지션명을 입력해주세요.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                placeholder="예: 프론트엔드 개발자 면접"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleTitleConfirm()}
-                autoFocus
-                className="flex-1"
-              />
-              <Button
-                disabled={!title.trim()}
-                onClick={handleTitleConfirm}
-                className="shrink-0 gap-1"
-              >
-                확인
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
+          <TitleStep
+            title={title}
+            onChange={setTitle}
+            onConfirm={() => { if (title.trim()) completeStep(1) }}
+          />
         )
       case 2:
         return (
-          <div className="space-y-5">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <FolderOpen className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">문서 업로드</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                이력서, 포트폴리오, 자기소개서를 업로드하면 AI가 맞춤 질문을 준비합니다.
-              </p>
-            </div>
-            <div className="space-y-2">
-              {(
-                [
-                  { label: '(필수) 이력서', file: resume, setter: setResume },
-                  { label: '(선택) 포트폴리오', file: portfolio, setter: setPortfolio },
-                  { label: '(선택) 자기소개서', file: selfIntro, setter: setSelfIntro },
-                ] as { label: string; file: File | null; setter: (f: File | null) => void }[]
-              ).map(({ label, file, setter }) => (
-                <div key={label}>
-                  {file ? (
-                    <div className="flex items-center gap-2.5 rounded-xl bg-green-50 px-4 py-2.5">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
-                      <span className="flex-1 truncate text-sm font-medium text-green-700">
-                        {file.name}
-                      </span>
-                      <button
-                        onClick={() => setter(null)}
-                        className="shrink-0 text-green-400 transition-colors hover:text-green-700"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="border-border hover:bg-muted/30 flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed px-4 py-2.5 transition-colors">
-                      <Upload className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-                      <span className="text-muted-foreground text-sm">{label} 업로드</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.docx,.hwp,.txt"
-                        onChange={makeFileHandler(setter)}
-                      />
-                    </label>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2 pt-1">
-              <Button
-                size="sm"
-                disabled={!hasAnyDoc}
-                className="gap-2"
-                onClick={() => completeStep(2)}
-              >
-                완료
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => completeStep(2)}>
-                건너뛰기
-              </Button>
-            </div>
-          </div>
+          <DocumentStep
+            resume={resume}
+            portfolio={portfolio}
+            selfIntro={selfIntro}
+            setResume={setResume}
+            setPortfolio={setPortfolio}
+            setSelfIntro={setSelfIntro}
+            onComplete={() => completeStep(2)}
+            onSkip={() => completeStep(2)}
+          />
         )
       case 3:
         return (
-          <div className="space-y-5">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <Video className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">카메라 권한 요청 및 테스트</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                면접 영상 녹화를 위해 카메라 접근 권한이 필요합니다.
-              </p>
-            </div>
-            {cameraStatus === 'idle' && (
-              <Button variant="outline" className="gap-2" onClick={requestCamera}>
-                <Video className="h-4 w-4" />
-                카메라 권한 요청하기
-              </Button>
-            )}
-            {cameraStatus === 'requesting' && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                권한 요청 중...
-              </p>
-            )}
-            {cameraStatus === 'granted' && (
-              <div className="space-y-3">
-                <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-900">
-                  <video
-                    ref={cameraVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    className="h-full w-full -scale-x-100 object-cover"
-                  />
-
-                  {!landmarker && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-                      <p className="animate-pulse text-xs text-white">AI 분석 준비 중...</p>
-                    </div>
-                  )}
-
-                  {landmarker && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src="/images/camera_guide_line.png"
-                      alt=""
-                      className="pointer-events-none absolute inset-0 h-full w-full scale-[1.3] object-contain"
-                      style={{
-                        opacity: basePose ? 1 : alignProgress > 0 ? 0.8 : 0.45,
-                        transition: 'opacity 0.3s',
-                      }}
-                    />
-                  )}
-
-                  {landmarker && (
-                    <div className="absolute inset-x-0 bottom-3 flex justify-center">
-                      {basePose ? (
-                        <div className="flex items-center gap-1.5 rounded-full bg-green-500/80 px-3 py-1 text-xs text-white backdrop-blur">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          기준 자세 설정 완료
-                        </div>
-                      ) : faceDetected && !alignProgress ? (
-                        // 🎯 [수정됨] 얼굴은 인식됐지만 정면이 아닐 때 (게이지가 0일 때) 빨간색 경고
-                        <div className="flex animate-pulse items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur">
-                          <AlertCircle className="h-3.5 w-3.5" />
-                          가이드 안에 얼굴을 똑바로 맞춰주세요
-                        </div>
-                      ) : alignProgress > 0 ? (
-                        <div className="flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs text-white backdrop-blur">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          자세 유지 중 ({Math.ceil(3 * (1 - alignProgress / 100))}초)
-                        </div>
-                      ) : (
-                        <div className="rounded-full bg-black/50 px-3 py-1 text-xs text-white/80 backdrop-blur">
-                          얼굴을 화면에 맞춰주세요
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 정렬 진행 바 */}
-                {landmarker && !basePose && (
-                  <div className="bg-border h-1 overflow-hidden rounded-full">
-                    <div
-                      className="h-full rounded-full bg-blue-500 transition-all duration-200"
-                      style={{ width: `${alignProgress}%` }}
-                    />
-                  </div>
-                )}
-
-                <Button size="sm" className="gap-2" disabled={!basePose} onClick={confirmCamera}>
-                  확인 완료
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
-            {cameraStatus === 'denied' && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  카메라 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setCameraStatus('idle')}>
-                    다시 시도
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => completeStep(3)}>
-                    건너뛰기
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <CameraStep
+            cameraStatus={camera.cameraStatus}
+            cameraVideoRef={camera.cameraVideoRef}
+            isLandmarkerReady={!!camera.landmarker}
+            basePose={camera.basePose}
+            alignProgress={camera.alignProgress}
+            faceDetected={camera.faceDetected}
+            onRequest={camera.requestCamera}
+            onConfirm={handleCameraConfirm}
+            onRetry={() => camera.setCameraStatus('idle')}
+            onSkip={() => completeStep(3)}
+          />
         )
       case 4:
         return (
-          <div className="space-y-5">
-            <div>
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-2xl">
-                <Mic className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold">마이크 권한 요청 및 테스트</h3>
-              <p className="text-muted-foreground mt-1 text-sm">
-                답변 인식을 위해 마이크 접근 권한이 필요합니다.
-              </p>
-            </div>
-            {micStatus === 'idle' && (
-              <Button variant="outline" className="gap-2" onClick={requestMic}>
-                <Mic className="h-4 w-4" />
-                마이크 권한 요청하기
-              </Button>
-            )}
-            {micStatus === 'requesting' && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                권한 요청 중...
-              </p>
-            )}
-            {micStatus === 'granted' && (
-              <div className="space-y-3">
-                <VuMeter level={audioLevel} />
-                <p className="flex items-center gap-1.5 text-xs text-green-600">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  마이크가 감지되었습니다. 말해보세요!
-                </p>
-                <Button size="sm" className="gap-2" onClick={confirmMic}>
-                  확인 완료
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
-            {micStatus === 'denied' && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  마이크 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setMicStatus('idle')}>
-                    다시 시도
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => completeStep(4)}>
-                    건너뛰기
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <MicStep
+            micStatus={mic.micStatus}
+            audioLevel={mic.audioLevel}
+            onRequest={mic.requestMic}
+            onConfirm={handleMicConfirm}
+            onRetry={() => mic.setMicStatus('idle')}
+            onSkip={() => completeStep(4)}
+          />
         )
       default:
         return (
@@ -670,24 +135,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
       >
         <DialogTitle className="sr-only">면접 환경 설정</DialogTitle>
         <div className="flex min-h-155">
-          <aside className="border-border/60 bg-muted/30 flex w-64 shrink-0 flex-col border-r">
-            <div className="border-border/50 border-b px-5 py-5">
-              <p className="text-sm leading-tight font-bold">면접 환경 설정</p>
-              <p className="text-muted-foreground mt-1 text-xs">{doneCount} / 4 단계 완료</p>
-              <div className="bg-border mt-3 h-1 overflow-hidden rounded-full">
-                <motion.div
-                  className="bg-primary h-full rounded-full"
-                  animate={{ width: `${(doneCount / 4) * 100}%` }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-            <nav className="flex-1 space-y-0.5 p-3">
-              {STEPS.map((step) => (
-                <SidebarStep key={step.id} step={step} status={statuses[step.id - 1]} />
-              ))}
-            </nav>
-          </aside>
+          <SetupSidebar statuses={statuses} doneCount={doneCount} />
           <div className="flex flex-1 flex-col">
             <div className="flex-1 overflow-y-auto px-8 py-8">
               <AnimatePresence mode="wait">
@@ -698,7 +146,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                   exit={{ opacity: 0, x: -16 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                 >
-                  {renderContent()}
+                  {renderStep()}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -708,7 +156,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
               </Button>
               <Button
                 disabled={!allDone}
-                onClick={() => onComplete({ title: title.trim() || '모의 면접', basePose })}
+                onClick={() => onComplete({ title: title.trim() || '모의 면접', basePose: camera.basePose })}
                 className="gap-2"
               >
                 면접 시작하기

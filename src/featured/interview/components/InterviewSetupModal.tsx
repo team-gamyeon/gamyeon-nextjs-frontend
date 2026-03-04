@@ -217,7 +217,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     if (title.trim()) completeStep(1)
   }
 
-  // 🎯 [체크포인트 1] 베이스 포인트 캡처 핵심 로직
+  //  [체크포인트 1] 베이스 포인트 캡처 핵심 로직
   useEffect(() => {
     // 1. 방어막 (일찍 종료시키기)
     if (cameraStatus !== 'granted' || !landmarker || basePose) return
@@ -252,7 +252,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           return
         }
 
-        // 🎯 [새로 추가] 거울 모드 버그를 해결한 '코 중앙 고정 + 얼굴 크기' 깐깐 검사법
+        //  [새로 추가] 거울 모드 버그를 해결한 '코 중앙 고정 + 얼굴 크기' 깐깐 검사법
         const landmarks = result.faceLandmarks[0]
         const noseTip = landmarks[1] // 코 끝
         const leftCheek = landmarks[234] // 왼쪽 뺨
@@ -279,14 +279,13 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
         const { pitch, yaw } = extractEulerAngles(rawMatrix)
         const isStraight = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
 
-        // 🎯 5) 최종 통과 조건: 중앙 고정 + 크기 일치 + 얼굴 대칭 + 각도 정면 (4박자!)
+        //  5) 최종 통과 조건: 중앙 고정 + 크기 일치 + 얼굴 대칭 + 각도 정면 (4박자!)
         const inPosition = isNoseCentered && isProperSize && isSymmetric && isStraight
 
         // 6. 타이머 및 캡처 (기존과 동일)
         if (inPosition) {
           if (alignStart === null) alignStart = now
           const elapsed = now - alignStart
-          // ... (이하 생략) ...
           const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
           setAlignProgress(progress) // 파란 게이지 증가
 

@@ -13,8 +13,6 @@ const getDistance = (p1: { x: number; y: number }, p2: { x: number; y: number })
   return Math.hypot(p1.x - p2.x, p1.y - p2.y)
 }
 
-// scaleX/scaleY로 정규화 좌표 → 픽셀 변환 후 EAR 계산
-// (가로/세로 스케일이 다른 영상에서 aspect ratio 왜곡 방지)
 const calculateEAR = (landmarks: any[], indices: number[], scaleX: number, scaleY: number) => {
   const pts = indices.map((i) => ({
     x: landmarks[i].x * scaleX,
@@ -27,15 +25,12 @@ const calculateEAR = (landmarks: any[], indices: number[], scaleX: number, scale
   return (v1 + v2) / (2.0 * h)
 }
 
-// 💡 [수정됨] Matrix 파싱 안정성 강화
 const extractEulerAngles = (matrix: number[] | Float32Array) => {
   try {
     const RAD_TO_DEG = 180 / Math.PI
-    // MediaPipe의 4x4 변환 행렬에서 회전 정보 추출
-    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG // 상하 반전 보정
-    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG // 좌우 반전 보정
+    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
+    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
 
-    // NaN 방지 처리
     return {
       pitch: isNaN(pitch) ? 0 : pitch,
       yaw: isNaN(yaw) ? 0 : yaw,
@@ -55,7 +50,7 @@ interface BackendPayload {
   blinkCount: number
   pitch: string
   yaw: string
-  eventType: 'ANOMALY' | 'RECOVERY' // 백엔드 분류용 태그 추가
+  eventType: 'ANOMALY' | 'RECOVERY'
 }
 
 interface VideoAreaProps {
@@ -66,7 +61,9 @@ interface VideoAreaProps {
 }
 
 export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) {
-  const landmarker = useGazeTracker()
+  // 🎯 [핵심 수정] 도구 상자에서 landmarker만 쏙 꺼내옵니다.
+  const { landmarker } = useGazeTracker()
+
   const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
 
@@ -85,7 +82,6 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
   const lastStateUpdateRef = useRef(0)
   const lastLogTimeRef = useRef(0)
 
-  // 💡 [추가됨] 이전 상태를 기억하여 상태가 변할 때만 로그 전송
   const lastLoggedStateRef = useRef<'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN'>('CENTER')
 
   const DETECT_INTERVAL_MS = 50
@@ -108,7 +104,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
 
         const landmarks = result.faceLandmarks[0]
 
-        // 1. EAR (눈 깜빡임) — 픽셀 좌표 기준으로 계산
+        // 1. EAR (눈 깜빡임)
         const scaleX = video.videoWidth
         const scaleY = video.videoHeight
         const avgEAR =
@@ -129,17 +125,17 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
           yaw = 0
         const matrixes = result.facialTransformationMatrixes
         if (matrixes && matrixes.length > 0) {
-          // MediaPipe 버전에 따라 data 객체 안에 있거나 배열 자체일 수 있음
           const rawMatrix = matrixes[0].data || matrixes[0]
           const angles = extractEulerAngles(rawMatrix)
           pitch = angles.pitch
           yaw = angles.yaw
         }
 
-        // 3. 시선 집중도 (basePose 기준으로 상대 판단)
+        // 3. 시선 집중도 (모달창에서 잡은 basePose 기준으로 상대 판단!)
         const baseYaw = basePose?.yaw ?? 0
         const basePitch = basePose?.pitch ?? 0
         let currentFocus: 'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' = 'CENTER'
+
         if (yaw - baseYaw > 15) currentFocus = 'LEFT'
         else if (yaw - baseYaw < -15) currentFocus = 'RIGHT'
         else if (pitch - basePitch > 15) currentFocus = 'DOWN'
@@ -156,12 +152,11 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
           })
         }
 
-        // 💡 5. [수정됨] 특이점 발생 시에만 백엔드 전송 (Event-driven)
+        // 5. 백엔드 로그 전송 (Event-driven)
         const isAnomaly = currentFocus !== 'CENTER'
         const isStateChanged = currentFocus !== lastLoggedStateRef.current
         const timeSinceLastLog = now - lastLogTimeRef.current
 
-        // 조건 1: 시선 이탈이 감지되었고 (상태가 막 변했거나, 이탈한 지 2초가 지났을 때)
         if (isAnomaly && (isStateChanged || timeSinceLastLog > 2000)) {
           lastLogTimeRef.current = now
           lastLoggedStateRef.current = currentFocus
@@ -180,9 +175,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
             ].slice(0, 5),
           )
           blinkCountRef.current = 0
-        }
-        // 조건 2: 시선이 이탈했다가 다시 정면('CENTER')으로 복귀했을 때 (1회성 기록)
-        else if (!isAnomaly && isStateChanged) {
+        } else if (!isAnomaly && isStateChanged) {
           lastLogTimeRef.current = now
           lastLoggedStateRef.current = 'CENTER'
 
@@ -213,11 +206,11 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)
     }
-  }, [landmarker, cameraOn, phase])
+  }, [landmarker, cameraOn, phase, basePose]) // 🎯 의존성 배열에 basePose 추가
 
   return (
     <div className="flex w-full max-w-175 flex-col gap-4">
-      {/* 윗부분: 기존 비디오 영역 (변경 없음) */}
+      {/* 윗부분: 비디오 영역 */}
       <motion.div
         layout
         className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-800 shadow-2xl"
@@ -277,7 +270,6 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
       {/* 아랫부분: 실시간 수치 및 백엔드 전송 로그 영역 */}
       {phase === 'answering' && (
         <div className="grid grid-cols-2 gap-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white shadow-xl">
-          {/* 좌측 패널 (변경 없음) */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <Activity className="h-4 w-4 text-emerald-400" />
@@ -311,7 +303,6 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
             </div>
           </div>
 
-          {/* 우측 패널: 이벤트 기반 로그 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <AlertTriangle className="h-4 w-4 text-orange-400" />

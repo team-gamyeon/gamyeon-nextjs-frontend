@@ -20,14 +20,19 @@ import {
 import { cn } from '@/shared/lib/utils'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 
-const ALIGN_THRESHOLD = 12 // degrees
+// 🎯 [체크포인트] 카메라 밖 이탈의 기준점 (Threshold) 정의
+// 화면 중심(0.5, 0.5)을 기준으로 얼굴 중심 좌표가 이 범위를 벗어나면 에러 처리
+const SAFE_ZONE_MIN = 0.2 // 화면 왼쪽 20%, 위쪽 20%
+const SAFE_ZONE_MAX = 0.8 // 화면 오른쪽 80%, 아래쪽 80%
+
+const ALIGN_THRESHOLD = 15 // degrees (기존 12도에서 약간 완화)
 const ALIGN_DURATION_MS = 3000 // 3초
 
 const extractEulerAngles = (matrix: number[] | Float32Array) => {
   try {
     const RAD_TO_DEG = 180 / Math.PI
-    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG // 상하 반전 보정
-    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG // 좌우 반전 보정
+    const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
+    const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
     return { pitch: isNaN(pitch) ? 0 : pitch, yaw: isNaN(yaw) ? 0 : yaw }
   } catch {
     return { pitch: 0, yaw: 0 }
@@ -55,6 +60,7 @@ const STEPS = [
   { id: 4, label: '마이크 권한', icon: Mic },
 ] as const
 
+// ... (VuMeter, SidebarStep 함수는 기존과 동일하게 유지 - 분량 상 생략 없이 아래 포함합니다)
 function VuMeter({ level }: { level: number }) {
   const BARS = 22
   return (
@@ -139,10 +145,14 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     'pending',
   ])
 
-  const landmarker = useGazeTracker()
+  // 🎯 훅에서 엔진만 깔끔하게 받아옵니다
+  const { landmarker } = useGazeTracker()
   const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
+
   const [alignProgress, setAlignProgress] = useState(0)
   const [faceDetected, setFaceDetected] = useState(false)
+  const [isFaceOutOfBounds, setIsFaceOutOfBounds] = useState(false) // 이탈 여부 상태 추가
+
   const poseDetectRef = useRef<number | null>(null)
 
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
@@ -228,11 +238,29 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           alignStart = null
           setAlignProgress(0)
           setFaceDetected(false)
+          setIsFaceOutOfBounds(false)
           poseDetectRef.current = requestAnimationFrame(detect)
           return
         }
 
         setFaceDetected(true)
+
+        // 🎯 [체크포인트] 카메라 밖 이탈 에러 처리 (Threshold 적용)
+        const noseTip = result.faceLandmarks[0][1] // 코 끝 좌표
+        if (
+          noseTip.x < SAFE_ZONE_MIN ||
+          noseTip.x > SAFE_ZONE_MAX ||
+          noseTip.y < SAFE_ZONE_MIN ||
+          noseTip.y > SAFE_ZONE_MAX
+        ) {
+          setIsFaceOutOfBounds(true)
+          alignStart = null // 이탈하면 진행 게이지 초기화
+          setAlignProgress(0)
+          poseDetectRef.current = requestAnimationFrame(detect)
+          return
+        } else {
+          setIsFaceOutOfBounds(false)
+        }
 
         const matrixes = result.facialTransformationMatrixes
         if (!matrixes?.length) {
@@ -240,10 +268,13 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           return
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
         const { pitch, yaw } = extractEulerAngles(rawMatrix)
-        const inPosition = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
+
+        // 🎯 [체크포인트] 사용자가 고개를 돌린 상태로 3초를 버티면, 그 삐딱한 각도가 캡처되도록 허용!
+        // (이전에 inPosition 조건을 빡빡하게 잡았던 것을 느슨하게 풀어서 의도한 대로 작동하게 함)
+        const inPosition =
+          Math.abs(pitch) < ALIGN_THRESHOLD * 2 && Math.abs(yaw) < ALIGN_THRESHOLD * 2
 
         if (inPosition) {
           if (alignStart === null) alignStart = now
@@ -252,8 +283,13 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           setAlignProgress(progress)
 
           if (elapsed >= ALIGN_DURATION_MS) {
+            // 🎯 [체크포인트] 3초 달성 시 단 1회 값 캡처!
             setBasePose({ pitch: Math.round(pitch), yaw: Math.round(yaw) })
-            return // 루프 종료
+            console.log('✅ 셋업 모달에서 베이스 포인트 캡처 완료:', {
+              pitch: Math.round(pitch),
+              yaw: Math.round(yaw),
+            })
+            return // 루프 영원히 종료
           }
         } else {
           alignStart = null
@@ -275,6 +311,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     setBasePose(null)
     setAlignProgress(0)
     setFaceDetected(false)
+    setIsFaceOutOfBounds(false)
     setCameraStatus('requesting')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
@@ -292,6 +329,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     completeStep(3)
   }
 
+  // ... (requestMic, confirmMic, makeFileHandler 함수는 기존과 동일)
   const requestMic = async () => {
     setMicStatus('requesting')
     try {
@@ -326,6 +364,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
 
   const renderContent = () => {
     switch (currentStep) {
+      // ... (case 1, case 2 생략 없이 기존 코드 유지)
       case 1:
         return (
           <div className="space-y-6">
@@ -458,14 +497,17 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                     className="h-full w-full -scale-x-100 object-cover"
                   />
 
-                  {/* AI 엔진 로딩 중 */}
+                  {/* 🎯 [체크포인트] 이탈 시 화면을 살짝 붉게 만드는 피드백 */}
+                  {isFaceOutOfBounds && (
+                    <div className="pointer-events-none absolute inset-0 border-4 border-red-500 bg-red-500/20 transition-colors" />
+                  )}
+
                   {!landmarker && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
                       <p className="animate-pulse text-xs text-white">AI 분석 준비 중...</p>
                     </div>
                   )}
 
-                  {/* 카메라 가이드라인 이미지 */}
                   {landmarker && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -479,13 +521,18 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                     />
                   )}
 
-                  {/* 상태 안내 텍스트 */}
+                  {/* 🎯 [체크포인트] 텍스트 알림 고도화 */}
                   {landmarker && (
                     <div className="absolute inset-x-0 bottom-3 flex justify-center">
                       {basePose ? (
                         <div className="flex items-center gap-1.5 rounded-full bg-green-500/80 px-3 py-1 text-xs text-white backdrop-blur">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           기준 자세 설정 완료
+                        </div>
+                      ) : isFaceOutOfBounds ? (
+                        <div className="flex animate-pulse items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          얼굴이 화면 중앙을 벗어났습니다!
                         </div>
                       ) : alignProgress > 0 ? (
                         <div className="flex items-center gap-1.5 rounded-full bg-blue-500/80 px-3 py-1 text-xs text-white backdrop-blur">
@@ -494,7 +541,9 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                         </div>
                       ) : (
                         <div className="rounded-full bg-black/50 px-3 py-1 text-xs text-white/80 backdrop-blur">
-                          {faceDetected ? '가이드 안에 얼굴을 맞춰주세요' : '얼굴을 화면에 맞춰주세요'}
+                          {faceDetected
+                            ? '가이드 안에 얼굴을 맞춰주세요'
+                            : '얼굴을 화면에 맞춰주세요'}
                         </div>
                       )}
                     </div>
@@ -502,8 +551,8 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                 </div>
 
                 {/* 정렬 진행 바 */}
-                {landmarker && !basePose && (
-                  <div className="h-1 overflow-hidden rounded-full bg-border">
+                {landmarker && !basePose && !isFaceOutOfBounds && (
+                  <div className="bg-border h-1 overflow-hidden rounded-full">
                     <div
                       className="h-full rounded-full bg-blue-500 transition-all duration-200"
                       style={{ width: `${alignProgress}%` }}

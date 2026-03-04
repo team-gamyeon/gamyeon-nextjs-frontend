@@ -4,8 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, MicOff, VideoOff, Activity, AlertTriangle } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
 import Webcam from 'react-webcam'
-import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
-import { EAR_THRESHOLD, YAW_THRESHOLD, PITCH_THRESHOLD } from '@/featured/interview/utils/visionUtils'
+import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'  
+import {
+  EAR_THRESHOLD,
+  YAW_THRESHOLD,
+  PITCH_THRESHOLD,
+} from '@/featured/interview/utils/visionUtils'
 
 interface VideoAreaProps {
   cameraOn: boolean
@@ -168,6 +172,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
             </div>
           </div>
 
+          {/* 우측 패널: 이벤트 기반 로그 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <AlertTriangle className="h-4 w-4 text-orange-400" />

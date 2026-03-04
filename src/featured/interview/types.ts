@@ -13,10 +13,20 @@ export interface InterviewSession {
   showSetup: boolean
 }
 
-export type FocusDirection = 'CENTER' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN'
+export type FocusState =
+  | 'CENTER'
+  | 'LEFT'
+  | 'RIGHT'
+  | 'TOP'
+  | 'BOTTOM'
+  | 'TOP-LEFT'
+  | 'TOP-RIGHT'
+  | 'BOTTOM-LEFT'
+  | 'BOTTOM-RIGHT'
+
 export interface BackendPayload {
   timestamp: string
-  focusState: FocusDirection
+  focusState: FocusState
   blinkCount: number
   pitch: string
   yaw: string

@@ -1,11 +1,11 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, VideoOff, Activity, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Mic, MicOff, VideoOff, Activity, AlertTriangle } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
 import Webcam from 'react-webcam'
 import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
-import { EAR_THRESHOLD } from '@/featured/interview/utils/visionUtils'
+import { EAR_THRESHOLD, YAW_THRESHOLD, PITCH_THRESHOLD } from '@/featured/interview/utils/visionUtils'
 
 interface VideoAreaProps {
   cameraOn: boolean
@@ -23,6 +23,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
 
   return (
     <div className="flex w-full max-w-175 flex-col gap-4">
+      {/* 윗부분: 비디오 영역 */}
       <motion.div
         layout
         className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-800 shadow-2xl"
@@ -79,14 +80,16 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
         </AnimatePresence>
       </motion.div>
 
+      {/* 아랫부분: 실시간 수치 및 백엔드 전송 로그 영역 */}
       {phase === 'answering' && (
         <div className="grid grid-cols-2 gap-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white shadow-xl">
+          {/* 좌측 패널 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <Activity className="h-4 w-4 text-emerald-400" />
               실시간 비전 데이터 (60fps)
             </h3>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
               <div className="rounded bg-slate-900 p-2">
                 <p className="text-slate-400">Pitch (상하)</p>
                 <p className="font-mono text-lg">{realtimeStats.pitch}°</p>
@@ -96,7 +99,11 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                 <p className="font-mono text-lg">{realtimeStats.yaw}°</p>
               </div>
               <div className="rounded bg-slate-900 p-2">
-                <p className="text-slate-400">EAR (눈 깜빡임)</p>
+                <p className="text-slate-400">Roll (기울기)</p>
+                <p className="font-mono text-lg">{realtimeStats.roll}°</p>
+              </div>
+              <div className="rounded bg-slate-900 p-2">
+                <p className="text-slate-400">EAR (눈 감김)</p>
                 <p
                   className={`font-mono text-lg ${realtimeStats.ear < EAR_THRESHOLD ? 'text-red-400' : ''}`}
                 >
@@ -111,9 +118,57 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                   {realtimeStats.focusState}
                 </p>
               </div>
+              <div className="rounded bg-slate-900 p-2">
+                <p className="text-slate-400">Blink Count</p>
+                <p className="font-mono text-lg text-blue-400">{realtimeStats.blinkCount}</p>
+              </div>
+            </div>
+
+            {/* Base Pose 기준값 */}
+            <div className="mt-1 rounded bg-slate-950/60 px-3 py-2 text-xs">
+              <p className="mb-1 text-slate-500">Base Pose (기준 자세)</p>
+              {basePose ? (
+                <div className="flex gap-4 font-mono text-slate-400">
+                  <span>
+                    Pitch: <span className="text-slate-300">{basePose.pitch}°</span>
+                  </span>
+                  <span>
+                    Yaw: <span className="text-slate-300">{basePose.yaw}°</span>
+                  </span>
+                  <span>
+                    ΔP:{' '}
+                    <span
+                      className={
+                        Math.abs(realtimeStats.pitch - basePose.pitch) > PITCH_THRESHOLD
+                          ? 'text-orange-400'
+                          : 'text-slate-300'
+                      }
+                    >
+                      {realtimeStats.pitch - basePose.pitch > 0 ? '+' : ''}
+                      {realtimeStats.pitch - basePose.pitch}°
+                    </span>
+                  </span>
+                  <span>
+                    ΔY:{' '}
+                    <span
+                      className={
+                        Math.abs(realtimeStats.yaw - basePose.yaw) > YAW_THRESHOLD
+                          ? 'text-orange-400'
+                          : 'text-slate-300'
+                      }
+                    >
+                      {realtimeStats.yaw - basePose.yaw > 0 ? '+' : ''}
+                      {realtimeStats.yaw - basePose.yaw}°
+                    </span>
+                  </span>
+                </div>
+              ) : (
+                <p className="text-slate-600">미설정</p>
+              )}
             </div>
           </div>
 
+          {/* 우측 패널: 이벤트 기반 로그 */}
           <div className="flex flex-col gap-2 rounded-xl bg-slate-800 p-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <AlertTriangle className="h-4 w-4 text-orange-400" />

@@ -23,14 +23,20 @@ import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 const ALIGN_THRESHOLD = 8 // 정면 판정 각도 기준 (15도 이내면 정면으로 인정)
 const ALIGN_DURATION_MS = 3000 // 3초
 
+// [수정 후] 🎯 에러 나면 999도(완전 이탈)로 처리해서 절대 통과 못하게 막기 ✅
 const extractEulerAngles = (matrix: number[] | Float32Array) => {
   try {
     const RAD_TO_DEG = 180 / Math.PI
     const pitch = Math.atan2(matrix[6], matrix[10]) * RAD_TO_DEG
     const yaw = -Math.asin(matrix[2]) * RAD_TO_DEG
-    return { pitch: isNaN(pitch) ? 0 : pitch, yaw: isNaN(yaw) ? 0 : yaw }
+
+    // 에러(NaN)가 발생하면 0이 아니라 999를 반환해서 무조건 이탈 처리!
+    if (isNaN(pitch) || isNaN(yaw)) {
+      return { pitch: 999, yaw: 999 }
+    }
+    return { pitch, yaw }
   } catch {
-    return { pitch: 0, yaw: 0 }
+    return { pitch: 999, yaw: 999 }
   }
 }
 
@@ -211,7 +217,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
     if (title.trim()) completeStep(1)
   }
 
-  // 🎯 [체크포인트 1] 베이스 포인트 캡처 핵심 로직
+  //  [체크포인트 1] 베이스 포인트 캡처 핵심 로직
   useEffect(() => {
     // 1. 방어막 (일찍 종료시키기)
     if (cameraStatus !== 'granted' || !landmarker || basePose) return
@@ -245,17 +251,41 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
           poseDetectRef.current = requestAnimationFrame(detect)
           return
         }
-        // 2. 각도 추출
+
+        //  [새로 추가] 거울 모드 버그를 해결한 '코 중앙 고정 + 얼굴 크기' 깐깐 검사법
+        const landmarks = result.faceLandmarks[0]
+        const noseTip = landmarks[1] // 코 끝
+        const leftCheek = landmarks[234] // 왼쪽 뺨
+        const rightCheek = landmarks[454] // 오른쪽 뺨
+
+        // 1) 코가 가이드라인 '정중앙'에 있는지 깐깐하게 검사 (오차 허용 범위 ±5%)
+        // 화면 정중앙은 무조건 0.5입니다. 코가 0.45 ~ 0.55 사이에 없으면 탈락!
+        const isNoseCentered =
+          noseTip.x > 0.45 && noseTip.x < 0.55 && noseTip.y > 0.4 && noseTip.y < 0.6
+
+        // 2) 얼굴 크기 검사 (가이드라인 밖으로 튀어나가거나 너무 멀리 있는지)
+        const faceWidth = Math.abs(leftCheek.x - rightCheek.x)
+        // 가이드라인 너비에 맞게 얼굴이 화면의 20% ~ 35% 사이일 때만 통과
+        const isProperSize = faceWidth > 0.2 && faceWidth < 0.35
+
+        // 3) 코와 양 뺨의 대칭 검사 (가짜 정면 차단)
+        const leftDist = Math.abs(noseTip.x - leftCheek.x)
+        const rightDist = Math.abs(rightCheek.x - noseTip.x)
+        const symmetryRatio = rightDist > 0 ? leftDist / rightDist : 0
+        const isSymmetric = symmetryRatio > 0.7 && symmetryRatio < 1.3 // 비율 깐깐하게 조임
+
+        // 4) 기존 각도 추출 및 정면 판정
         const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
         const { pitch, yaw } = extractEulerAngles(rawMatrix)
+        const isStraight = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
 
-        // 3. 정면 판정 (15도 이내)
-        const inPosition = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
+        //  5) 최종 통과 조건: 중앙 고정 + 크기 일치 + 얼굴 대칭 + 각도 정면 (4박자!)
+        const inPosition = isNoseCentered && isProperSize && isSymmetric && isStraight
 
-        // 4. 타이머 및 캡처
+        // 6. 타이머 및 캡처 (기존과 동일)
         if (inPosition) {
-          if (alignStart === null) alignStart = now // 처음 정면을 본 시간 기록
-          const elapsed = now - alignStart // 지난 시간 계산
+          if (alignStart === null) alignStart = now
+          const elapsed = now - alignStart
           const progress = Math.min(100, (elapsed / ALIGN_DURATION_MS) * 100)
           setAlignProgress(progress) // 파란 게이지 증가
 

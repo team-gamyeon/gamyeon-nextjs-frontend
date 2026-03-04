@@ -206,7 +206,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current)
     }
-  }, [landmarker, cameraOn, phase, basePose]) // 🎯 의존성 배열에 basePose 추가
+  }, [landmarker, cameraOn, phase])
 
   return (
     <div className="flex w-full max-w-175 flex-col gap-4">

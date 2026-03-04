@@ -22,7 +22,7 @@ export const useGazeTracker = () => {
         },
         runningMode: 'VIDEO',
         numFaces: 1,
-        outputFacialTransformationMatrixes: true, // pitch/yaw 계산에 필수
+        outputFacialTransformationMatrixes: true,
       })
       setLandmarker(instance)
     }

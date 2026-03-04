@@ -24,6 +24,46 @@ export type FocusState =
   | 'BOTTOM-LEFT'
   | 'BOTTOM-RIGHT'
 
+interface RawGazeData {
+  offset_ms: number
+  gaze: {
+    left: {
+      x: number
+      y: number
+    }
+    right: {
+      x: number
+      y: number
+    }
+  }
+  head: {
+    pitch: number
+    yaw: number
+    roll: number
+  }
+}
+
+interface GazeEvent {
+  type: 'AWAY_START' | 'AWAY_END'
+  offset_ms: number
+  direction: FocusState
+}
+
+export interface InterviewBatchPayload {
+  meta: {
+    interviewId: string
+    questionId: string
+    timestamp: number
+    segmentSequence: number
+  }
+  metrics_summary: {
+    average_concentration: number
+    blink_count: number
+    is_away_detected: boolean
+  }
+  raw_data: RawGazeData[] // 10FPS 기준 10초간의 데이터 (약 100개)
+  events: GazeEvent[] // 구간 내 발생한 모든 이탈/복귀 이벤트
+}
 export interface BackendPayload {
   timestamp: string
   focusState: FocusState

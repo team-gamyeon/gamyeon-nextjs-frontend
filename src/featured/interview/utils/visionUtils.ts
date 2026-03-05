@@ -1,4 +1,5 @@
 import { FocusState } from '@/featured/interview/types'
+import { PITCH_THRESHOLD, YAW_THRESHOLD } from '@/featured/interview/constants'
 
 const getDistance = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
   return Math.hypot(p1.x - p2.x, p1.y - p2.y)
@@ -72,30 +73,21 @@ const extractEulerAngles = (matrix: number[] | Float32Array) => {
   }
 }
 
-const LEFT_EYE = [33, 160, 158, 133, 153, 144]
-const RIGHT_EYE = [362, 385, 387, 263, 373, 380]
+const calculateAverageConcentration = (rawData: any[]) => {
+  if (rawData.length === 0) return 0
 
-// EAR 임계값 및 깜빡임 감지 상수
-const EAR_THRESHOLD = 0.22
-const BLINK_MIN_FRAMES = 2 // EAR이 threshold 아래로 유지돼야 할 최소 연속 프레임 (50ms × 2 = 100ms)
-const BLINK_MAX_MS = 400 // 이 시간 초과 시 깜빡임 아닌 눈 감음으로 판단
-const EAR_HISTORY_SIZE = 3 // EAR 롤링 평균 윈도우 크기
+  const focusedCount = rawData.filter((d) => {
+    return Math.abs(d.head.pitch) < PITCH_THRESHOLD && Math.abs(d.head.yaw) < YAW_THRESHOLD
+  }).length
 
-// 시선 방향 판단 임계값 (정규화 기준)
-const YAW_THRESHOLD = 15 // 좌우 이탈 기준 (°)
-const PITCH_THRESHOLD = 12 // 상하 이탈 기준 (°)
+  const score = (focusedCount / rawData.length) * 100
+  return Math.round(score)
+}
 
 export {
   getDistance,
   calculateEAR,
   calculateFocus,
   extractEulerAngles,
-  LEFT_EYE,
-  RIGHT_EYE,
-  EAR_THRESHOLD,
-  BLINK_MIN_FRAMES,
-  BLINK_MAX_MS,
-  EAR_HISTORY_SIZE,
-  YAW_THRESHOLD,
-  PITCH_THRESHOLD,
+  calculateAverageConcentration,
 }

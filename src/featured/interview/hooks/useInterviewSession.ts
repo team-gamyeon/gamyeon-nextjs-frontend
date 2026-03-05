@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Phase } from '@/featured/interview/types'
-import { QUESTIONS, TOTAL_THINK_TIME, TOTAL_ANSWER_TIME } from '@/featured/interview/types'
+import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 
 export function useInterviewSession() {
   const router = useRouter()
@@ -30,7 +30,10 @@ export function useInterviewSession() {
     currentQuestionRef.current = currentQuestion
   }, [currentQuestion])
 
-  const handleSetupComplete = (config: { title?: string; basePose?: { pitch: number; yaw: number } | null }) => {
+  const handleSetupComplete = (config: {
+    title?: string
+    basePose?: { pitch: number; yaw: number } | null
+  }) => {
     setInterviewTitle(config.title || 'AI 모의 면접')
     setBasePose(config.basePose ?? null)
     setShowSetup(false)

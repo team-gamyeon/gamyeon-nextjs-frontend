@@ -4,7 +4,7 @@ import { installMediapipeConsoleFilter } from '@/shared/lib/mediapipeConsoleFilt
 
 export const useGazeTracker = () => {
   const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(null)
-  const [error, setError] = useState<Error | null>(null) // 에러 상태 추가
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     installMediapipeConsoleFilter()

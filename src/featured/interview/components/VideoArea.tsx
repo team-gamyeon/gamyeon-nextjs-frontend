@@ -6,7 +6,7 @@ import type { Phase } from '@/featured/interview/types'
 import Webcam from 'react-webcam'
 import { useRef, useState } from 'react'
 import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
-import { EAR_THRESHOLD, YAW_THRESHOLD, PITCH_THRESHOLD } from '@/featured/interview/utils/visionUtils'
+import { EAR_THRESHOLD, PITCH_THRESHOLD, YAW_THRESHOLD } from '@/featured/interview/constants'
 
 interface VideoAreaProps {
   cameraOn: boolean
@@ -47,10 +47,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
         )}
 
         {cameraOn && phase === 'answering' && showMesh && (
-          <canvas
-            ref={canvasRef}
-            className="pointer-events-none absolute inset-0 h-full w-full"
-          />
+          <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />
         )}
 
         {cameraOn && !landmarker && (
@@ -144,13 +141,13 @@ export function VideoArea({ cameraOn, micOn, phase, basePose }: VideoAreaProps) 
                 <div className="rounded bg-slate-900 p-2">
                   <p className="text-slate-400">L Eye (x, y)</p>
                   <p className="font-mono text-sm text-purple-400">
-                    ({realtimeStats.leftGazeX}, {realtimeStats.leftGazeY})
+                    ({realtimeStats.gaze.left.x}, {realtimeStats.gaze.left.y})
                   </p>
                 </div>
                 <div className="rounded bg-slate-900 p-2">
                   <p className="text-slate-400">R Eye (x, y)</p>
                   <p className="font-mono text-sm text-purple-400">
-                    ({realtimeStats.rightGazeX}, {realtimeStats.rightGazeY})
+                    ({realtimeStats.gaze.right.x}, {realtimeStats.gaze.left.y})
                   </p>
                 </div>
               </div>

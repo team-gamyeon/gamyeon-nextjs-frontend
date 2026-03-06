@@ -43,7 +43,7 @@ export function SignupForm() {
                 환영합니다! 이제 AI 면접 연습을 시작할 수 있습니다.
               </p>
               <Button className="w-full" size="lg" asChild>
-                <Link href="/upload">이력서 업로드하기</Link>
+                <Link href="/signin">로그인 페이지로 이동</Link>
               </Button>
             </CardContent>
           </Card>

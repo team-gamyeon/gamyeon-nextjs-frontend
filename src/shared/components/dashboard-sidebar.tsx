@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,7 +16,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import { useAuthStore } from '@/featured/auth/store'
 import {
-  BrainCircuit,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -67,12 +67,14 @@ export function DashboardSidebar() {
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.15 }}
             >
-              <Link
-                href="/dashboard"
-                className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg"
-                aria-label="대시보드로 이동"
-              >
-                <BrainCircuit className="text-primary-foreground h-5 w-5" />
+              <Link href="/dashboard" aria-label="대시보드로 이동">
+                <Image
+                  src="/images/Gamyeon_Logo.png"
+                  alt="Gamyeon logo"
+                  width={1024}
+                  height={768}
+                  style={{ height: '32px', width: 'auto' }}
+                />
               </Link>
             </motion.div>
           ) : (
@@ -82,20 +84,17 @@ export function DashboardSidebar() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -6 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center gap-2.5"
+              className="flex items-center"
             >
-              <Link
-                href="/dashboard"
-                className="bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                aria-label="대시보드로 이동"
-              >
-                <BrainCircuit className="text-primary-foreground h-5 w-5" />
-              </Link>
-              <Link
-                href="/dashboard"
-                className="text-base leading-none font-bold tracking-tight whitespace-nowrap"
-              >
-                Gamyeon
+              <Link href="/dashboard" className="flex items-center gap-1">
+                <Image
+                  src="/images/Gamyeon_Logo.png"
+                  alt="Gamyeon logo"
+                  width={1024}
+                  height={768}
+                  style={{ height: '32px', width: 'auto' }}
+                />
+                <span className="text-primary text-lg font-bold tracking-tight">Gamyeon</span>
               </Link>
             </motion.div>
           )}

@@ -10,7 +10,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
       <div className="absolute inset-0 -z-10">
-        <div className="bg-primary/5 absolute top-1/4 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full blur-3xl" />
+        <div className="bg-primary/5 absolute top-1/4 left-1/2 h-125 w-125 -translate-x-1/2 rounded-full blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -105,7 +105,7 @@ export function HeroSection() {
             </div>
             <div className="grid gap-4 p-6 md:grid-cols-3">
               <div className="md:col-span-2">
-                <div className="flex aspect-video items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <div className="flex aspect-video items-center justify-center rounded-xl bg-linear-to-br from-slate-800 to-slate-900">
                   <div className="text-center">
                     <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/20 bg-white/10">
                       <Play className="ml-1 h-6 w-6 text-white/80" />

@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Separator } from '@/shared/ui/separator'
-import { BrainCircuit, Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react'
 import { PasswordStrength } from '@/featured/auth/components/PasswordStrength'
 import { useSignupForm } from '@/featured/auth/hooks/useSignupForm'
 
@@ -43,7 +44,7 @@ export function SignupForm() {
                 환영합니다! 이제 AI 면접 연습을 시작할 수 있습니다.
               </p>
               <Button className="w-full" size="lg" asChild>
-                <Link href="/upload">이력서 업로드하기</Link>
+                <Link href="/signin">로그인 페이지로 이동</Link>
               </Button>
             </CardContent>
           </Card>
@@ -60,12 +61,15 @@ export function SignupForm() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-md"
       >
-        <div className="mb-8 text-center">
-          <Link href="/dashboard" className="text-foreground inline-flex items-center gap-2">
-            <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-xl">
-              <BrainCircuit className="text-primary-foreground h-6 w-6" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">InterviewAI</span>
+        <div className="mb-4 text-center">
+          <Link href="/dashboard" className="text-foreground mb-1 flex flex-col items-center">
+            <Image
+              src="/images/Gamyeon_Logo.png"
+              alt="Gamyeon logo"
+              width={1024}
+              height={768}
+              style={{ height: '32px', width: 'auto' }}
+            />
           </Link>
         </div>
 
@@ -97,11 +101,14 @@ export function SignupForm() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full gap-2">
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+              <Button
+                type="button"
+                className="w-full gap-2.5 bg-[#FEE500] font-medium text-[#3C1E1E] hover:bg-[#F0D900]"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.617 5.076 4.077 6.54l-.977 3.642a.3.3 0 0 0 .44.327l4.217-2.79A12.2 12.2 0 0 0 12 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" />
                 </svg>
-                GitHub
+                카카오
               </Button>
             </div>
 

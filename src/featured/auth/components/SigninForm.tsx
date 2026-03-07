@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Separator } from '@/shared/ui/separator'
-import { BrainCircuit, Eye, EyeOff, Mail, Lock } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { useSigninForm } from '@/featured/auth/hooks/useSigninForm'
 
 export function SigninForm() {
@@ -30,19 +31,24 @@ export function SigninForm() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-md"
       >
-        <div className="mb-8 text-center">
-          <Link href="/dashboard" className="text-foreground inline-flex items-center gap-2">
-            <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-xl">
-              <BrainCircuit className="text-primary-foreground h-6 w-6" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">InterviewAI</span>
+        <div className="mb-4 text-center">
+          <Link href="/dashboard" className="text-foreground flex flex-col items-center">
+            <Image
+              src="/images/Gamyeon_Logo.png"
+              alt="Gamyeon logo"
+              width={1024}
+              height={768}
+              style={{ height: '32px', width: 'auto' }}
+            />
           </Link>
         </div>
 
         <Card className="border-border/50 shadow-primary/5 shadow-xl">
           <CardHeader className="space-y-1 pb-4 text-center">
             <h1 className="text-2xl font-bold">로그인</h1>
-            <p className="text-muted-foreground text-sm">계속하려면 로그인해주세요</p>
+            <p className="text-muted-foreground text-sm">
+              면접을 진행하시려면 로그인 후 이용해주세요
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col gap-2.5">
@@ -82,18 +88,6 @@ export function SigninForm() {
                   />
                 </svg>
                 Google로 로그인
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full gap-2.5"
-                onClick={handleSocialSignin}
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
-                </svg>
-                GitHub로 로그인
               </Button>
             </div>
 

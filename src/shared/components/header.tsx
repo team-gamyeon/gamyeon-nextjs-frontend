@@ -15,7 +15,8 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { useAuthStore } from '@/featured/auth/store'
-import { Menu, BrainCircuit, Play, LayoutDashboard, LogOut, Settings } from 'lucide-react'
+import Image from 'next/image'
+import { Menu, Play, LayoutDashboard, LogOut, Settings } from 'lucide-react'
 
 const navLinks = [
   { href: '#features', label: '주요 기능' },
@@ -45,11 +46,15 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 로고 */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-            <BrainCircuit className="text-primary-foreground h-5 w-5" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">Gamyeon</span>
+        <Link href="/dashboard" className="flex items-center gap-1">
+          <Image
+            src="/images/Gamyeon_Logo.png"
+            alt="Gamyeon logo"
+            width={1024}
+            height={768}
+            style={{ height: '32px', width: 'auto' }}
+          />
+          <span className="text-primary text-lg font-bold tracking-tight">Gamyeon</span>
         </Link>
 
         {/* 데스크탑 네비게이션 */}

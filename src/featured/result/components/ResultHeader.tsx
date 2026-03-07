@@ -1,16 +1,15 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
-import { BrainCircuit, Download, Share2 } from 'lucide-react'
+import Image from 'next/image'
+import { Download, Share2 } from 'lucide-react'
 
 export function ResultHeader() {
   return (
     <header className="border-border/50 bg-background/80 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-            <BrainCircuit className="text-primary-foreground h-5 w-5" />
-          </div>
-          <span className="text-lg font-bold">Gamyeon</span>
+        <Link href="/dashboard" className="flex items-center">
+          <Image src="/images/Gamyeon_Logo.png" alt="Gamyeon logo" width={1024} height={768} style={{ height: '32px', width: 'auto' }} />
+          <span className="text-lg font-bold text-foreground">Gamyeon</span>
         </Link>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5">

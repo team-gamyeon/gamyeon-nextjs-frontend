@@ -78,7 +78,7 @@ export function NoticeSection() {
               <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
                   <span
-                    className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] leading-none font-medium ${
+                    className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${
                       item.category === '업데이트'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
                         : item.category === '안내'

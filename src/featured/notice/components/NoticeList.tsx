@@ -56,7 +56,7 @@ export function NoticeList({ notices, search }: NoticeListProps) {
             >
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <span
-                  className={`flex h-5 w-[56px] shrink-0 items-center justify-center rounded text-[10px] font-medium ${CATEGORY_COLORS[notice.category]}`}
+                  className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${CATEGORY_COLORS[notice.category]}`}
                 >
                   {notice.category}
                 </span>

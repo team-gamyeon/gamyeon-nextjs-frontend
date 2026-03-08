@@ -1,10 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Card, CardContent } from '@/shared/ui/card'
-import { Badge } from '@/shared/ui/badge'
-import { Play, History, ArrowRight } from 'lucide-react'
+// FastForward 대신 RefreshCcw로 변경 (필요시 ImagePlay로 교체 가능)
+import { Play, History, RefreshCcw } from 'lucide-react'
+import { QuickStartCard } from '@/featured/dashboard/components/QuickStartCard'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -16,51 +15,75 @@ const fadeUp = {
 }
 
 export function QuickStartSection() {
+  // TODO: 실제 유저 상태(진행 중인 면접 여부)에 따라 이 값을 동적으로 설정해야 합니다.
+  // true : 이어보기 활성화
+  // false : 이어보기 비활성화
+  const hasInProgressInterview = false
+
   return (
     <div>
       <h2 className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
         빠른 시작
       </h2>
-      <div className="grid gap-4 md:grid-cols-3">
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <Link href="/interview">
-            <Card className="group border-primary/20 bg-primary/5 hover:border-primary/40 hover:shadow-primary/10 cursor-pointer transition-all hover:shadow-md">
-              <CardContent className="p-5">
-                <div className="bg-primary/10 group-hover:bg-primary/20 mb-4 flex h-11 w-11 items-center justify-center rounded-xl transition-colors">
-                  <Play className="text-primary h-5 w-5" />
-                </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <h3 className="font-semibold">면접 시작</h3>
-                  <Badge className="bg-primary/10 text-primary px-1.5 py-0 text-[10px]">추천</Badge>
-                </div>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  AI 면접관과 실전 모의 면접을 진행하세요
-                </p>
-                <div className="text-primary mt-4 flex items-center gap-1 text-xs font-medium">
-                  지금 시작 <ArrowRight className="h-3 w-3" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+      <div className="flex h-57.5 flex-row gap-4">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={1}
+          className="flex-1"
+        >
+          <QuickStartCard
+            title="면접 시작"
+            description="AI 면접관과 실전 모의 면접을 진행하세요"
+            icon={Play}
+            iconStyle="bg-primary/10 text-primary group-hover:bg-primary/20"
+            iconColorStyle="text-primary"
+            href="/interview"
+            buttonText="지금 시작"
+            isRecommended={true}
+          />
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-          <Link href="/history">
-            <Card className="group border-border/50 hover:border-primary/30 hover:shadow-primary/5 cursor-pointer transition-all hover:shadow-md">
-              <CardContent className="p-5">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 transition-colors group-hover:bg-violet-100">
-                  <History className="h-5 w-5 text-violet-600" />
-                </div>
-                <h3 className="mb-1 font-semibold">면접 기록</h3>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  지난 면접 결과와 피드백을 다시 확인하세요
-                </p>
-                <div className="text-primary mt-4 flex items-center gap-1 text-xs font-medium">
-                  기록 보기 <ArrowRight className="h-3 w-3" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={2}
+          className="flex-1"
+        >
+          <QuickStartCard
+            title="면접 기록"
+            description="지난 면접 결과와 피드백을 다시 확인하세요"
+            icon={History}
+            iconStyle="bg-violet-50 text-violet-600 group-hover:bg-violet-100"
+            iconColorStyle="text-violet-600"
+            href="/history"
+            buttonText="기록 보기"
+          />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={3}
+          className="flex-1"
+        >
+          <QuickStartCard
+            title="이어하기"
+            description={
+              hasInProgressInterview
+                ? '진행중인 면접이 있습니다. 이어서 진행해 보세요'
+                : '현재 진행 중인 면접이 없습니다.'
+            }
+            icon={RefreshCcw}
+            iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
+            iconColorStyle="text-blue-600"
+            href="/interview/continue"
+            buttonText="이어서 면접보기"
+            isDisabled={!hasInProgressInterview}
+          />
         </motion.div>
       </div>
     </div>

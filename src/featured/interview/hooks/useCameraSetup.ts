@@ -2,11 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { FaceLandmarker } from '@mediapipe/tasks-vision'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 import { type PermStatus } from '@/featured/interview/types'
-import {
-  ALIGN_THRESHOLD,
-  ALIGN_DURATION_MS,
-  extractSetupEulerAngles,
-} from '@/featured/interview/utils/setupUtils'
+import { extractSetupEulerAngles } from '@/featured/interview/utils/setupUtils'
+import { ALIGN_DURATION_MS, ALIGN_THRESHOLD } from '@/featured/interview/constants'
 
 interface UseCameraSetupReturn {
   landmarker: FaceLandmarker | null

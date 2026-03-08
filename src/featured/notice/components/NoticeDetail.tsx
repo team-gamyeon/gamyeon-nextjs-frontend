@@ -74,9 +74,7 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
       initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={
-        shouldReduceMotion
-          ? { duration: 0 }
-          : { type: 'spring', stiffness: 300, damping: 28 }
+        shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28 }
       }
       className="px-8 py-6"
     >
@@ -89,11 +87,13 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
           </Link>
         </Button>
         <nav className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <Link href="/dashboard" className="hover:text-foreground transition-colors">
+            대시보드
+          </Link>
+          <ChevronRight className="h-3 w-3" />
           <Link href="/notices" className="hover:text-foreground transition-colors">
             공지사항
           </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground/50 max-w-60 truncate">{notice.title}</span>
         </nav>
       </div>
 
@@ -103,7 +103,7 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
         <div className="border-border/50 border-b px-8 py-6">
           <div className="mb-3 flex items-center gap-2">
             <span
-              className={`rounded px-1.5 py-0.5 text-[10px] leading-none font-medium ${CATEGORY_COLORS[notice.category]}`}
+              className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${CATEGORY_COLORS[notice.category]}`}
             >
               {notice.category}
             </span>
@@ -114,7 +114,7 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
             ) : null}
           </div>
 
-          <h1 className="mb-4 text-lg font-bold leading-snug">{notice.title}</h1>
+          <h1 className="mb-4 text-lg leading-snug font-bold">{notice.title}</h1>
 
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Calendar className="h-3 w-3" />
@@ -127,7 +127,6 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
           <NoticeContent content={notice.content} />
         </CardContent>
       </Card>
-
     </motion.div>
   )
 }

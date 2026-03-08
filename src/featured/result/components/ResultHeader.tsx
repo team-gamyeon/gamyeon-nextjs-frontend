@@ -1,9 +1,29 @@
+'use client'
+
 import Link from 'next/link'
-import { Button } from '@/shared/ui/button'
 import Image from 'next/image'
-import { Download, Share2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { LayoutDashboard, LogOut, Settings } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu'
+import { useAuthStore } from '@/featured/auth/store'
 
 export function ResultHeader() {
+  const { user, logout } = useAuthStore()
+  const router = useRouter()
+  const initials = user?.name ? user.name.slice(0, 1) : 'U'
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
   return (
     <header className="border-border/50 bg-background/80 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
@@ -17,16 +37,43 @@ export function ResultHeader() {
           />
           <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Download className="h-3.5 w-3.5" />
-            PDF 저장
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Share2 className="h-3.5 w-3.5" />
-            공유
-          </Button>
-        </div>
+
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button className="ring-primary/40 flex items-center rounded-full outline-none transition hover:ring-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <div className="px-3 py-2">
+              <p className="text-sm font-medium">{user?.name ?? '사용자'}</p>
+              <p className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard" className="cursor-pointer gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                대시보드
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer gap-2">
+              <Settings className="h-4 w-4" />
+              설정
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              로그아웃
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

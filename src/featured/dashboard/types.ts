@@ -1,4 +1,5 @@
 export interface RecentHistoryItem {
+  id: number
   position: string
   score: number
   date: string

@@ -26,13 +26,14 @@ export function FinishedOverlay({ phase }: FinishedOverlayProps) {
             </div>
             <div>
               <p className="text-xl font-bold text-green-300">면접이 완료되었습니다</p>
-              <p className="mt-1 text-sm text-white/50">
-                수고하셨습니다! AI가 결과를 분석 중입니다.
+              <p className="mt-2 text-sm text-white/70">
+                수고하셨습니다! AI가 답변을 정밀 분석 중입니다. <br />
+                분석 완료까지 <strong>약 3~5분이 소요</strong>되며, 면접 기록에서 확인 가능합니다.
               </p>
             </div>
             <Button size="lg" className="mt-2 gap-2 px-8" asChild>
-              <Link href="/result">
-                결과 리포트 확인
+              <Link href="/history">
+                나의 면접 기록 보기
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>

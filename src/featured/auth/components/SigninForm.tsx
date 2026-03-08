@@ -32,7 +32,7 @@ export function SigninForm() {
         className="w-full max-w-md"
       >
         <div className="mb-4 text-center">
-          <Link href="/dashboard" className="text-foreground flex flex-col items-center">
+          <Link href="/dashboard" className="text-foreground flex items-center justify-center gap-0.5">
             <Image
               src="/images/Gamyeon_Logo.png"
               alt="Gamyeon logo"
@@ -40,6 +40,7 @@ export function SigninForm() {
               height={768}
               style={{ height: '32px', width: 'auto' }}
             />
+            <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
           </Link>
         </div>
 

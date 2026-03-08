@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { DashboardSidebar } from '@/shared/components/dashboard-sidebar'
 import { NoticeHeader } from '@/featured/notice/components/NoticeHeader'
 import { NoticeDetail } from '@/featured/notice/components/NoticeDetail'
 import { MOCK_NOTICES } from '@/featured/notice/types'
@@ -21,13 +20,9 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
   const nextNotice = idx < MOCK_NOTICES.length - 1 ? MOCK_NOTICES[idx + 1] : null
 
   return (
-    <div className="bg-muted/20 flex h-screen">
-      <DashboardSidebar />
-
-      <main className="flex-1 overflow-y-auto">
-        <NoticeHeader />
-        <NoticeDetail notice={notice} prevNotice={prevNotice} nextNotice={nextNotice} />
-      </main>
-    </div>
+    <>
+      <NoticeHeader />
+      <NoticeDetail notice={notice} prevNotice={prevNotice} nextNotice={nextNotice} />
+    </>
   )
 }

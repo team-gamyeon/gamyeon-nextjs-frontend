@@ -1,9 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { Search, Calendar, ArrowUpDown } from 'lucide-react'
+import { Search, Calendar, ArrowUpDown, Plus } from 'lucide-react'
 import type { SortBy } from '@/featured/history/types'
 
 interface HistoryFiltersProps {
@@ -53,6 +54,11 @@ export function HistoryFilters({
         >
           <ArrowUpDown className="h-3.5 w-3.5" />
           점수순
+        </Button>
+        <Button size="sm" className="gap-1.5" asChild>
+          <Link href="/upload">
+            <Plus className="h-3.5 w-3.5" />새 면접
+          </Link>
         </Button>
       </div>
     </motion.div>

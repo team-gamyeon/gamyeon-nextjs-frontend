@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/button'
 import { Mic, SkipForward, CheckCircle2 } from 'lucide-react'
 import { CircularTimer } from '@/featured/interview/components/CircularTimer'
 import type { Phase } from '@/featured/interview/types'
-import { QUESTIONS, TOTAL_THINK_TIME, TOTAL_ANSWER_TIME } from '@/featured/interview/constants'
+import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 
 interface TimerOverlayProps {
   isActive: boolean

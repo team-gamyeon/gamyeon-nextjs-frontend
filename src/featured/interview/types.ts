@@ -32,8 +32,9 @@ export type FocusState =
   | 'BOTTOM-LEFT'
   | 'BOTTOM-RIGHT'
 
-interface RawGazeData {
+export interface RawGazeData {
   offset_ms: number
+  confidence: number
   gaze: {
     left: {
       x: number
@@ -51,7 +52,7 @@ interface RawGazeData {
   }
 }
 
-interface GazeEvent {
+export interface GazeEvent {
   type: 'AWAY_START' | 'AWAY_END'
   offset_ms: number
   direction: FocusState

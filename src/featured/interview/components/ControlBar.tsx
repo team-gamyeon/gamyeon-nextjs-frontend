@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { Mic, MicOff, Video, VideoOff, SkipForward, CheckCircle2, ChevronRight } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
-import { QUESTIONS } from '@/featured/interview/types'
+import { QUESTIONS } from '@/featured/interview/constants'
 
 interface ControlBarProps {
   micOn: boolean

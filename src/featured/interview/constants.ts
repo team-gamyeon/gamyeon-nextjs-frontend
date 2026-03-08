@@ -14,6 +14,9 @@ const PITCH_THRESHOLD = 12 // 상하 이탈 기준 (°)
 const TOTAL_THINK_TIME = 10
 const TOTAL_ANSWER_TIME = 60
 
+export const ALIGN_THRESHOLD = 8 // 정면 판정 각도 기준 (8도 이내면 정면)
+export const ALIGN_DURATION_MS = 3000 // 3초 유지 필요
+
 const QUESTIONS = [
   '자기소개를 부탁드립니다. 본인의 핵심 역량과 지원 동기를 중심으로 말씀해주세요.',
   '이전 프로젝트에서 가장 어려웠던 기술적 도전은 무엇이었고, 어떻게 해결하셨나요?',

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { InterviewBatchPayload } from '@/featured/interview/types'
 import { calculateAverageConcentration } from '@/featured/interview/utils/visionUtils'
 import { sendInterviewBatch } from '@/featured/interview/utils/sendBatchData'
@@ -9,7 +9,7 @@ export function useBatchSender() {
   const segmentSequenceRef = useRef(1)
   const lastBatchTimeRef = useRef(0)
 
-  const handleSendBatch = async (blinkCount: number) => {
+  const handleSendBatch = useCallback(async (blinkCount: number) => {
     if (rawDataRef.current.length === 0) return
 
     const averageConcentration = calculateAverageConcentration(rawDataRef.current)
@@ -44,7 +44,8 @@ export function useBatchSender() {
     } else {
       console.error('전송 실패, 다음 배치에 합쳐서 전송')
     }
-  }
+  }, [])
+
   return {
     rawDataRef,
     eventsRef,

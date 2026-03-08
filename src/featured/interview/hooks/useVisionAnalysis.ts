@@ -20,7 +20,7 @@ interface UseVisionParams {
 }
 
 export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseVisionParams) {
-  const { landmarker } = useGazeTracker()
+  const { landmarker, detector } = useGazeTracker()
   const { blinkCountRef, updateBlink } = useBlinkDetector()
   const { rawDataRef, eventsRef, lastBatchTimeRef, handleSendBatch } = useBatchSender()
 
@@ -43,6 +43,7 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
   const [uiLogs, setUiLogs] = useState<any[]>([])
 
   useEffect(() => {
+    // 추후 제거 예정(불필요한 ui)
     const updateUiLogs = (
       currentFocus: FocusState,
       type: 'AWAY_START' | 'AWAY_END',
@@ -69,7 +70,7 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
           },
           eventType: type === 'AWAY_END' ? 'RECOVERY' : 'ANOMALY',
         }
-        return [newLog, ...prev].slice(0, 5) // 최신 5개 유지
+        return [newLog, ...prev].slice(0, 5)
       })
     }
 
@@ -79,53 +80,74 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
       const now = performance.now()
 
       const video = webcamRef.current?.video
-      if (!landmarker || !video || video.readyState !== 4) return
+      if (!landmarker || !detector || !video || video.readyState !== 4) return
 
       try {
+        // face detector 로 신뢰도 먼저 추출
+        const detectorResult = detector.detectForVideo(video, now)
+        let nativeConfidence = 0
+
+        if (detectorResult.detections && detectorResult.detections.length > 0) {
+          nativeConfidence = detectorResult.detections[0].categories[0].score
+        }
+
+        // face landmarker 로 상세 분석
         const result = landmarker.detectForVideo(video, now)
-        if (!result.faceLandmarks?.length) return
-        const landmarks = result.faceLandmarks[0]
+        const landmarks = result.faceLandmarks?.[0] || null
 
-        const scaleX = video.videoWidth
-        const scaleY = video.videoHeight
-
-        // 눈 깜빡임
-        const rawEAR =
-          (calculateEAR(landmarks, LEFT_EYE, scaleX, scaleY) +
-            calculateEAR(landmarks, RIGHT_EYE, scaleX, scaleY)) /
-          2
-        const { blinkCount: currentBlinkNumber, avgEAR } = updateBlink(rawEAR, now)
-
-        // 고개 각도 &  머리 방향
         let pitch = 0,
           yaw = 0,
-          roll = 0
-        const matrixes = result.facialTransformationMatrixes
-        if (matrixes && matrixes.length > 0) {
-          const rawMatrix = matrixes[0].data || matrixes[0]
-          const angles = extractEulerAngles(rawMatrix)
-          pitch = angles.pitch
-          yaw = angles.yaw
-          roll = angles.roll
+          roll = 0,
+          rawEAR = 0,
+          currentFocus: FocusState = 'CENTER'
+        let leftGazeX = 0,
+          leftGazeY = 0,
+          rightGazeX = 0,
+          rightGazeY = 0
+        let avgEAR = 0,
+          currentBlinkNumber = blinkCountRef.current
+
+        if (landmarks) {
+          // Face Mesh 렌더링
+          const canvas = canvasRef?.current
+          renderFaceMesh({ canvas, video, landmarks })
+
+          // 눈 깜빡임
+          const scaleX = video.videoWidth
+          const scaleY = video.videoHeight
+          rawEAR =
+            (calculateEAR(landmarks, LEFT_EYE, scaleX, scaleY) +
+              calculateEAR(landmarks, RIGHT_EYE, scaleX, scaleY)) /
+            2
+          const blinkData = updateBlink(rawEAR, now)
+          currentBlinkNumber = blinkData.blinkCount
+          avgEAR = blinkData.avgEAR
+
+          // 고개 각도 &  머리 방향
+          const matrixes = result.facialTransformationMatrixes
+          if (matrixes && matrixes.length > 0) {
+            const rawMatrix = matrixes[0].data || matrixes[0]
+            const angles = extractEulerAngles(rawMatrix)
+            pitch = Number(angles.pitch.toFixed(3))
+            yaw = Number(angles.yaw.toFixed(3))
+            roll = Number(angles.roll.toFixed(3))
+          }
+          currentFocus = calculateFocus(pitch, yaw, basePose)
+
+          // 시선 좌표
+          const leftIris = landmarks[468]
+          const rightIris = landmarks[473]
+          leftGazeX = leftIris ? Number((1 - leftIris.x).toFixed(3)) : 0
+          leftGazeY = leftIris ? Number(leftIris.y.toFixed(3)) : 0
+          rightGazeX = rightIris ? Number((1 - rightIris.x).toFixed(3)) : 0
+          rightGazeY = rightIris ? Number(rightIris.y.toFixed(3)) : 0
         }
-        const currentFocus = calculateFocus(pitch, yaw, basePose)
-
-        // Face Mesh
-        const canvas = canvasRef?.current
-        renderFaceMesh({ canvas, video, landmarks })
-
-        // Gaze (x, y)
-        const leftIris = landmarks[468]
-        const rightIris = landmarks[473]
-        const leftGazeX = leftIris ? Number((1 - leftIris.x).toFixed(3)) : 0
-        const leftGazeY = leftIris ? Number(leftIris.y.toFixed(3)) : 0
-        const rightGazeX = rightIris ? Number((1 - rightIris.x).toFixed(3)) : 0
-        const rightGazeY = rightIris ? Number(rightIris.y.toFixed(3)) : 0
 
         // raw_data 쌓기
         if (now - lastSampleTimeRef.current >= 100) {
           rawDataRef.current.push({
             offset_ms: Math.floor(now),
+            confidence: Number(nativeConfidence.toFixed(2)),
             gaze: { left: { x: leftGazeX, y: leftGazeY }, right: { x: rightGazeX, y: rightGazeY } },
             head: { pitch, yaw, roll },
           })
@@ -145,22 +167,24 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
         }
 
         // events 쌓기
-        const isStateChanged = currentFocus !== lastLoggedStateRef.current
-        if (isStateChanged) {
-          const type = currentFocus === 'CENTER' ? 'AWAY_END' : 'AWAY_START'
-          const gaze = {
-            left: { x: leftGazeX, y: leftGazeY },
-            right: { x: rightGazeX, y: rightGazeY },
-          }
-          eventsRef.current.push({
-            type,
-            offset_ms: Math.floor(now),
-            direction: currentFocus !== 'CENTER' ? currentFocus : 'CENTER',
-          })
+        if (landmarks) {
+          const isStateChanged = currentFocus !== lastLoggedStateRef.current
+          if (isStateChanged) {
+            const type = currentFocus === 'CENTER' ? 'AWAY_END' : 'AWAY_START'
+            const gaze = {
+              left: { x: leftGazeX, y: leftGazeY },
+              right: { x: rightGazeX, y: rightGazeY },
+            }
+            eventsRef.current.push({
+              type,
+              offset_ms: Math.floor(now),
+              direction: currentFocus !== 'CENTER' ? currentFocus : 'CENTER',
+            })
 
-          updateUiLogs(currentFocus, type, pitch, yaw, roll, gaze)
-          lastLoggedStateRef.current = currentFocus
-          console.warn(`상태 변경: ${lastLoggedStateRef.current} -> ${currentFocus}`)
+            updateUiLogs(currentFocus, type, pitch, yaw, roll, gaze)
+            lastLoggedStateRef.current = currentFocus
+            console.warn(`상태 변경: ${lastLoggedStateRef.current} -> ${currentFocus}`)
+          }
         }
 
         // 10초마다 배치 전송
@@ -172,7 +196,7 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
       }
     }
 
-    if (landmarker && cameraOn && phase === 'answering') {
+    if (landmarker && detector && cameraOn && phase === 'answering') {
       lastBatchTimeRef.current = performance.now()
       requestRef.current = requestAnimationFrame(detectGaze)
     }
@@ -183,11 +207,12 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
         requestRef.current = null
       }
 
+      // 10초 안됨 but, 다음질문 넘어가서 배치 전송 필수
       if (phase === 'answering' && rawDataRef.current.length > 0) {
         handleSendBatch(blinkCountRef.current)
       }
     }
-  }, [landmarker, cameraOn, phase, basePose, handleSendBatch, lastBatchTimeRef])
+  }, [landmarker, detector, cameraOn, phase, basePose, handleSendBatch])
 
   return {
     uiLogs,

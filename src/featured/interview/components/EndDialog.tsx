@@ -21,11 +21,15 @@ export function EndDialog({ open, onOpenChange }: EndDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/10 bg-slate-900 text-white">
         <DialogHeader>
-          <DialogTitle>면접을 종료하시겠습니까?</DialogTitle>
-          <DialogDescription className="text-white/60">
-            종료하면 현재까지의 답변을 바탕으로 결과 리포트가 생성됩니다.
+          <DialogTitle>정말 면접을 중단하시겠습니까?</DialogTitle>
+          <DialogDescription className="text-white/50">
+            면접을 중단하면
+            <span className="font-semibold text-red-400"> AI 분석 리포트가 생성되지 않습니다.</span>
+            <br />
+            모든 질문에 답변해야 AI 분석 리포트를 받을 수 있습니다.
           </DialogDescription>
         </DialogHeader>
+
         <DialogFooter className="gap-2 sm:gap-0">
           <Button
             variant="ghost"
@@ -35,7 +39,7 @@ export function EndDialog({ open, onOpenChange }: EndDialogProps) {
             계속하기
           </Button>
           <Button variant="destructive" asChild>
-            <Link href="/result">면접 종료</Link>
+            <Link href="/history">면접 중단</Link>
           </Button>
         </DialogFooter>
       </DialogContent>

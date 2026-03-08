@@ -1,8 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-// FastForward 대신 RefreshCcw로 변경 (필요시 ImagePlay로 교체 가능)
-import { Play, History, RefreshCcw } from 'lucide-react'
+import { Play, History, RotateCcw } from 'lucide-react'
 import { QuickStartCard } from '@/featured/dashboard/components/QuickStartCard'
 
 const fadeUp = {
@@ -77,7 +76,7 @@ export function QuickStartSection() {
                 ? '진행중인 면접이 있습니다. 이어서 진행해 보세요'
                 : '현재 진행 중인 면접이 없습니다.'
             }
-            icon={RefreshCcw}
+            icon={RotateCcw}
             iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
             iconColorStyle="text-blue-600"
             href="/interview/continue"

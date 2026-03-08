@@ -13,7 +13,7 @@ export interface QuickStartCardProps {
   href: string
   buttonText: string
   isRecommended?: boolean
-  isDisabled?: boolean
+  isDisabled?: boolean //유저가 꼭 눌렀으면 하는 핵심 기능(면접 시작) 하나만 시각적으로 눈에 띄게 강조하기 위한 스위치
   onClick?: () => void
 }
 
@@ -68,7 +68,11 @@ export function QuickStartCard({
   )
 
   if (isDisabled) {
-    return <div className="h-full w-full">{CardContainer}</div>
+    return (
+      <div className="h-full w-full" aria-disabled={true}>
+        {CardContainer}
+      </div>
+    )
   }
 
   return (

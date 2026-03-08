@@ -35,7 +35,7 @@ export function NoticeFilters({
         ))}
       </div>
 
-      <div className="relative w-full sm:w-56">
+      <div className="relative w-full sm:w-96">
         <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
           value={search}

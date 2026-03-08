@@ -89,11 +89,13 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
           </Link>
         </Button>
         <nav className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <Link href="/dashboard" className="hover:text-foreground transition-colors">
+            대시보드
+          </Link>
+          <ChevronRight className="h-3 w-3" />
           <Link href="/notices" className="hover:text-foreground transition-colors">
             공지사항
           </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground/50 max-w-60 truncate">{notice.title}</span>
         </nav>
       </div>
 

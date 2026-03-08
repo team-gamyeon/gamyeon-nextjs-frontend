@@ -69,7 +69,7 @@ export function DashboardSidebar() {
             >
               <Link href="/dashboard" aria-label="대시보드로 이동">
                 <Image
-                  src="/images/Gamyeon_Logo.png"
+                  src="/images/Gamyeon_Logo.svg"
                   alt="Gamyeon logo"
                   width={1024}
                   height={768}
@@ -86,15 +86,15 @@ export function DashboardSidebar() {
               transition={{ duration: 0.15 }}
               className="flex items-center"
             >
-              <Link href="/dashboard" className="flex items-center gap-1">
+              <Link href="/dashboard" className="flex items-center">
                 <Image
-                  src="/images/Gamyeon_Logo.png"
+                  src="/images/Gamyeon_Logo.svg"
                   alt="Gamyeon logo"
                   width={1024}
                   height={768}
                   style={{ height: '32px', width: 'auto' }}
                 />
-                <span className="text-primary text-lg font-bold tracking-tight">Gamyeon</span>
+                <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
               </Link>
             </motion.div>
           )}
@@ -138,7 +138,7 @@ export function DashboardSidebar() {
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
-              <item.icon className="h-[18px] w-[18px] shrink-0" />
+              <item.icon className="h-4.5 w-4.5 shrink-0" />
               <AnimatePresence initial={false}>
                 {!collapsed && (
                   <motion.span

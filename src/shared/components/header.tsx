@@ -46,15 +46,15 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 로고 */}
-        <Link href="/dashboard" className="flex items-center gap-1">
+        <Link href="/dashboard" className="flex items-center">
           <Image
-            src="/images/Gamyeon_Logo.png"
+            src="/images/Gamyeon_Logo.svg"
             alt="Gamyeon logo"
             width={1024}
             height={768}
             style={{ height: '32px', width: 'auto' }}
           />
-          <span className="text-primary text-lg font-bold tracking-tight">Gamyeon</span>
+          <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
         </Link>
 
         {/* 데스크탑 네비게이션 */}

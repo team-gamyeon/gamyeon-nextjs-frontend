@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { BrainCircuit, ArrowLeft, Square } from 'lucide-react'
-import { QUESTIONS } from '@/featured/interview/types'
+import { QUESTIONS } from '@/featured/interview/constants'
 import type { Phase } from '@/featured/interview/types'
 
 interface InterviewTopBarProps {

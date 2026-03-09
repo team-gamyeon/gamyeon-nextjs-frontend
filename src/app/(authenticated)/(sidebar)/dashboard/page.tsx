@@ -16,7 +16,7 @@ export default function DashboardPage() {
               기존 유저 (데이터 있음): <RecentHistorySection /> 
               신규 유저 (데이터 없음): <RecentHistorySection history={[]} /> 
           */}
-          <RecentHistorySection history={[]} />
+          <RecentHistorySection />
           <NoticeSection />
         </div>
       </div>

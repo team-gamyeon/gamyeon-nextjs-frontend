@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
-import { FileText, Plus, Play } from 'lucide-react'
+import { FileText, Play, Inbox } from 'lucide-react'
 import { InterviewRecord } from '@/featured/history/types'
 import { PendingCard } from '@/featured/history/components/Cards/PedingCard'
 import { AnalysingCard } from '@/featured/history/components/Cards/AnalysingCard'
@@ -74,29 +74,29 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
     }
 
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">
-        <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
-          <FileText className="text-muted-foreground h-7 w-7" />
-        </div>
-        <h3 className="mb-1 text-lg font-semibold">진행된 면접 기록이 없습니다.</h3>
-        <p className="text-muted-foreground mb-8 text-sm">
-          아직 면접 연습 기록이 없습니다. 첫 면접을 시작해보세요!
-        </p>
-
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex min-h-[60vh] flex-col items-center justify-center text-center"
+      >
         <Link
           href="/interview"
-          className="focus-visible:ring-primary mx-auto block max-w-sm rounded-xl focus:outline-none focus-visible:ring-2"
+          className="group flex cursor-pointer flex-col items-center justify-center"
         >
-          <Card className="group border-border/50 hover:border-primary/50 hover:shadow-primary/10 bg-background/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-            <CardContent className="flex flex-col items-center justify-center gap-4 p-8">
-              <div className="bg-primary/10 text-primary group-hover:bg-primary/20 rounded-full p-4 transition-all duration-300 group-hover:scale-110">
-                <Plus className="h-6 w-6" />
-              </div>
-              <span className="text-foreground group-hover:text-primary text-base font-semibold transition-colors">
-                첫 면접 시작하기
-              </span>
-            </CardContent>
-          </Card>
+          <div className="bg-primary/10 text-primary mb-6 rounded-full p-4 transition-transform duration-300 group-hover:scale-110">
+            <Inbox className="h-8 w-8" />
+          </div>
+
+          <div className="mb-8 flex flex-col items-center gap-1.5">
+            <h3 className="text-foreground text-xl font-bold">진행된 면접 기록이 없습니다.</h3>
+            <p className="text-muted-foreground text-sm">
+              아직 면접 연습 기록이 없습니다. 첫 면접을 시작해보세요!
+            </p>
+          </div>
+
+          <span className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-8 py-3 text-base font-semibold shadow-sm transition-colors">
+            첫 면접 시작하기 &rarr;
+          </span>
         </Link>
       </motion.div>
     )

@@ -25,7 +25,7 @@ export function UserProfileButton() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button className="ring-primary/40 flex items-center gap-2.5 rounded-full px-1 py-1 pr-3 outline-none transition hover:ring-2">
+        <button className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-xl px-2 py-1 outline-none transition-colors">
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {initials}

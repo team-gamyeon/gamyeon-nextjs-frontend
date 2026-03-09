@@ -18,6 +18,7 @@ import {
 interface HistoryListProps {
   records: InterviewRecord[]
   search: string
+  onSelect: (record: InterviewRecord) => void
 }
 
 interface FlipCardProps {
@@ -56,7 +57,7 @@ function FlipCard({ record }: FlipCardProps) {
   )
 }
 
-export function HistoryList({ records, search }: HistoryListProps) {
+export function HistoryList({ records, search, onSelect }: HistoryListProps) {
   if (records.length === 0) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">

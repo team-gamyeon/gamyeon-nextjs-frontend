@@ -45,6 +45,22 @@ const MOCK_NOTIFICATIONS: Notification[] = [
     time: '2일 전',
     read: true,
   },
+  {
+    id: '4',
+    type: 'analysis_complete',
+    title: '면접 분석 완료',
+    description: '2026.03.06 풀스택 개발자 면접 분석이 완료됐어요.',
+    time: '3일 전',
+    read: true,
+  },
+  {
+    id: '5',
+    type: 'notice',
+    title: '공지사항',
+    description: '가면 서비스 점검 안내 (3월 10일 02:00 ~ 04:00)',
+    time: '4일 전',
+    read: true,
+  },
 ]
 
 const typeConfig: Record<NotificationType, { icon: React.ElementType; color: string }> = {
@@ -76,7 +92,7 @@ export function NotificationButton() {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0">
+      <DropdownMenuContent align="end" className="w-96 p-0">
         <div className="border-border/50 flex items-center justify-between border-b px-4 py-3">
           <span className="text-sm font-semibold">알림</span>
           {unreadCount > 0 && (

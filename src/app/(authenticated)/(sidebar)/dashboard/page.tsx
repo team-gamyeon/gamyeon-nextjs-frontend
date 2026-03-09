@@ -12,7 +12,12 @@ export default function DashboardPage() {
         <QuickStartSection />
         <StatusSection />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <RecentHistorySection />
+          {/* 테스트 방법: 
+              기존 유저 (데이터 있음): <RecentHistorySection /> 
+              신규 유저 (데이터 없음): <RecentHistorySection history={[]} /> 
+          */}
+          {/* <RecentHistorySection /> */}
+          <RecentHistorySection history={[]} />
           <NoticeSection />
         </div>
       </div>

@@ -14,7 +14,9 @@ import {
   MOCK_IMPROVEMENTS,
 } from '@/featured/result/types'
 
-const OVERALL_SCORE = 76
+const OVERALL_SCORE = Math.round(
+  MOCK_RADAR_DATA.reduce((sum, d) => sum + d.value, 0) / MOCK_RADAR_DATA.length,
+)
 
 export default function ResultPage() {
   return (

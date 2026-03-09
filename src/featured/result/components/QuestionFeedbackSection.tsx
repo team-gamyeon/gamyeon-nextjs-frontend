@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import type { FeedbackItem } from '@/featured/result/types'
 
@@ -16,15 +16,16 @@ const fadeUp = {
   }),
 }
 
-const videoVariants = {
+const videoVariants: Variants = {
   hidden: { opacity: 0, height: 0, marginTop: 0 },
   visible: {
     opacity: 1,
     height: 'auto',
     marginTop: 12,
     transition: {
-      height: { type: 'spring' as const, stiffness: 280, damping: 28 },
-      opacity: { duration: 0.2, delay: 0.05 },
+      height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
+      marginTop: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
+      opacity: { duration: 0.25, delay: 0.1 },
     },
   },
   exit: {
@@ -32,8 +33,9 @@ const videoVariants = {
     height: 0,
     marginTop: 0,
     transition: {
-      height: { type: 'spring' as const, stiffness: 280, damping: 28 },
-      opacity: { duration: 0.15 },
+      height: { duration: 0.3, ease: 'easeInOut' },
+      marginTop: { duration: 0.3, ease: 'easeInOut' },
+      opacity: { duration: 0.2 },
     },
   },
 }
@@ -54,7 +56,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
       viewport={{ once: true }}
       variants={fadeUp}
       custom={0}
-      className="mt-6"
+      className="mt-3"
     >
       <h2 className="mb-4 text-lg font-semibold">질문별 피드백</h2>
       <div className="space-y-3">
@@ -71,30 +73,18 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
               custom={i}
             >
               <Card
-                className="border-border/50 cursor-pointer overflow-hidden"
+                className="border-border/50 cursor-pointer flex-row items-center gap-3 overflow-hidden px-5 py-8"
                 onClick={() => toggle(i)}
               >
-                {/* 아코디언 헤더 */}
-                <div className="flex w-full items-center gap-3 px-5 pt-5 text-left">
-                  <Badge variant="outline" className="shrink-0 text-xs">
-                    질문 {i + 1}
-                  </Badge>
-                  <p className="flex-1 text-sm font-medium">{fb.question}</p>
-                  <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="shrink-0"
-                  >
-                    <ChevronDown className="text-muted-foreground h-4 w-4" />
-                  </motion.div>
-                </div>
-
-                {/* 항상 보이는 피드백 + 열릴 때만 보이는 영상 */}
-                <CardContent className="px-5 pt-0 pb-5">
-                  {/* 피드백 텍스트 — 항상 표시 */}
+                {/* 질문 + 피드백 + 영상 */}
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="shrink-0 text-xs">
+                      질문 {i + 1}
+                    </Badge>
+                    <p className="flex-1 text-sm font-medium">{fb.question}</p>
+                  </div>
                   <p className="text-muted-foreground text-sm leading-relaxed">{fb.feedback}</p>
-
-                  {/* 영상 — 아코디언 열릴 때만 */}
                   <AnimatePresence initial={false}>
                     {isOpen && fb.videoUrl && (
                       <motion.div
@@ -119,7 +109,16 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </CardContent>
+                </div>
+
+                {/* 아코디언 아이콘 — 카드 세로 중앙 */}
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="shrink-0 self-start"
+                >
+                  <ChevronDown className="text-muted-foreground h-4 w-4" />
+                </motion.div>
               </Card>
             </motion.div>
           )

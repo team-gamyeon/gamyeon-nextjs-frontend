@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
@@ -26,19 +27,35 @@ interface FlipCardProps {
 }
 
 function FlipCard({ record }: FlipCardProps) {
+  const router = useRouter()
   const [isFlipped, setIsFlipped] = useState(false)
-  const isCompleted = record.status === 'completed' // hover 가능한 단 하나 조건
+  const [isHovered, setIsHovered] = useState(false)
+  const isCompleted = record.status === 'completed'
 
-  const handleFlip = () => {
-    setIsFlipped((prev) => !prev)
+  const handleClick = () => {
+    if (isCompleted) {
+      router.push(`/result/${record.id}`)
+    }
   }
+
   return (
     <div
-      onMouseEnter={() => isCompleted && setIsFlipped(true)}
-      onMouseLeave={() => isCompleted && setIsFlipped(false)}
-      className="h-full w-full"
+      onClick={handleClick}
+      onMouseEnter={() => {
+        if (isCompleted) {
+          setIsHovered(true)
+          setIsFlipped(true)
+        }
+      }}
+      onMouseLeave={() => {
+        if (isCompleted) {
+          setIsHovered(false)
+          setIsFlipped(false)
+        }
+      }}
+      className={`h-full w-full ${isCompleted ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      <CardContainer isFlipped={isFlipped} onFlip={handleFlip}>
+      <CardContainer isFlipped={isFlipped} isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {record.status === 'completed' && <CompletedCardFront record={record} />}
           {record.status === 'pending' && <PendingCard />}
@@ -46,8 +63,8 @@ function FlipCard({ record }: FlipCardProps) {
         </Card>
         {isCompleted && (
           <Card
-            className="absolute inset-0 backface-hidden"
-            style={{ transform: 'rotateY(180deg)' }}
+            className="absolute inset-0 backface-hidden antialiased"
+            style={{ transform: 'rotateY(180deg) translateZ(1px)' }}
           >
             <CompletedCardBack record={record} />
           </Card>
@@ -82,8 +99,8 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
         {records.map((record, i) => (
           <motion.div
             key={record.id}
@@ -96,7 +113,7 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
         ))}
       </div>
 
-      <div className="mt-8 flex items-center justify-center gap-2">
+      <div className="mt-auto flex items-center justify-center gap-2 py-2">
         <Button variant="outline" size="sm" disabled>
           이전
         </Button>
@@ -110,6 +127,6 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
           다음
         </Button>
       </div>
-    </>
+    </div>
   )
 }

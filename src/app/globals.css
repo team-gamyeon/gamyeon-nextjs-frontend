@@ -126,17 +126,7 @@
   }
 }
 
-/* html에 overflow-y: scroll → html 스크롤바를 항상 유지
-   react-remove-scroll이 body에 overflow:hidden을 걸어도
-   html 스크롤바는 사라지지 않으므로 레이아웃 shift 없음 */
+/* h-screen overflow-hidden 레이아웃이므로 html 자체는 스크롤되지 않음 */
 html {
-  overflow-y: scroll;
-}
-
-/* react-remove-scroll이 body에 주입하는 margin/padding 보정 무력화
-   동적 <style> 태그보다 나중에 적용되는 문제를 선택자 특이도로 극복:
-   html body[data-scroll-locked] (0,1,2) > body[data-scroll-locked] (0,1,1) */
-html body[data-scroll-locked] {
-  padding-right: 0 !important;
-  margin-right: 0 !important;
+  overflow: hidden;
 }

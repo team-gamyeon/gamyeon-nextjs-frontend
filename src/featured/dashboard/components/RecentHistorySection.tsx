@@ -38,7 +38,7 @@ export function RecentHistorySection() {
       <Card className="border-border/50 shadow-primary/5 shadow-x py-4">
         <CardContent className="divide-border/50 divide-y p-0">
           {recentHistory.map((item, i) => (
-            <Link key={i} href={`/history/${item.id}`}>
+            <Link key={i} href={`/result/${item.id}`}>
               <div className="hover:bg-muted/40 flex items-center gap-4 px-5 py-4 transition-colors">
                 <div
                   className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-sm font-bold ${

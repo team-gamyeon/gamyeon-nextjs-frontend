@@ -17,9 +17,10 @@ export function HistoryClient() {
         sortBy={sortBy}
         onSortChange={setSortBy}
       />
-      {/* <HistoryList records={filtered} search={''} onSelect={setSelectedRecord} /> */}
+
       {/* // 신규유저 테스트용 코드 (확인 후 원래대로 복구하세요!) */}
-      <HistoryList records={[]} search={''} onSelect={setSelectedRecord} />
+      {/* <HistoryList records={[]} search={''} onSelect={setSelectedRecord} /> */}
+      <HistoryList records={filtered} search={'search'} onSelect={setSelectedRecord} />
       <HistoryDetailDialog record={selectedRecord} onClose={() => setSelectedRecord(null)} />
     </div>
   )

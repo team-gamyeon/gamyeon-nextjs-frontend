@@ -3,13 +3,15 @@
 import { motion } from 'framer-motion'
 
 interface RadarChartProps {
-  data: { label: string; value: number }[]
+  data: { label: string; value: number; description: string }[]
   size?: number
+  hoveredIndex: number | null
+  onHoverChange: (index: number | null) => void
 }
 
-export function RadarChart({ data, size = 280 }: RadarChartProps) {
+export function RadarChart({ data, size = 320, hoveredIndex, onHoverChange }: RadarChartProps) {
   const center = size / 2
-  const radius = size / 2 - 40
+  const radius = size / 2 - 65
   const levels = 5
   const angleStep = (2 * Math.PI) / data.length
 
@@ -82,35 +84,18 @@ export function RadarChart({ data, size = 280 }: RadarChartProps) {
           key={i}
           cx={p.x}
           cy={p.y}
-          r={4}
-          fill="oklch(0.546 0.245 262.881)"
+          r={hoveredIndex === i ? 6 : 4}
+          fill={hoveredIndex === i ? 'oklch(0.6 0 0)' : 'oklch(0.546 0.245 262.881)'}
           stroke="white"
           strokeWidth={2}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 + i * 0.1 }}
+          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => onHoverChange(i)}
+          onMouseLeave={() => onHoverChange(null)}
         />
       ))}
-
-      {/* Labels */}
-      {data.map((d, i) => {
-        const angle = angleStep * i - Math.PI / 2
-        const labelRadius = radius + 24
-        const x = center + labelRadius * Math.cos(angle)
-        const y = center + labelRadius * Math.sin(angle)
-        return (
-          <text
-            key={i}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-muted-foreground text-[11px]"
-          >
-            {d.label}
-          </text>
-        )
-      })}
     </svg>
   )
 }

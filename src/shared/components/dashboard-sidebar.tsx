@@ -2,29 +2,16 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
-import { useAuthStore } from '@/featured/auth/store'
 import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
   House,
   LayoutDashboard,
-  LogOut,
-  MoreHorizontal,
-  Settings,
-  UserCircle2,
   Video,
 } from 'lucide-react'
 
@@ -38,14 +25,6 @@ const navItems = [
 export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout } = useAuthStore()
-  const initials = user?.name ? user.name.slice(0, 1) : 'U'
-
-  const handleLogout = () => {
-    logout()
-    router.push('/')
-  }
 
   return (
     <motion.aside
@@ -171,59 +150,6 @@ export function DashboardSidebar() {
         })}
       </nav>
 
-      <div className="border-border/50 border-t p-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {collapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="hover:bg-muted flex w-full items-center justify-center rounded-xl py-2 transition-colors">
-                    <UserCircle2 className="text-primary h-8 w-8" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  {user?.name ?? '사용자'}
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <button className="hover:bg-muted flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors">
-                <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm leading-tight font-medium">
-                    {user?.name ?? '사용자'}
-                  </p>
-                  <p className="text-muted-foreground truncate text-xs leading-tight">
-                    {user?.email ?? ''}
-                  </p>
-                </div>
-                <MoreHorizontal className="text-muted-foreground h-4 w-4 shrink-0" />
-              </button>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-52">
-            <div className="border-border/50 mb-1 border-b px-3 py-2">
-              <p className="text-sm font-medium">{user?.name ?? '사용자'}</p>
-              <p className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</p>
-            </div>
-            <DropdownMenuItem className="gap-2">
-              <Settings className="h-4 w-4" />
-              설정
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive gap-2"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              로그아웃
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </motion.aside>
   )
 }

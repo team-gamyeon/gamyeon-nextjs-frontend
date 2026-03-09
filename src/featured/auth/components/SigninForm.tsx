@@ -32,9 +32,12 @@ export function SigninForm() {
         className="w-full max-w-md"
       >
         <div className="mb-4 text-center">
-          <Link href="/dashboard" className="text-foreground flex items-center justify-center gap-0.5">
+          <Link
+            href="/dashboard"
+            className="text-foreground flex items-center justify-center gap-0.5"
+          >
             <Image
-              src="/images/Gamyeon_Logo.png"
+              src="/images/Gamyeon_Logo.svg"
               alt="Gamyeon logo"
               width={1024}
               height={768}

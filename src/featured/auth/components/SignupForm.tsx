@@ -62,9 +62,12 @@ export function SignupForm() {
         className="w-full max-w-md"
       >
         <div className="mb-4 text-center">
-          <Link href="/dashboard" className="text-foreground flex items-center justify-center gap-0.5">
+          <Link
+            href="/dashboard"
+            className="text-foreground flex items-center justify-center gap-0.5"
+          >
             <Image
-              src="/images/Gamyeon_Logo.png"
+              src="/images/Gamyeon_Logo.svg"
               alt="Gamyeon logo"
               width={1024}
               height={768}
@@ -73,7 +76,6 @@ export function SignupForm() {
             <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
           </Link>
         </div>
-
 
         <Card className="border-border/50 shadow-primary/5 shadow-xl">
           <CardHeader className="space-y-1 pb-4 text-center">

@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
-import { BrainCircuit, ArrowLeft, Square } from 'lucide-react'
+import { BrainCircuit, ArrowLeft, Square, Power } from 'lucide-react'
 import { QUESTIONS } from '@/featured/interview/constants'
 import type { Phase } from '@/featured/interview/types'
+import Image from 'next/image'
 
 interface InterviewTopBarProps {
   interviewTitle: string
@@ -34,8 +35,14 @@ export function InterviewTopBar({
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-          <BrainCircuit className="text-primary-foreground h-5 w-5" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+          <Image
+            src="/images/Gamyeon_Logo.svg"
+            alt="Gamyeon logo"
+            width={1024}
+            height={768}
+            style={{ height: '24px', width: 'auto' }}
+          />
         </div>
         <span className="text-sm font-semibold">{interviewTitle}</span>
       </div>
@@ -64,7 +71,7 @@ export function InterviewTopBar({
         className="gap-1.5 text-red-400 hover:bg-red-500/10 hover:text-red-300"
         onClick={onEndClick}
       >
-        <Square className="h-3.5 w-3.5 fill-current" />
+        <Power className="h-3.5 w-3.5" />
         면접 종료
       </Button>
     </header>

@@ -79,7 +79,7 @@ export function ControlBar({
       {phase === 'finished' && (
         <Button className="ml-4 gap-2" size="lg" asChild>
           <Link href="/result">
-            결과 보기
+            면접 완료
             <ChevronRight className="h-4 w-4" />
           </Link>
         </Button>

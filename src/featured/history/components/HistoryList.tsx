@@ -1,21 +1,62 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
-import { Badge } from '@/shared/ui/badge'
-import { Calendar, Clock, ChevronRight, FileText, Plus } from 'lucide-react'
-import { ScoreTrend } from '@/featured/history/components/ScoreTrend'
-import type { InterviewRecord } from '@/featured/history/types'
+import { Card } from '@/shared/ui/card'
+import { FileText, Plus } from 'lucide-react'
+import { InterviewRecord } from '@/featured/history/types'
+import { PendingCard } from '@/featured/history/components/Cards/PedingCard'
+import { AnalysingCard } from '@/featured/history/components/Cards/AnalysingCard'
+import { CardContainer } from '@/featured/history/components/Cards/CardContainer'
+import {
+  CompletedCardBack,
+  CompletedCardFront,
+} from '@/featured/history/components/Cards/CompletedCard'
 
 interface HistoryListProps {
   records: InterviewRecord[]
   search: string
-  onSelect: (record: InterviewRecord) => void
 }
 
-export function HistoryList({ records, search, onSelect }: HistoryListProps) {
+interface FlipCardProps {
+  record: InterviewRecord
+}
+
+function FlipCard({ record }: FlipCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false)
+  const isCompleted = record.status === 'completed' // hover 가능한 단 하나 조건
+
+  const handleFlip = () => {
+    setIsFlipped((prev) => !prev)
+  }
+  return (
+    <div
+      onMouseEnter={() => isCompleted && setIsFlipped(true)}
+      onMouseLeave={() => isCompleted && setIsFlipped(false)}
+      className="h-full w-full"
+    >
+      <CardContainer isFlipped={isFlipped} onFlip={handleFlip}>
+        <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
+          {record.status === 'completed' && <CompletedCardFront record={record} />}
+          {record.status === 'pending' && <PendingCard />}
+          {record.status === 'analysing' && <AnalysingCard />}
+        </Card>
+        {isCompleted && (
+          <Card
+            className="absolute inset-0 backface-hidden"
+            style={{ transform: 'rotateY(180deg)' }}
+          >
+            <CompletedCardBack record={record} />
+          </Card>
+        )}
+      </CardContainer>
+    </div>
+  )
+}
+
+export function HistoryList({ records, search }: HistoryListProps) {
   if (records.length === 0) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">
@@ -41,40 +82,15 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {records.map((record, i) => (
           <motion.div
             key={record.id}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
+            transition={{ delay: i * 0.1, duration: 0.5 }}
           >
-            <Card
-              className="group border-border/50 hover:border-primary/30 hover:shadow-primary/5 cursor-pointer transition-all hover:shadow-md"
-              onClick={() => onSelect(record)}
-            >
-              <CardContent className="flex items-center gap-4 p-4 sm:p-5">
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-2">
-                    <h3 className="truncate text-sm font-semibold">{record.position}</h3>
-                    <Badge variant="secondary" className="shrink-0 text-xs">
-                      {record.questionCount}문항
-                    </Badge>
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {record.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {record.duration}
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className="text-muted-foreground h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
-              </CardContent>
-            </Card>
+            <FlipCard record={record}></FlipCard>
           </motion.div>
         ))}
       </div>

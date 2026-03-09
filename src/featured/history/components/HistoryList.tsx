@@ -61,7 +61,11 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
   if (records.length === 0) {
     if (search) {
       return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex min-h-[calc(100vh-250px)] flex-col items-center justify-center text-center"
+        >
           <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
             <FileText className="text-muted-foreground h-7 w-7" />
           </div>

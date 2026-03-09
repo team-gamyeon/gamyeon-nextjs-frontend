@@ -50,7 +50,7 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
         )}
       </div>
 
-      <Card className="border-border/50 flex h-[266px] flex-col overflow-hidden">
+      <Card className="border-border/50 flex h-67 flex-col overflow-hidden">
         <CardContent
           className={
             isEmpty

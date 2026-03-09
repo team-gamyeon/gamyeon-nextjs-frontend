@@ -66,19 +66,21 @@ export function NoticeSection() {
         </Link>
       </div>
 
-      <Card className="border-border/50 flex h-full flex-col overflow-hidden">
-        <CardContent className="flex flex-1 flex-col p-0">
+      {/* 🚨 높이 266px 고정 */}
+      <Card className="border-border/50 flex h-[266px] flex-col overflow-hidden">
+        {/* 🚨 divide-y 제거 및 위아래 여백(py-6) 추가 */}
+        <CardContent className="flex flex-1 flex-col p-0 py-6">
           {noticeData.map((item) => (
             <Link
               key={item.id}
               href={`/notices/${item.id}`}
-              className="flex flex-1 flex-col justify-center"
+              className="flex flex-col justify-center"
             >
-              <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
+              {/* 🚨 개발자 도구 이미지대로 개별 아이템 높이를 54px로 강제 고정 */}
+              <div className="hover:bg-muted/40 flex h-[54px] w-full items-center justify-between gap-4 px-5 transition-colors">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                  {/* 🚨 태그 너비/높이 고정 및 중앙 정렬 적용 (w-[56px] h-5 flex items-center justify-center) */}
                   <span
-                    className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${
+                    className={`flex h-5 w-[56px] shrink-0 items-center justify-center rounded text-[10px] font-medium ${
                       item.category === '업데이트'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
                         : item.category === '안내'

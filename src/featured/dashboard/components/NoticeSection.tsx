@@ -66,7 +66,7 @@ export function NoticeSection() {
         </Link>
       </div>
 
-      <Card className="border-border/50 flex h-full flex-col overflow-hidden">
+      <Card className="border-border/50 flex h-full flex-col overflow-hidden py-4">
         <CardContent className="flex flex-1 flex-col p-0">
           {noticeData.map((item) => (
             <Link

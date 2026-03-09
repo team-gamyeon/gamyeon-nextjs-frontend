@@ -35,7 +35,7 @@ export function RecentHistorySection() {
           전체 보기 <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
-      <Card className="border-border/50">
+      <Card className="border-border/50 shadow-primary/5 shadow-x py-4">
         <CardContent className="divide-border/50 divide-y p-0">
           {recentHistory.map((item, i) => (
             <Link key={i} href={`/history/${item.id}`}>

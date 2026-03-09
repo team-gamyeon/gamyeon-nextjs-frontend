@@ -68,7 +68,7 @@ export function TestimonialsSection() {
               variants={fadeUp}
               custom={i}
             >
-              <Card className="border-border/50 h-full">
+              <Card className="border-border/50 h-full py-4">
                 <CardContent className="p-6">
                   <div className="mb-3 flex gap-0.5">
                     {Array.from({ length: t.rating }).map((_, j) => (

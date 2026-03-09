@@ -80,7 +80,7 @@ export function FeaturesSection() {
               variants={fadeUp}
               custom={i}
             >
-              <Card className="group border-border/50 bg-card hover:shadow-primary/5 h-full transition-shadow hover:shadow-lg">
+              <Card className="group border-border/50 bg-card hover:shadow-primary/5 h-full py-4 transition-shadow hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="bg-primary/10 group-hover:bg-primary/15 mb-4 flex h-11 w-11 items-center justify-center rounded-xl transition-colors">
                     <feature.icon className="text-primary h-5 w-5" />

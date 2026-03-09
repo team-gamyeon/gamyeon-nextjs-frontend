@@ -37,8 +37,8 @@ export const MOCK_RECORDS: InterviewRecord[] = [
     questionCount: 5,
     duration: '12분 30초',
     status: 'completed',
-    strengths: ['논리적 답변 구조', '시간 관리'],
-    improvements: ['구체적 사례 부족', 'STAR 기법 활용'],
+    strengths: ['논리적 답변 구조', '시간 관리', '기술 키워드 활용'],
+    improvements: ['구체적 사례 부족', 'STAR 기법 활용', '자신감 있는 말투 필요'],
   },
   {
     id: '3',
@@ -75,5 +75,17 @@ export const MOCK_RECORDS: InterviewRecord[] = [
     status: 'completed',
     strengths: ['STAR 기법 적용', '구체적 수치 활용', '시간 관리'],
     improvements: ['마지막 질문 준비 부족'],
+  },
+  {
+    id: '6',
+    date: '2026.02.07',
+    position: '백엔드 개발자',
+    score: 71,
+    prevScore: 65,
+    questionCount: 5,
+    duration: '11분 45초',
+    status: 'completed',
+    strengths: ['문제 해결 능력', '논리적 사고'],
+    improvements: ['기술 깊이 부족', '답변 구조화'],
   },
 ]

@@ -98,7 +98,7 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
       </div>
 
       {/* 본문 카드 */}
-      <Card className="border-border/50 mb-5 overflow-hidden">
+      <Card className="border-border/50 mb-5 overflow-hidden py-4">
         {/* 카드 헤더 */}
         <div className="border-border/50 border-b px-8 py-6">
           <div className="mb-3 flex items-center gap-2">

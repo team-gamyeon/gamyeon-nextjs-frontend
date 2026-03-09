@@ -38,7 +38,7 @@ export function NoticeList({ notices, search }: NoticeListProps) {
   }
 
   return (
-    <Card className="border-border/50 overflow-hidden">
+    <Card className="border-border/50 overflow-hidden py-4">
       <CardContent className="p-0">
         <AnimatePresence initial={false}>
           {notices.map((notice, i) => (

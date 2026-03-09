@@ -21,7 +21,7 @@ export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: Scor
           AI가 분석한 5가지 핵심 역량의 종합 점수입니다
         </p>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col items-center justify-center px-6 pb-2">
+      <CardContent className="flex flex-1 flex-col items-center justify-center px-6 py-8">
         <div className="relative flex h-full w-full items-center justify-center">
           <svg width="200" height="200" viewBox="0 0 200 200">
             <circle

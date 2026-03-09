@@ -14,7 +14,7 @@ interface ScoreSummaryCardProps {
 
 export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: ScoreSummaryCardProps) {
   return (
-    <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-3 py-6 shadow-lg">
+    <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-0 py-6 shadow-lg">
       <CardHeader className="w-full">
         <h2 className="text-lg font-semibold">나의 역량 점수</h2>
         <p className="text-muted-foreground text-sm break-keep">

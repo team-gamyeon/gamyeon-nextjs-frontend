@@ -66,9 +66,7 @@ export function NoticeSection() {
         </Link>
       </div>
 
-      {/* 🚨 높이 266px 고정 */}
-      <Card className="border-border/50 flex h-[266px] flex-col overflow-hidden">
-        {/* 🚨 divide-y 제거 및 위아래 여백(py-6) 추가 */}
+      <Card className="border-border/50 flex h-67 flex-col overflow-hidden">
         <CardContent className="flex flex-1 flex-col p-0 py-6">
           {noticeData.map((item) => (
             <Link
@@ -76,11 +74,10 @@ export function NoticeSection() {
               href={`/notices/${item.id}`}
               className="flex flex-col justify-center"
             >
-              {/* 🚨 개발자 도구 이미지대로 개별 아이템 높이를 54px로 강제 고정 */}
-              <div className="hover:bg-muted/40 flex h-[54px] w-full items-center justify-between gap-4 px-5 transition-colors">
+              <div className="hover:bg-muted/40 flex h-13.5 w-full items-center justify-between gap-4 px-5 transition-colors">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
                   <span
-                    className={`flex h-5 w-[56px] shrink-0 items-center justify-center rounded text-[10px] font-medium ${
+                    className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${
                       item.category === '업데이트'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
                         : item.category === '안내'

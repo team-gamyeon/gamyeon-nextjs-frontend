@@ -55,8 +55,7 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
           className={
             isEmpty
               ? 'flex flex-1 flex-col items-center justify-center p-5'
-              : // 🚨 divide-y 제거 및 카드 내부 위아래 여백(py-6) 추가
-                'flex flex-1 flex-col p-0 py-6'
+              : 'flex flex-1 flex-col p-0 py-6'
           }
         >
           {isEmpty ? (
@@ -68,9 +67,14 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
             </div>
           ) : (
             history.map((item, i) => (
-              <Link key={i} href={`/history/${item.id}`} className="flex flex-col justify-center">
-                {/* 🚨 아이템 개별 높이를 54px로 강제 고정 */}
-                <div className="hover:bg-muted/40 flex h-[54px] w-full items-center gap-4 px-5 transition-colors">
+              /* 🚨 flex-1을 주어 3개의 아이템이 전체 높이를 1:1:1로 균일하게 나눠 가지도록 수정 */
+              <Link
+                key={i}
+                href={`/history/${item.id}`}
+                className="flex flex-1 flex-col justify-center"
+              >
+                {/* 🚨 고정 높이(h-[54px])를 h-full로 변경하여 부모(Link)가 나눠준 높이를 꽉 채우도록 설정 */}
+                <div className="hover:bg-muted/40 flex h-full w-full items-center gap-4 px-5 transition-colors">
                   <div
                     className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-sm font-bold ${
                       item.score >= 80

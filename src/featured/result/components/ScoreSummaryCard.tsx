@@ -4,16 +4,18 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
-import { Award, Clock, MessageSquare } from 'lucide-react'
+import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
+import { type AiConfidenceLevel, AI_CONFIDENCE_STYLE } from '@/featured/result/constants'
 
 interface ScoreSummaryCardProps {
   overallScore: number
+  aiConfidence?: AiConfidenceLevel
 }
 
-export function ScoreSummaryCard({ overallScore }: ScoreSummaryCardProps) {
+export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: ScoreSummaryCardProps) {
   return (
-    <Card className="border-border/50 shadow-primary/5 shadow-lg">
-      <CardContent className="flex flex-col items-center p-6">
+    <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center shadow-lg">
+      <CardContent className="flex flex-1 flex-col items-center justify-center p-6">
         <div className="relative mb-4">
           <svg width="160" height="160" viewBox="0 0 160 160">
             <circle
@@ -54,10 +56,16 @@ export function ScoreSummaryCard({ overallScore }: ScoreSummaryCardProps) {
           </div>
         </div>
 
-        <Badge className="bg-primary/10 text-primary mb-2">
-          <Award className="mr-1 h-3.5 w-3.5" />
-          양호
-        </Badge>
+        <div className="mb-2 flex flex-wrap justify-center gap-2">
+          <Badge className="bg-primary/10 text-primary">
+            <Award className="mr-1 h-3.5 w-3.5" />
+            양호
+          </Badge>
+          <Badge className={AI_CONFIDENCE_STYLE[aiConfidence]}>
+            <ShieldCheck className="mr-0.5 h-3.5 w-3.5" />
+            AI 분석 신뢰도 : {aiConfidence}
+          </Badge>
+        </div>
         <p className="text-muted-foreground text-center text-sm">
           전체적으로 준비가 잘 되어 있으나 일부 개선이 필요합니다.
         </p>

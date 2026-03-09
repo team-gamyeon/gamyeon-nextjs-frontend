@@ -23,7 +23,7 @@ export function RadarChartSection({ data }: RadarChartSectionProps) {
       <Card className="border-border/50 shadow-primary/5 shadow-lg">
         <CardHeader className="pb-2">
           <h2 className="text-lg font-semibold">역량 분석</h2>
-          <p className="text-muted-foreground text-sm">6가지 핵심 역량별 점수입니다</p>
+          <p className="text-muted-foreground text-sm">5가지 핵심 역량별 점수입니다</p>
         </CardHeader>
         <CardContent className="flex flex-col items-center pb-6">
           <RadarChart data={data} />

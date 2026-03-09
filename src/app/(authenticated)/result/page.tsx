@@ -6,13 +6,12 @@ import { ScoreSummaryCard } from '@/featured/result/components/ScoreSummaryCard'
 import { RadarChartSection } from '@/featured/result/components/RadarChartSection'
 import { StrengthsImprovementsSection } from '@/featured/result/components/StrengthsImprovementsSection'
 import { QuestionFeedbackSection } from '@/featured/result/components/QuestionFeedbackSection'
-import { NextActionsSection } from '@/featured/result/components/NextActionsSection'
+import { DeleteResultButton } from '@/featured/result/components/DeleteResultButton'
 import {
   MOCK_RADAR_DATA,
   MOCK_FEEDBACKS,
   MOCK_STRENGTHS,
   MOCK_IMPROVEMENTS,
-  MOCK_NEXT_ACTIONS,
 } from '@/featured/result/types'
 
 const OVERALL_SCORE = 76
@@ -29,7 +28,7 @@ export default function ResultPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 h-full">
             <ScoreSummaryCard overallScore={OVERALL_SCORE} />
           </div>
           <RadarChartSection data={MOCK_RADAR_DATA} />
@@ -39,9 +38,8 @@ export default function ResultPage() {
 
         <QuestionFeedbackSection feedbacks={MOCK_FEEDBACKS} />
 
-        <NextActionsSection actions={MOCK_NEXT_ACTIONS} />
-
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex justify-center gap-3">
+          <DeleteResultButton />
           <Button className="gap-2" asChild>
             <Link href="/history">
               면접 기록 보기

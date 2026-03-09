@@ -77,7 +77,7 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex min-h-[60vh] flex-col items-center justify-center text-center"
+        className="flex min-h-[calc(100vh-250px)] flex-col items-center justify-center text-center"
       >
         <Link
           href="/interview"

@@ -31,14 +31,14 @@ export function StrengthsImprovementsSection({
         variants={fadeUp}
         custom={0}
       >
-        <Card className="border-border/50 h-full">
-          <CardHeader className="pb-3">
+        <Card className="border-border/50 mb-5 gap-2 py-4">
+          <CardHeader>
             <h2 className="flex items-center gap-2 text-lg font-semibold text-green-700">
               <ThumbsUp className="h-5 w-5" />
               잘한 점
             </h2>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 pb-3">
             {strengths.map((s, i) => (
               <div key={i} className="flex items-start gap-3">
                 <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
@@ -56,14 +56,14 @@ export function StrengthsImprovementsSection({
         variants={fadeUp}
         custom={1}
       >
-        <Card className="border-border/50 h-full">
-          <CardHeader className="pb-3">
+        <Card className="border-border/50 mb-5 gap-2 py-4">
+          <CardHeader>
             <h2 className="flex items-center gap-2 text-lg font-semibold text-amber-700">
               <AlertTriangle className="h-5 w-5" />
               개선할 점
             </h2>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 pb-3">
             {improvements.map((s, i) => (
               <div key={i} className="flex items-start gap-3">
                 <TrendingDown className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />

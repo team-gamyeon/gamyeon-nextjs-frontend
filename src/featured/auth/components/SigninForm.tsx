@@ -34,33 +34,42 @@ export function SigninForm() {
         <div className="mb-4 text-center">
           <Link
             href="/dashboard"
-            className="text-foreground flex items-center justify-center gap-0.5"
+            className="text-foreground inline-flex items-center justify-center"
           >
             <Image
               src="/images/Gamyeon_Logo.png"
-              alt="Gamyeon logo"
+              alt="Gamyeon 홈으로 이동"
               width={1024}
               height={768}
+              priority
               style={{ height: '44px', width: 'auto' }}
             />
           </Link>
         </div>
 
-        <Card className="border-border/50 shadow-primary/5 shadow-x py-6">
-          <CardHeader className="space-y-1 pb-4 text-center">
-            <h1 className="text-2xl font-bold">로그인</h1>
-            <p className="text-muted-foreground text-sm">
+        <Card className="border-border/50 py-6 shadow-sm">
+          <CardHeader className="text-center">
+            <h1 className="text-2xl font-bold text-balance">환영합니다!</h1>
+            <p className="text-muted-foreground text-sm text-pretty">
               면접을 진행하시려면 로그인 후 이용해주세요
             </p>
           </CardHeader>
+          <Separator className="mx-6 w-auto!" />
+
           <CardContent className="space-y-4">
             <div className="flex flex-col gap-2.5">
               <Button
                 type="button"
-                className="w-full gap-2.5 bg-[#FEE500] font-medium text-[#3C1E1E] hover:bg-[#F0D900]"
+                className="w-full cursor-pointer gap-2.5 bg-[#FEE500] py-6 font-medium text-[#3C1E1E] transition-colors hover:bg-[#F0D900] active:bg-[#E8CF00]"
+                style={{ touchAction: 'manipulation' }}
                 onClick={handleSocialSignin}
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="h-5 w-5 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
                   <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.617 5.076 4.077 6.54l-.977 3.642a.3.3 0 0 0 .44.327l4.217-2.79A12.2 12.2 0 0 0 12 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" />
                 </svg>
                 카카오로 로그인
@@ -69,10 +78,11 @@ export function SigninForm() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full gap-2.5"
+                className="active:bg-muted/50 w-full cursor-pointer gap-2.5 py-6 transition-colors"
+                style={{ touchAction: 'manipulation' }}
                 onClick={handleSocialSignin}
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                     fill="#4285F4"
@@ -94,7 +104,19 @@ export function SigninForm() {
               </Button>
             </div>
 
-            <div className="relative">
+            <p className="text-muted-foreground text-center text-xs">
+              계속 진행하면{' '}
+              <Link href="/terms" className="text-primary cursor-pointer font-medium hover:underline">
+                이용약관
+              </Link>{' '}
+              및{' '}
+              <Link href="/privacy" className="text-primary cursor-pointer font-medium hover:underline">
+                개인정보 처리 방침
+              </Link>
+              에 동의하는 것으로 간주됩니다.
+            </p>
+
+            {/* <div className="relative">
               <Separator />
               <span className="bg-card text-muted-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-xs">
                 또는 이메일로 로그인
@@ -154,7 +176,7 @@ export function SigninForm() {
               <Link href="/signup" className="text-primary font-medium hover:underline">
                 회원가입
               </Link>
-            </p>
+            </p> */}
           </CardContent>
         </Card>
       </motion.div>

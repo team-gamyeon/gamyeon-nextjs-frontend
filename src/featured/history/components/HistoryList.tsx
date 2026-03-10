@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
-import { FileText, Play, Inbox } from 'lucide-react'
+import { Card } from '@/shared/ui/card'
+import { FileText, Inbox } from 'lucide-react'
 import { InterviewRecord } from '@/featured/history/types'
 import { PendingCard } from '@/featured/history/components/cards/PedingCard'
 import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
@@ -24,6 +24,22 @@ interface HistoryListProps {
 
 interface FlipCardProps {
   record: InterviewRecord
+}
+
+function useColumnsPerRow() {
+  const [cols, setCols] = useState(2)
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth
+      setCols(w >= 1280 ? 5 : w >= 1024 ? 4 : w >= 640 ? 3 : 2)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  return cols
 }
 
 function FlipCard({ record }: FlipCardProps) {
@@ -75,6 +91,20 @@ function FlipCard({ record }: FlipCardProps) {
 }
 
 export function HistoryList({ records, search, onSelect }: HistoryListProps) {
+  const [currentPage, setCurrentPage] = useState(1)
+  const cols = useColumnsPerRow()
+  const itemsPerPage = cols * 2
+
+  const totalPages = Math.max(1, Math.ceil(records.length / itemsPerPage))
+  const safePage = Math.min(currentPage, totalPages)
+  const start = (safePage - 1) * itemsPerPage
+  const pageRecords = records.slice(start, start + itemsPerPage)
+
+  // 검색/필터 변경 시 첫 페이지로 이동
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [records.length, search])
+
   if (records.length === 0) {
     if (search) {
       return (
@@ -124,34 +154,51 @@ export function HistoryList({ records, search, onSelect }: HistoryListProps) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
-        {records.map((record, i) => (
+        {pageRecords.map((record, i) => (
           <motion.div
             key={record.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
+            transition={{ delay: i * 0.05, duration: 0.4 }}
           >
-            <FlipCard record={record}></FlipCard>
+            <FlipCard record={record} />
           </motion.div>
         ))}
       </div>
 
-      <div className="mt-auto flex items-center justify-center gap-2 py-2">
-        <Button variant="outline" size="sm" disabled>
-          이전
-        </Button>
-        <Button variant="default" size="sm" className="h-8 w-8 p-0">
-          1
-        </Button>
-        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-          2
-        </Button>
-        <Button variant="outline" size="sm">
-          다음
-        </Button>
-      </div>
+      {totalPages > 1 && (
+        <div className="mt-auto flex items-center justify-center gap-2 py-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            이전
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <Button
+              key={page}
+              variant={page === safePage ? 'default' : 'outline'}
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            다음
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

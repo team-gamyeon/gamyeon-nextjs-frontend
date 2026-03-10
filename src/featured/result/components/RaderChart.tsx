@@ -1,101 +1,164 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import {
+  RadarChart as RechartsRadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Tooltip,
+} from 'recharts'
+import type { RadarDataPoint } from '@/featured/result/types'
+
+const OUTER_RADIUS = 150
+const LABEL_RADIUS = 180
+const INNER_LABEL_RADIUS = 170
+const INNER_LABEL_INDICES = new Set([0, 2, 3]) // 답변 구성력, 키워드, 논리성
 
 interface RadarChartProps {
-  data: { label: string; value: number; description: string }[]
+  data: RadarDataPoint[]
   size?: number
-  hoveredIndex: number | null
-  onHoverChange: (index: number | null) => void
 }
 
-export function RadarChart({ data, size = 320, hoveredIndex, onHoverChange }: RadarChartProps) {
-  const center = size / 2
-  const radius = size / 2 - 65
-  const levels = 5
-  const angleStep = (2 * Math.PI) / data.length
 
-  const getPoint = (index: number, value: number) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean
+  payload?: { value: number }[]
+}) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div
+      className="rounded-lg border px-3 py-2 text-sm font-semibold whitespace-nowrap shadow-sm"
+      style={{ backgroundColor: '#F2F2F2', borderColor: '#E0E0E0', color: '#333' }}
+    >
+      {payload[0].value}점
+    </div>
+  )
+}
+
+export function RadarChart({ data, size = 320 }: RadarChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const cx = size / 2
+  const cy = size / 2
+
+  // 마운트 시 중앙 좌표로 tooltip prevCoordinate 초기화 → 첫 hover 시 중앙에서 시작
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const svg = containerRef.current?.querySelector('svg')
+      if (!svg) return
+      const rect = svg.getBoundingClientRect()
+      svg.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: rect.left + cx, clientY: rect.top + cy }))
+      svg.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [cx, cy])
+
+  // 라벨 hover → 해당 dot 좌표로 synthetic mousemove dispatch → Recharts tooltip 트리거
+  const triggerTooltip = (index: number) => {
+    const item = data[index]
+    const angleStep = (2 * Math.PI) / data.length
     const angle = angleStep * index - Math.PI / 2
-    return {
-      x: center + radius * (value / 100) * Math.cos(angle),
-      y: center + radius * (value / 100) * Math.sin(angle),
-    }
+    const dotR = OUTER_RADIUS * (item.value / 100)
+    const dotX = cx + dotR * Math.cos(angle)
+    const dotY = cy + dotR * Math.sin(angle)
+
+    const svg = containerRef.current?.querySelector('svg')
+    if (!svg) return
+
+    const rect = svg.getBoundingClientRect()
+    svg.dispatchEvent(
+      new MouseEvent('mousemove', {
+        bubbles: true,
+        clientX: rect.left + dotX,
+        clientY: rect.top + dotY,
+      }),
+    )
   }
 
-  const dataPoints = data.map((d, i) => getPoint(i, d.value))
-  const pathData = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
+  const hideTooltip = () => {
+    const svg = containerRef.current?.querySelector('svg')
+    if (!svg) return
+    svg.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
+  }
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {/* Grid */}
-      {Array.from({ length: levels }).map((_, level) => {
-        const levelRadius = (radius * (level + 1)) / levels
-        const points = data
-          .map((_, i) => {
-            const angle = angleStep * i - Math.PI / 2
-            return `${center + levelRadius * Math.cos(angle)},${center + levelRadius * Math.sin(angle)}`
-          })
-          .join(' ')
-        return (
-          <polygon
-            key={level}
-            points={points}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={0.5}
-            className="text-border"
-          />
-        )
-      })}
-
-      {/* Axes */}
-      {data.map((_, i) => {
-        const angle = angleStep * i - Math.PI / 2
-        return (
-          <line
-            key={i}
-            x1={center}
-            y1={center}
-            x2={center + radius * Math.cos(angle)}
-            y2={center + radius * Math.sin(angle)}
-            stroke="currentColor"
-            strokeWidth={0.5}
-            className="text-border"
-          />
-        )
-      })}
-
-      {/* Data area */}
-      <motion.path
-        d={pathData}
-        fill="oklch(0.546 0.245 262.881 / 0.15)"
-        stroke="oklch(0.546 0.245 262.881)"
-        strokeWidth={2}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        style={{ transformOrigin: `${center}px ${center}px` }}
-      />
-
-      {/* Data points */}
-      {dataPoints.map((p, i) => (
-        <motion.circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r={hoveredIndex === i ? 6 : 4}
-          fill={hoveredIndex === i ? 'oklch(0.6 0 0)' : 'oklch(0.546 0.245 262.881)'}
-          stroke="white"
-          strokeWidth={2}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 + i * 0.1 }}
-          style={{ cursor: 'pointer' }}
-          onMouseEnter={() => onHoverChange(i)}
-          onMouseLeave={() => onHoverChange(null)}
+    <div
+      ref={containerRef}
+      className="relative [&_.recharts-surface]:overflow-visible"
+      style={{ width: size, height: size, overflow: 'visible' }}
+    >
+      <RechartsRadarChart
+        width={size}
+        height={size}
+        data={data}
+        cx="50%"
+        cy="50%"
+        outerRadius={OUTER_RADIUS}
+      >
+        <PolarGrid
+          gridType="polygon"
+          stroke="currentColor"
+          strokeOpacity={0.15}
+          strokeWidth={0.5}
         />
-      ))}
-    </svg>
+        <PolarAngleAxis dataKey="label" tick={false} />
+        <PolarRadiusAxis domain={[0, 100]} tickCount={6} tick={false} axisLine={false} />
+        <Tooltip
+          content={CustomTooltip as never}
+          cursor={false}
+          isAnimationActive={false}
+          wrapperStyle={{ transition: 'left 350ms ease, top 350ms ease' }}
+        />
+        <Radar
+          dataKey="value"
+          fill="oklch(0.546 0.245 262.881)"
+          fillOpacity={0.15}
+          stroke="oklch(0.546 0.245 262.881)"
+          strokeWidth={2}
+          dot={{
+            r: 4,
+            fill: 'oklch(0.546 0.245 262.881)',
+            fillOpacity: 0.8,
+            stroke: 'white',
+            strokeWidth: 2,
+          }}
+          activeDot={{
+            r: 6,
+            fill: 'oklch(0.546 0.245 262.881)',
+            fillOpacity: 1,
+            stroke: 'white',
+            strokeWidth: 2.5,
+          }}
+          isAnimationActive={true}
+          animationDuration={800}
+          animationEasing="ease-out"
+        />
+      </RechartsRadarChart>
+
+      {/* 라벨 오버레이 */}
+      {data.map((item, index) => {
+        const angleStep = (2 * Math.PI) / data.length
+        const angle = angleStep * index - Math.PI / 2
+        const radius = INNER_LABEL_INDICES.has(index) ? INNER_LABEL_RADIUS : LABEL_RADIUS
+        const x = cx + radius * Math.cos(angle)
+        const y = cy + radius * Math.sin(angle)
+
+        return (
+          <span
+            key={index}
+            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-default text-[11px] text-current opacity-60 transition-all duration-150 select-none hover:font-semibold hover:opacity-90 whitespace-nowrap"
+            style={{ left: x, top: y }}
+            onMouseEnter={() => triggerTooltip(index)}
+            onMouseLeave={hideTooltip}
+          >
+            {item.label}
+          </span>
+        )
+      })}
+    </div>
   )
 }

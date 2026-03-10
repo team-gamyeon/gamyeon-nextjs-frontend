@@ -1,19 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
-import { TrendingUp, LayoutGrid, Lightbulb } from 'lucide-react'
+import { ChartSpline, LayoutGrid, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ScoreTrendChart } from './ScoreTrendChart'
 import { useActivityData } from '@/featured/dashboard/hooks/useActivityData'
+import { useRandomTip } from '@/featured/dashboard/hooks/useRandomTip'
+import { useWeekNavigation } from '@/featured/dashboard/hooks/useWeekNavigation'
 import { formatDateKorean } from '@/shared/lib/utils/date'
-
-const INTERVIEW_TIPS = [
-  "답변 시 결론부터 말씀하시는 '두괄식' 화법은 면접관의 집중도를 높여줍니다.",
-  "예상치 못한 질문에는 당황하지 않고, '잠시 생각할 시간을 주시겠습니까?'라고 여유를 가져보세요.",
-  '자신의 경험을 STAR 기법(상황-과제-행동-결과)으로 구조화해서 답변해 보세요.',
-  '면접은 대화입니다. 외운 것을 암기하듯 말하기보다 자연스럽게 소통하는 것이 중요합니다.',
-  '마지막으로 하고 싶은 말이나 질문을 미리 준비해 가면 긍정적인 인상을 남길 수 있습니다.',
-]
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -25,15 +19,8 @@ const fadeUp = {
 }
 
 export function StatusSection() {
-  const [randomTip, setRandomTip] = useState(INTERVIEW_TIPS[0])
-  const [tipMounted, setTipMounted] = useState(false)
-
-  useEffect(() => {
-    setTipMounted(true)
-    setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
-  }, [])
-
-  // 커스텀 훅 사용
+  const { tip } = useRandomTip()
+  const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation()
   const { mounted, activityData, getLevelColor } = useActivityData()
 
   return (
@@ -52,25 +39,40 @@ export function StatusSection() {
               <h3 className="text-sm font-semibold">오늘의 면접 팁</h3>
             </div>
             <div className="flex flex-1 items-center">
-              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">
-                {tipMounted ? randomTip : INTERVIEW_TIPS[0]}
-              </p>
+              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">{tip}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Card 2: 최근 점수 추이 */}
         <Card className="border-border/50 flex h-57.5 flex-col">
-          <CardContent className="flex h-full flex-col justify-between p-5">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
+          <CardContent className="flex h-full flex-col p-5">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50">
+                  <ChartSpline className="h-5 w-5 text-sky-500" />
+                </div>
+                <h3 className="text-sm font-semibold">주간 점수</h3>
               </div>
-              <h3 className="text-sm font-semibold">최근 점수 추이</h3>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground text-[11px] font-medium">{weekLabel}</span>
+                <button
+                  onClick={() => setWeekOffset((o) => o - 1)}
+                  disabled={!canPrev}
+                  className="hover:bg-muted rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setWeekOffset((o) => o + 1)}
+                  disabled={!canNext}
+                  className="hover:bg-muted rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
-            <div className="mt-2 flex w-full flex-1 items-center justify-center">
-              <span className="text-muted-foreground/50 text-sm">차트 영역</span>
-            </div>
+            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} />
           </CardContent>
         </Card>
 

@@ -8,7 +8,7 @@ export const formatDateKorean = (dateObj: Date) => {
 }
 
 /**
- * Date 객체를 "YYYY.MM.DD" 포맷의 문자열로 변환합니다. 
+ * Date 객체를 "YYYY.MM.DD" 포맷의 문자열로 변환합니다.
  * @param dateObj 변환할 Date 객체
  * @returns 예: "2026.03.05"
  */
@@ -17,4 +17,40 @@ export const formatDateDot = (dateObj: Date) => {
   const month = String(dateObj.getMonth() + 1).padStart(2, '0')
   const day = String(dateObj.getDate()).padStart(2, '0')
   return `${year}.${month}.${day}`
+}
+
+/**
+ * "YYYY.MM.DD" 포맷의 문자열을 Date 객체로 변환합니다.
+ * @param dateStr 변환할 문자열 (예: "2026.03.05")
+ * @returns Date 객체
+ */
+export const parseDateDot = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split('.').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+/**
+ * 주어진 날짜가 속한 주의 월요일을 반환합니다.
+ * @param dateObj 기준 Date 객체
+ * @returns 해당 주 월요일의 Date 객체 (시각 00:00:00)
+ */
+export const getMondayOf = (dateObj: Date): Date => {
+  const d = new Date(dateObj)
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setDate(d.getDate() + diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+/**
+ * 주어진 날짜에 n일을 더한 Date 객체를 반환합니다.
+ * @param dateObj 기준 Date 객체
+ * @param n 더할 일수 (음수 가능)
+ * @returns n일 후의 Date 객체
+ */
+export const addDays = (dateObj: Date, n: number): Date => {
+  const d = new Date(dateObj)
+  d.setDate(d.getDate() + n)
+  return d
 }

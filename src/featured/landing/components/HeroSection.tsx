@@ -32,9 +32,8 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           >
-            면접, 이제
-            <br />
-            <span className="text-primary">AI와 함께</span> 준비하세요
+            <span className="block">면접, 이제</span>
+            <span className="block mt-3"><span className="text-primary">AI와 함께</span> 준비하세요</span>
           </motion.h1>
 
           <motion.p

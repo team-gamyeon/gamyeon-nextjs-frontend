@@ -64,12 +64,12 @@ export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: Scor
 
         <div className="mb-2 flex flex-wrap justify-center gap-2 py-3">
           <Badge className={SCORE_GRADE_STYLE[getScoreGrade(overallScore)]}>
-            <Award className="mr-1 h-3.5 w-3.5" />
+            <Award />
             {getScoreGrade(overallScore)}
           </Badge>
           <Badge className={AI_CONFIDENCE_STYLE[aiConfidence]}>
-            <ShieldCheck className="mr-0.5 h-3.5 w-3.5" />
-            AI 분석 신뢰도 : {aiConfidence}
+            <ShieldCheck />
+            <span className="translate-y-px">AI 분석 신뢰도 : {aiConfidence}</span>
           </Badge>
         </div>
         <p className="text-muted-foreground text-center text-sm break-keep">

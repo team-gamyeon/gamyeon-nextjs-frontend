@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { TrendingUp, LayoutGrid, Lightbulb } from 'lucide-react'
+import { useActivityData } from '@/featured/dashboard/hooks/useActivityData'
+import { formatDateKorean } from '@/shared/lib/utils/date'
 
 const INTERVIEW_TIPS = [
   "답변 시 결론부터 말씀하시는 '두괄식' 화법은 면접관의 집중도를 높여줍니다.",
@@ -22,72 +24,17 @@ const fadeUp = {
   }),
 }
 
-// 1. 타입 정의 추가 (TypeScript 에러 방지)
-interface ActivityDay {
-  dateObj: Date
-  count: number
-}
-
 export function StatusSection() {
   const [randomTip, setRandomTip] = useState(INTERVIEW_TIPS[0])
-  const [mounted, setMounted] = useState(false)
-
-  // 2. 랜덤 잔디 데이터를 담을 빈 상태(State) 생성
-  const [activityData, setActivityData] = useState<ActivityDay[]>([])
+  const [tipMounted, setTipMounted] = useState(false)
 
   useEffect(() => {
-    // 브라우저에 화면이 나타나면(mounted) 실행됨
-    setMounted(true)
+    setTipMounted(true)
     setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
-
-    // --- [3. 브라우저에서만 랜덤 잔디 데이터 생성] ---
-    const data: ActivityDay[] = []
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const currentDayOfWeek = today.getDay()
-    const mappedDay = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
-
-    const daysToSunday = 6 - mappedDay
-    const endDate = new Date(today)
-    endDate.setDate(today.getDate() + daysToSunday)
-
-    for (let i = 55; i >= 0; i--) {
-      const currentDate = new Date(endDate)
-      currentDate.setDate(endDate.getDate() - i)
-      currentDate.setHours(0, 0, 0, 0)
-
-      let count = 0
-      if (currentDate <= today) {
-        const rand = Math.random()
-        if (rand > 0.4 && rand <= 0.7) count = Math.floor(Math.random() * 2) + 1
-        else if (rand > 0.7 && rand <= 0.85) count = Math.floor(Math.random() * 2) + 3
-        else if (rand > 0.85) count = Math.floor(Math.random() * 2) + 5
-      }
-
-      data.push({
-        dateObj: currentDate,
-        count: count,
-      })
-    }
-    // 계산이 다 끝나면 상태에 쏙 넣어줌
-    setActivityData(data)
   }, [])
 
-  const getLevelColor = (count: number, dateObj: Date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    if (dateObj > today) return 'bg-transparent'
-    if (count === 0) return 'bg-slate-100'
-    if (count <= 2) return 'bg-emerald-200'
-    if (count <= 4) return 'bg-emerald-400'
-    return 'bg-emerald-600'
-  }
-
-  const formatDate = (dateObj: Date) => {
-    return `${dateObj.getFullYear()}년 ${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일`
-  }
+  // 커스텀 훅 사용
+  const { mounted, activityData, getLevelColor } = useActivityData()
 
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
@@ -106,7 +53,7 @@ export function StatusSection() {
             </div>
             <div className="flex flex-1 items-center">
               <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">
-                {mounted ? randomTip : INTERVIEW_TIPS[0]}
+                {tipMounted ? randomTip : INTERVIEW_TIPS[0]}
               </p>
             </div>
           </CardContent>
@@ -167,8 +114,7 @@ export function StatusSection() {
                   ))}
                 </div>
 
-                <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 sm:gap-1.5">
-                  {/* 4. 초기 SSR 렌더링 시에는 빈 회색 네모 56개를 보여주고, 마운트 후 데이터를 보여줌 */}
+                <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 pb-1 sm:gap-1.5">
                   {!mounted || activityData.length === 0
                     ? Array.from({ length: 56 }).map((_, i) => (
                         <div
@@ -184,7 +130,7 @@ export function StatusSection() {
                           {item.dateObj <= new Date() && (
                             <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                               <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
-                                {formatDate(item.dateObj)}: 면접 {item.count}회
+                                {formatDateKorean(item.dateObj)}: 면접 {item.count}회
                               </div>
                               <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
                             </div>

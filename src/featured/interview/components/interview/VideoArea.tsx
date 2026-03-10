@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, MicOff, VideoOff, Activity, ScanFace, Video } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
-// import Webcam from 'react-webcam'
 import { useEffect, useRef, useState } from 'react'
 import { useVisionAnalysis } from '@/featured/interview/hooks/useVisionAnalysis'
 
@@ -19,12 +18,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
   const [showMesh, setShowMesh] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  // const { realtimeStats, webcamRef, landmarker } = useVisionAnalysis({
-  //   cameraOn,
-  //   phase,
-  //   basePose,
-  //   canvasRef,
-  // })
+
   const { realtimeStats, landmarker } = useVisionAnalysis({
     cameraOn,
     phase,
@@ -33,11 +27,6 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
     videoRef,
   })
 
-  // useEffect(() => {
-  //   if (webcamRef.current && stream && cameraOn) {
-  //     webcamRef.current.stream = stream
-  //   }
-  // }, [stream, cameraOn])
   useEffect(() => {
     if (videoRef.current && stream && cameraOn) {
       videoRef.current.srcObject = stream
@@ -51,12 +40,6 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
         className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-800 shadow-2xl"
       >
         {cameraOn ? (
-          // <Webcam
-          //   ref={webcamRef}
-          //   audio={false}
-          //   mirrored={true}
-          //   className="absolute inset-0 h-full w-full object-cover"
-          // />
           <video
             ref={videoRef}
             autoPlay

@@ -1,4 +1,3 @@
-// mediapipeConsoleFilter.ts
 export function installMediapipeConsoleFilter() {
   if (typeof window === 'undefined') return
 

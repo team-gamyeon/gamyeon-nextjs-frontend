@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
-import Webcam from 'react-webcam'
 import { FocusState, type Phase } from '@/featured/interview/types'
 import {
   calculateEAR,
@@ -31,7 +30,6 @@ export function useVisionAnalysis({
   const { blinkCountRef, updateBlink } = useBlinkDetector()
   const { rawDataRef, eventsRef, lastBatchTimeRef, handleSendBatch } = useBatchSender()
 
-  // const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
 
   const lastSampleTimeRef = useRef(0)
@@ -53,7 +51,6 @@ export function useVisionAnalysis({
 
       const now = performance.now()
 
-      // const video = webcamRef.current?.video
       const video = videoRef.current
       if (!landmarker || !detector || !video || video.readyState !== 4) return
 
@@ -156,7 +153,6 @@ export function useVisionAnalysis({
               direction: currentFocus !== 'CENTER' ? currentFocus : 'CENTER',
             })
 
-            // updateUiLogs(currentFocus, type, pitch, yaw, roll, gaze)
             lastLoggedStateRef.current = currentFocus
             console.warn(`상태 변경: ${lastLoggedStateRef.current} -> ${currentFocus}`)
           }
@@ -191,7 +187,6 @@ export function useVisionAnalysis({
 
   return {
     realtimeStats,
-    // webcamRef,
     landmarker,
   }
 }

@@ -77,13 +77,18 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                 onClick={() => toggle(i)}
               >
                 {/* 질문 + 피드백 + 영상 */}
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="shrink-0 text-xs">
                       질문 {i + 1}
                     </Badge>
-                    <p className="flex-1 text-sm font-medium">{fb.question}</p>
+                    {fb.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="shrink-0 text-xs font-normal">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
+                  <p className="text-sm font-semibold">{fb.question}</p>
                   <p className="text-muted-foreground text-sm leading-relaxed">{fb.feedback}</p>
                   <AnimatePresence initial={false}>
                     {isOpen && fb.videoUrl && (

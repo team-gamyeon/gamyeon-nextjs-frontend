@@ -33,7 +33,12 @@ export function InterviewClient() {
       />
 
       <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
-        <VideoArea cameraOn={session.cameraOn} micOn={session.micOn} phase={session.phase} basePose={session.basePose} />
+        <VideoArea
+          cameraOn={session.cameraOn}
+          micOn={session.micOn}
+          phase={session.phase}
+          basePose={session.basePose}
+        />
 
         <TimerOverlay
           isActive={session.isActive}

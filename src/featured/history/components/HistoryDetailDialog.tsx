@@ -31,12 +31,14 @@ export function HistoryDetailDialog({ record, onClose }: HistoryDetailDialogProp
                   {record.date} · {record.duration}
                 </p>
               </div>
-              <div
-                className={`flex h-14 w-14 flex-col items-center justify-center rounded-xl ${record.score >= 80 ? 'bg-green-50 text-green-700' : record.score >= 70 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}
-              >
-                <span className="text-xl font-bold">{record.score}</span>
-                <span className="text-[10px]">점</span>
-              </div>
+              {record.score !== null && (
+                <div
+                  className={`flex h-14 w-14 flex-col items-center justify-center rounded-xl ${record.score >= 80 ? 'bg-green-50 text-green-700' : record.score >= 70 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}
+                >
+                  <span className="text-xl font-bold">{record.score}</span>
+                  <span className="text-[10px]">점</span>
+                </div>
+              )}
             </div>
             <Separator />
             <div>

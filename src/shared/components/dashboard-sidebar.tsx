@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import {
+  Megaphone,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -18,6 +19,7 @@ import {
 const navItems = [
   { icon: House, label: '랜딩 페이지', href: '/' },
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
+  { icon: Megaphone, label: '공지사항', href: '/notices' },
   { icon: Video, label: '면접 시작', href: '/interview' },
   { icon: ClipboardList, label: '면접 기록', href: '/history' },
 ]
@@ -67,13 +69,12 @@ export function DashboardSidebar() {
             >
               <Link href="/dashboard" className="flex items-center">
                 <Image
-                  src="/images/Gamyeon_Logo.svg"
+                  src="/images/Gamyeon_Logo.png"
                   alt="Gamyeon logo"
                   width={1024}
                   height={768}
-                  style={{ height: '32px', width: 'auto' }}
+                  style={{ height: '28px', width: 'auto' }}
                 />
-                <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
               </Link>
             </motion.div>
           )}
@@ -149,7 +150,6 @@ export function DashboardSidebar() {
           return <div key={item.href}>{linkEl}</div>
         })}
       </nav>
-
     </motion.aside>
   )
 }

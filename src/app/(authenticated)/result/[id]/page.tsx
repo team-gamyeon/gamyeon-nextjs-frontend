@@ -14,11 +14,17 @@ import {
   MOCK_IMPROVEMENTS,
 } from '@/featured/result/types'
 
+interface Props {
+  params: Promise<{ id: string }>
+}
+
 const OVERALL_SCORE = Math.round(
   MOCK_RADAR_DATA.reduce((sum, d) => sum + d.value, 0) / MOCK_RADAR_DATA.length,
 )
 
-export default function ResultPage() {
+export default async function ResultDetailPage({ params }: Props) {
+  await params
+
   return (
     <div className="bg-muted/20 min-h-screen">
       <ResultHeader />

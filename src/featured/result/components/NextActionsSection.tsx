@@ -42,7 +42,7 @@ export function NextActionsSection({ actions }: NextActionsSectionProps) {
             variants={fadeUp}
             custom={i}
           >
-            <Card className="group border-border/50 h-full cursor-pointer transition-shadow hover:shadow-md">
+            <Card className="group border-border/50 h-full cursor-pointer py-4 transition-shadow hover:shadow-md">
               <CardContent className="p-5">
                 <div className="bg-primary/10 mb-2 flex h-9 w-9 items-center justify-center rounded-lg">
                   <span className="text-primary text-sm font-bold">{i + 1}</span>

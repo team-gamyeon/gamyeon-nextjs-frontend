@@ -10,14 +10,17 @@ export function HistoryClient() {
     useHistoryFilter()
 
   return (
-    <div className="px-8 py-6">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-8 py-2">
       <HistoryFilters
         search={search}
         onSearchChange={setSearch}
         sortBy={sortBy}
         onSortChange={setSortBy}
       />
-      <HistoryList records={filtered} search={''} onSelect={setSelectedRecord} />
+
+      {/* // 신규유저 테스트용 코드 (확인 후 원래대로 복구하세요!) */}
+      {/* <HistoryList records={[]} search={''} onSelect={setSelectedRecord} /> */}
+      <HistoryList records={filtered} search={'search'} onSelect={setSelectedRecord} />
       <HistoryDetailDialog record={selectedRecord} onClose={() => setSelectedRecord(null)} />
     </div>
   )

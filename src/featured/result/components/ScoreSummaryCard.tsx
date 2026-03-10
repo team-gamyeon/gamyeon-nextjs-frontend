@@ -1,45 +1,53 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
-import { Award, Clock, MessageSquare } from 'lucide-react'
+import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
+import { type AiConfidenceLevel, AI_CONFIDENCE_STYLE, SCORE_GRADE_STYLE, getScoreGrade } from '@/featured/result/constants'
 
 interface ScoreSummaryCardProps {
   overallScore: number
+  aiConfidence?: AiConfidenceLevel
 }
 
-export function ScoreSummaryCard({ overallScore }: ScoreSummaryCardProps) {
+export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: ScoreSummaryCardProps) {
   return (
-    <Card className="border-border/50 shadow-primary/5 shadow-lg">
-      <CardContent className="flex flex-col items-center p-6">
-        <div className="relative mb-4">
-          <svg width="160" height="160" viewBox="0 0 160 160">
+    <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-0 py-6 shadow-lg">
+      <CardHeader className="w-full">
+        <h2 className="text-lg font-semibold">나의 역량 점수</h2>
+        <p className="text-muted-foreground text-sm break-keep">
+          AI가 분석한 5가지 핵심 역량의 종합 점수입니다
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col items-center justify-center px-6 py-8">
+        <div className="relative flex h-full w-full items-center justify-center">
+          <svg width="200" height="200" viewBox="0 0 200 200">
             <circle
-              cx="80"
-              cy="80"
-              r="68"
+              cx="100"
+              cy="100"
+              r="88"
               fill="none"
               stroke="currentColor"
               strokeWidth="8"
               className="text-muted"
             />
-            <motion.circle
-              cx="80"
-              cy="80"
-              r="68"
-              fill="none"
-              stroke="oklch(0.546 0.245 262.881)"
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 68}
-              initial={{ strokeDashoffset: 2 * Math.PI * 68 }}
-              animate={{ strokeDashoffset: 2 * Math.PI * 68 * (1 - overallScore / 100) }}
-              transition={{ duration: 1.5, ease: 'easeOut' }}
-              className="origin-center -rotate-90"
-              style={{ transformOrigin: '80px 80px' }}
-            />
+            <g transform="rotate(-90 100 100)">
+              <motion.circle
+                cx="100"
+                cy="100"
+                r="88"
+                fill="none"
+                stroke="oklch(0.546 0.245 262.881)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 88}
+                initial={{ strokeDashoffset: 2 * Math.PI * 88 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 88 * (1 - overallScore / 100) }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+              />
+            </g>
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <motion.span
@@ -54,11 +62,17 @@ export function ScoreSummaryCard({ overallScore }: ScoreSummaryCardProps) {
           </div>
         </div>
 
-        <Badge className="bg-primary/10 text-primary mb-2">
-          <Award className="mr-1 h-3.5 w-3.5" />
-          양호
-        </Badge>
-        <p className="text-muted-foreground text-center text-sm">
+        <div className="mb-2 flex flex-wrap justify-center gap-2 py-3">
+          <Badge className={SCORE_GRADE_STYLE[getScoreGrade(overallScore)]}>
+            <Award />
+            {getScoreGrade(overallScore)}
+          </Badge>
+          <Badge className={AI_CONFIDENCE_STYLE[aiConfidence]}>
+            <ShieldCheck />
+            <span className="translate-y-px">AI 분석 신뢰도 : {aiConfidence}</span>
+          </Badge>
+        </div>
+        <p className="text-muted-foreground text-center text-sm break-keep">
           전체적으로 준비가 잘 되어 있으나 일부 개선이 필요합니다.
         </p>
 

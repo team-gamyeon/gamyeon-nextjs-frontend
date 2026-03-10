@@ -34,7 +34,7 @@ export function SignupForm() {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md text-center"
         >
-          <Card className="border-border/50 shadow-primary/5 shadow-xl">
+          <Card className="border-border/50 shadow-primary/5 py-6 shadow-xl">
             <CardContent className="p-8">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                 <Check className="h-8 w-8 text-green-600" />
@@ -67,17 +67,16 @@ export function SignupForm() {
             className="text-foreground flex items-center justify-center gap-0.5"
           >
             <Image
-              src="/images/Gamyeon_Logo.svg"
+              src="/images/Gamyeon_Logo.png"
               alt="Gamyeon logo"
               width={1024}
               height={768}
-              style={{ height: '32px', width: 'auto' }}
+              style={{ height: '44px', width: 'auto' }}
             />
-            <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
           </Link>
         </div>
 
-        <Card className="border-border/50 shadow-primary/5 shadow-xl">
+        <Card className="border-border/50 shadow-primary/5 py-6 shadow-xl">
           <CardHeader className="space-y-1 pb-4 text-center">
             <h1 className="text-2xl font-bold">회원가입</h1>
             <p className="text-muted-foreground text-sm">무료로 가입하고 면접 연습을 시작하세요</p>

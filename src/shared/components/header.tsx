@@ -48,13 +48,12 @@ export function Header() {
         {/* 로고 */}
         <Link href="/dashboard" className="flex items-center">
           <Image
-            src="/images/Gamyeon_Logo.svg"
+            src="/images/Gamyeon_Logo.png"
             alt="Gamyeon logo"
             width={1024}
             height={768}
             style={{ height: '32px', width: 'auto' }}
           />
-          <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
         </Link>
 
         {/* 데스크탑 네비게이션 */}

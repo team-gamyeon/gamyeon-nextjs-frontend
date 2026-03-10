@@ -37,17 +37,16 @@ export function SigninForm() {
             className="text-foreground flex items-center justify-center gap-0.5"
           >
             <Image
-              src="/images/Gamyeon_Logo.svg"
+              src="/images/Gamyeon_Logo.png"
               alt="Gamyeon logo"
               width={1024}
               height={768}
-              style={{ height: '32px', width: 'auto' }}
+              style={{ height: '44px', width: 'auto' }}
             />
-            <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
           </Link>
         </div>
 
-        <Card className="border-border/50 shadow-primary/5 shadow-xl">
+        <Card className="border-border/50 shadow-primary/5 shadow-x py-6">
           <CardHeader className="space-y-1 pb-4 text-center">
             <h1 className="text-2xl font-bold">로그인</h1>
             <p className="text-muted-foreground text-sm">

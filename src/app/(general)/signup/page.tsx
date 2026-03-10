@@ -1,5 +1,5 @@
-import { SignupForm } from '@/featured/auth/components/SignupForm'
+import { redirect } from 'next/navigation'
 
 export default function SignupPage() {
-  return <SignupForm />
+  redirect('/dashboard')
 }

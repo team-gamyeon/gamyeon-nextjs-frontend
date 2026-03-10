@@ -13,8 +13,8 @@ interface ScoreSummaryCardProps {
 }
 
 function getScoreChartColor(score: number): string {
-  if (score >= 75) return '#22c55e' // green-500
-  if (score >= 50) return '#3b82f6' // blue-500
+  if (score >= 75) return '#3b82f6' // blue-500
+  if (score >= 50) return '#22c55e' // green-500
   if (score >= 25) return '#eab308' // yellow-500
   return '#ef4444' // red-500
 }

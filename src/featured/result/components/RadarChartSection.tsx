@@ -142,14 +142,14 @@ export function RadarChartSection({ data }: RadarChartSectionProps) {
           </TooltipProvider>
 
           {/* 역량 점수 그리드 */}
-          <div className="mt-4 grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="mt-4 flex w-full gap-2">
             {data.map((d) => (
               <div
                 key={d.label}
-                className="bg-muted/50 flex items-center justify-between rounded-lg px-3 py-2"
+                className="bg-muted/50 flex flex-1 flex-col items-center rounded-lg px-2 py-2"
               >
-                <span className="text-muted-foreground truncate text-xs">{d.label}</span>
-                <span className="ml-2 shrink-0 text-sm font-semibold">{d.value}</span>
+                <span className="text-muted-foreground text-center text-xs">{d.label}</span>
+                <span className="mt-1 text-sm font-semibold">{d.value}</span>
               </div>
             ))}
           </div>

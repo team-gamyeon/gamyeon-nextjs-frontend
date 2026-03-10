@@ -6,6 +6,7 @@ export type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
 export interface InterviewSetupConfig {
   title: string
   basePose: { pitch: number; yaw: number } | null
+  stream: MediaStream | null
 }
 
 export interface InterviewSession {

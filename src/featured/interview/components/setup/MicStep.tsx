@@ -12,7 +12,14 @@ interface MicStepProps {
   onSkip: () => void
 }
 
-export function MicStep({ micStatus, audioLevel, onRequest, onConfirm, onRetry, onSkip }: MicStepProps) {
+export function MicStep({
+  micStatus,
+  audioLevel,
+  onRequest,
+  onConfirm,
+  onRetry,
+  onSkip,
+}: MicStepProps) {
   return (
     <div className="space-y-5">
       <div>
@@ -54,18 +61,32 @@ export function MicStep({ micStatus, audioLevel, onRequest, onConfirm, onRetry, 
       )}
 
       {micStatus === 'denied' && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            마이크 권한이 거부되었습니다. 브라우저 설정에서 허용 후 다시 시도해주세요.
+        <div className="space-y-4">
+          <div className="bg-destructive/10 text-destructive border-destructive/20 flex items-start gap-3 rounded-xl border px-4 py-4 text-sm">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="space-y-1">
+              <p className="font-bold">마이크 접근이 차단되었습니다.</p>
+              <p className="text-xs leading-relaxed opacity-90">
+                주소창 왼쪽의 <b>설정</b> 아이콘을 클릭하여 마이크 권한을 <b>'허용'</b>으로 변경한
+                뒤 아래 버튼을 눌러주세요.
+              </p>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onRetry}>
-              다시 시도
+
+          <div className="flex flex-col gap-2">
+            <Button className="w-full gap-2 py-6 text-base shadow-lg" onClick={onRequest}>
+              <Mic className="h-4 w-4" />
+              설정 완료 및 마이크 테스트 시작
             </Button>
-            <Button variant="ghost" size="sm" onClick={onSkip}>
-              건너뛰기
-            </Button>
+
+            <div className="flex justify-center gap-2">
+              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onRetry}>
+                다시 시도
+              </Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onSkip}>
+                건너뛰기
+              </Button>
+            </div>
           </div>
         </div>
       )}

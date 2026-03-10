@@ -8,13 +8,13 @@ import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import { FileText, Play, Inbox } from 'lucide-react'
 import { InterviewRecord } from '@/featured/history/types'
-import { PendingCard } from '@/featured/history/components/Cards/PedingCard'
-import { AnalysingCard } from '@/featured/history/components/Cards/AnalysingCard'
-import { CardContainer } from '@/featured/history/components/Cards/CardContainer'
+import { PendingCard } from '@/featured/history/components/cards/PedingCard'
+import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
+import { CardContainer } from '@/featured/history/components/cards/CardContainer'
 import {
   CompletedCardBack,
   CompletedCardFront,
-} from '@/featured/history/components/Cards/CompletedCard'
+} from '@/featured/history/components/cards/CompletedCard'
 
 interface HistoryListProps {
   records: InterviewRecord[]

@@ -3,11 +3,11 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Mic, SkipForward, CheckCircle2 } from 'lucide-react'
-import { CircularTimer } from '@/featured/interview/components/CircularTimer'
+import { CircularTimer } from '@/featured/interview/components/interview/CircularTimer'
 import type { Phase } from '@/featured/interview/types'
 import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 
-interface TimerOverlayProps {
+interface TimerWidgetProps {
   isActive: boolean
   phase: Phase
   timeLeft: number
@@ -16,14 +16,14 @@ interface TimerOverlayProps {
   onNext: () => void
 }
 
-export function TimerOverlay({
+export function TimerWidget({
   isActive,
   phase,
   timeLeft,
   currentQuestion,
   onStartAnswering,
   onNext,
-}: TimerOverlayProps) {
+}: TimerWidgetProps) {
   return (
     <AnimatePresence>
       {isActive && (

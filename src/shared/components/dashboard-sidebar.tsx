@@ -73,7 +73,7 @@ export function DashboardSidebar() {
                   alt="Gamyeon logo"
                   width={1024}
                   height={768}
-                  style={{ height: '32px', width: 'auto' }}
+                  style={{ height: '28px', width: 'auto' }}
                 />
               </Link>
             </motion.div>

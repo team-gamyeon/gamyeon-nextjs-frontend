@@ -67,13 +67,12 @@ export function SignupForm() {
             className="text-foreground flex items-center justify-center gap-0.5"
           >
             <Image
-              src="/images/Gamyeon_Logo.svg"
+              src="/images/Gamyeon_Logo.png"
               alt="Gamyeon logo"
               width={1024}
               height={768}
-              style={{ height: '32px', width: 'auto' }}
+              style={{ height: '44px', width: 'auto' }}
             />
-            <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
           </Link>
         </div>
 

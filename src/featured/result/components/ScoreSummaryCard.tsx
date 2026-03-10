@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
 import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
-import { type AiConfidenceLevel, AI_CONFIDENCE_STYLE } from '@/featured/result/constants'
+import { type AiConfidenceLevel, AI_CONFIDENCE_STYLE, SCORE_GRADE_STYLE, getScoreGrade } from '@/featured/result/constants'
 
 interface ScoreSummaryCardProps {
   overallScore: number
@@ -63,9 +63,9 @@ export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: Scor
         </div>
 
         <div className="mb-2 flex flex-wrap justify-center gap-2 py-3">
-          <Badge className="bg-primary/10 text-primary">
+          <Badge className={SCORE_GRADE_STYLE[getScoreGrade(overallScore)]}>
             <Award className="mr-1 h-3.5 w-3.5" />
-            양호
+            {getScoreGrade(overallScore)}
           </Badge>
           <Badge className={AI_CONFIDENCE_STYLE[aiConfidence]}>
             <ShieldCheck className="mr-0.5 h-3.5 w-3.5" />

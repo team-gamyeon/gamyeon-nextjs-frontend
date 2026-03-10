@@ -15,21 +15,18 @@ const fadeUp = {
   }),
 }
 
-type DashboardRecentHistoryItem = Omit<RecentHistoryItem, 'diff'>
-
-const mockRecentHistory: DashboardRecentHistoryItem[] = [
-  { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25' },
-  { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22' },
-  { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18' },
+const mockRecentHistory: RecentHistoryItem[] = [
+  { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25', diff: +8 },
+  { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22', diff: +3 },
+  { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18', diff: null },
 ]
 
 export interface RecentHistorySectionProps {
-  history?: DashboardRecentHistoryItem[]
+  history?: RecentHistoryItem[]
 }
 
 export function RecentHistorySection({ history = mockRecentHistory }: RecentHistorySectionProps) {
   const isEmpty = history.length === 0
-
   return (
     <motion.div
       initial="hidden"
@@ -71,7 +68,7 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
             history.map((item, i) => (
               <Link
                 key={i}
-                href={`/history/${item.id}`}
+                href={`/result/${item.id}`}
                 className="flex flex-1 flex-col justify-center"
               >
                 <div className="hover:bg-muted/40 flex h-full w-full items-center gap-4 px-5 transition-colors">
@@ -90,6 +87,14 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
                     <p className="truncate text-sm font-medium">{item.position}</p>
                     <p className="text-muted-foreground text-xs">{item.date}</p>
                   </div>
+                  {item.diff !== null ? (
+                    <span
+                      className={`text-xs font-medium ${item.diff > 0 ? 'text-green-600' : 'text-red-500'}`}
+                    >
+                      {item.diff > 0 ? '+' : ''}
+                      {item.diff}점
+                    </span>
+                  ) : null}
                   <ChevronRight className="text-muted-foreground h-4 w-4" />
                 </div>
               </Link>

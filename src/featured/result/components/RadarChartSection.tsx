@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { Info } from 'lucide-react'
-import { RadarChart } from '@/featured/result/components/radar-chart'
+import { RadarChart } from '@/featured/result/components/RaderChart'
 import type { RadarDataPoint } from '@/featured/result/types'
 
 interface RadarChartSectionProps {

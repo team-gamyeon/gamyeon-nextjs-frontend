@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import {
+  Bell,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -18,6 +19,7 @@ import {
 const navItems = [
   { icon: House, label: '랜딩 페이지', href: '/' },
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
+  { icon: Bell, label: '공지사항', href: '/notices' },
   { icon: Video, label: '면접 시작', href: '/interview' },
   { icon: ClipboardList, label: '면접 기록', href: '/history' },
 ]

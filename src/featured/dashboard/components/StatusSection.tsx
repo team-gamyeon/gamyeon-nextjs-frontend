@@ -31,13 +31,13 @@ export function StatusSection() {
     setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
   }, [])
 
-  // --- [Card 3: 8주 잔디(초록색) 데이터 로직] ---
+  // --- [Card 3: 8주 잔디 데이터 로직] ---
   const activityData = useMemo(() => {
     const data = []
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // 월요일(0) 시작 ~ 일요일(6) 끝을 위한 보정
+    // 월요일(0) 시작 ~ 일요일(6)
     const currentDayOfWeek = today.getDay()
     const mappedDay = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
 
@@ -53,9 +53,12 @@ export function StatusSection() {
       let count = 0
       if (currentDate <= today) {
         const rand = Math.random()
-        if (rand > 0.6 && rand <= 0.85) count = Math.floor(Math.random() * 2) + 1
-        else if (rand > 0.85 && rand <= 0.95) count = Math.floor(Math.random() * 2) + 3
-        else if (rand > 0.95) count = Math.floor(Math.random() * 3) + 5
+        // 진한 색(5회 이상)이 눈에 잘 띄도록 확률(15%) 상향 조정
+        if (rand > 0.4 && rand <= 0.7)
+          count = Math.floor(Math.random() * 2) + 1 // 1~2회 (연한 에메랄드)
+        else if (rand > 0.7 && rand <= 0.85)
+          count = Math.floor(Math.random() * 2) + 3 // 3~4회 (중간 에메랄드)
+        else if (rand > 0.85) count = Math.floor(Math.random() * 2) + 5 // 5회 이상 (진한 에메랄드)
       }
 
       data.push({
@@ -66,15 +69,16 @@ export function StatusSection() {
     return data
   }, [])
 
+  // 트렌디한 에메랄드(Emerald) 팔레트로 변경
   const getLevelColor = (count: number, dateObj: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
     if (dateObj > today) return 'bg-transparent' // 미래 날짜
     if (count === 0) return 'bg-slate-100' // 활동 없음
-    if (count <= 2) return 'bg-green-300' // 적음
-    if (count <= 4) return 'bg-green-500' // 보통
-    return 'bg-green-700' // 많음
+    if (count <= 2) return 'bg-emerald-200' // 적음 (연한 초록)
+    if (count <= 4) return 'bg-emerald-400' // 보통 (중간 초록)
+    return 'bg-emerald-600' // 많음 ( 진한 초록)
   }
 
   const formatDate = (dateObj: Date) => {
@@ -89,7 +93,7 @@ export function StatusSection() {
       </h2>
       <div className="grid gap-4 sm:grid-cols-3">
         {/* Card 1: 오늘의 면접 팁 */}
-        <Card className="border-border/50 flex h-[230px] flex-col">
+        <Card className="border-border/50 flex h-57.5 flex-col">
           <CardContent className="flex h-full flex-col justify-between p-5">
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-50">
@@ -106,11 +110,11 @@ export function StatusSection() {
         </Card>
 
         {/* Card 2: 최근 점수 추이 */}
-        <Card className="border-border/50 flex h-[230px] flex-col">
+        <Card className="border-border/50 flex h-57.5 flex-col">
           <CardContent className="flex h-full flex-col justify-between p-5">
             <div className="mb-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
               <h3 className="text-sm font-semibold">최근 점수 추이</h3>
             </div>
@@ -121,21 +125,22 @@ export function StatusSection() {
         </Card>
 
         {/* Card 3: 면접 활동 (깃허브 스타일 잔디 UI) */}
-        <Card className="border-border/50 relative flex h-[230px] flex-col overflow-visible">
+        <Card className="border-border/50 relative flex h-57.5 flex-col overflow-visible">
           <CardContent className="flex h-full flex-col p-5">
             {/* 타이틀 영역 & 그라데이션 범례(Legend) */}
             <div className="flex w-full shrink-0 items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
-                  <LayoutGrid className="h-5 w-5 text-green-600" />
+                {/* 아이콘과 배경도 에메랄드 테마로 변경 */}
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
+                  <LayoutGrid className="h-5 w-5 text-emerald-600" />
                 </div>
                 <h3 className="text-sm font-semibold">면접 활동 (최근 8주)</h3>
               </div>
 
-              {/* Less - 그라데이션 - More 범례 */}
+              {/* Less - 그라데이션 - More 범례 (에메랄드) */}
               <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-medium">
                 <span>Less</span>
-                <div className="h-2.5 w-14 rounded-[3px] bg-gradient-to-r from-slate-100 via-green-400 to-green-700"></div>
+                <div className="h-2.5 w-14 rounded-[3px] bg-linear-to-r from-slate-100 via-emerald-400 to-emerald-600"></div>
                 <span>More</span>
               </div>
             </div>
@@ -144,7 +149,7 @@ export function StatusSection() {
             <div className="mt-4 flex min-h-0 w-full flex-1 flex-col">
               {/* X축 (Week1 ~ Week8) */}
               <div className="mb-1 flex shrink-0 items-end gap-1 sm:gap-1.5">
-                <div className="w-6 shrink-0"></div> {/* Y축 공간 확보 */}
+                <div className="w-6 shrink-0"></div>
                 <div className="text-muted-foreground grid w-full grid-cols-8 gap-1 text-center text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
                   {['Week1', 'Week2', 'Week3', 'Week4', 'Week5', 'Week6', 'Week7', 'Week8'].map(
                     (week, i) => (
@@ -158,7 +163,7 @@ export function StatusSection() {
 
               {/* Y축 + 실제 잔디 그래프 */}
               <div className="flex min-h-0 flex-1 items-stretch gap-1 sm:gap-1.5">
-                {/* Y축 (Mon ~ Sun 전체 표시) */}
+                {/* Y축 (Mon ~ Sun) */}
                 <div className="text-muted-foreground grid w-6 shrink-0 grid-rows-7 gap-1 text-right text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                     <div key={day} className="flex h-full items-center justify-end">
@@ -167,23 +172,21 @@ export function StatusSection() {
                   ))}
                 </div>
 
-                {/* 잔디(초록색) 그리드 - 7행 8열 */}
+                {/* 잔디(에메랄드) 그리드 - 7행 8열 */}
                 <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 pb-1 sm:gap-1.5">
                   {activityData.map((item, index) => (
-                    // group 속성을 추가하여 hover 상태 제어
                     <div key={index} className="group relative h-full w-full">
                       {/* 잔디 블록 */}
                       <div
                         className={`h-full w-full cursor-default rounded-[3px] transition-colors duration-200 ${getLevelColor(item.count, item.dateObj)}`}
                       />
 
-                      {/* 커스텀 툴팁 (가장자리 둥글게, 화살표 포함) */}
+                      {/* 커스텀 툴팁 */}
                       {item.dateObj <= new Date() && (
                         <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                           <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
                             {formatDate(item.dateObj)}: 면접 {item.count}회
                           </div>
-                          {/* 툴팁 아래 뾰족한 화살표 부분 */}
                           <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
                         </div>
                       )}

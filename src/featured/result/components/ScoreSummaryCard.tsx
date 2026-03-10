@@ -14,7 +14,7 @@ interface ScoreSummaryCardProps {
 
 function getScoreChartColor(score: number): string {
   if (score >= 75) return '#22c55e' // green-500
-  if (score >= 50) return '#0d9488' // teal-600
+  if (score >= 50) return '#3b82f6' // blue-500
   if (score >= 25) return '#eab308' // yellow-500
   return '#ef4444' // red-500
 }
@@ -61,7 +61,8 @@ export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: Scor
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-primary text-4xl font-bold"
+              className="text-4xl font-bold"
+              style={{ color: getScoreChartColor(overallScore) }}
             >
               {overallScore}
             </motion.span>

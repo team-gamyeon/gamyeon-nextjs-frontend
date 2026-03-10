@@ -3,7 +3,7 @@ export type ScoreGrade = '미흡' | '보통' | '양호' | '좋음'
 export const SCORE_GRADE_STYLE: Record<ScoreGrade, string> = {
   미흡: 'bg-red-500/10 text-red-600',
   보통: 'bg-yellow-500/10 text-yellow-600',
-  양호: 'bg-teal-500/10 text-teal-600',
+  양호: 'bg-blue-500/10 text-blue-500',
   좋음: 'bg-green-500/10 text-green-500',
 }
 

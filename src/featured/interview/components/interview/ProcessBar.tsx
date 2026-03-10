@@ -15,7 +15,7 @@ interface TopBarProps {
   onEndClick: () => void
 }
 
-export function TopBar({
+export function ProcessBar({
   interviewTitle,
   currentQuestion,
   phase,

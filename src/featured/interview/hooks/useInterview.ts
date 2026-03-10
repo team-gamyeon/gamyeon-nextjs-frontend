@@ -20,8 +20,11 @@ export function useInterview() {
   const [interviewTitle, setInterviewTitle] = useState('AI 모의 면접')
   const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+
   const phaseRef = useRef(phase)
   const currentQuestionRef = useRef(currentQuestion)
+
+  const isActive = phase === 'thinking' || phase === 'answering'
 
   useEffect(() => {
     phaseRef.current = phase
@@ -99,20 +102,19 @@ export function useInterview() {
     setTimeLeft(TOTAL_ANSWER_TIME)
   }
 
-  const isActive = phase === 'thinking' || phase === 'answering'
-
-  // 면접이 끝나는 즉시 리트림 리소스 정리
-  // useEffect(() => {
-  //   return () => {
-  //     if (cameraStream) {
-  //       cameraStream.getTracks().forEach((track) => {
-  //         track.stop()
-  //         console.log('면접 종료로 인한 트랙 종료')
-  //       })
-  //     }
-  //     setCameraStream(null)
-  //   }
-  // }, [cameraStream])
+  // 면접이 끝나는 즉시 스트림 리소스 정리
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => {
+          if (track.readyState === 'live') {
+            track.stop()
+            console.log('면접 종료로 인한 스트림 트랙 종료')
+          }
+        })
+      }
+    }
+  }, [cameraStream])
 
   return {
     currentQuestion,

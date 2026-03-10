@@ -15,11 +15,11 @@ import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
 import { MicStep } from '@/featured/interview/components/setup/MicStep'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
-interface Props {
+interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
 }
 
-export function InterviewSetupModal({ session }: Props) {
+export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   const [statuses, setStatuses] = useState<StepStatus[]>([
     'active',
     'pending',

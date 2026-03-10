@@ -12,11 +12,11 @@ import {
 } from '@/shared/ui/dialog'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
-interface EndDialogProps {
+interface EndDialogModalProps {
   session: ReturnType<typeof useInterview>
 }
 
-export function EndDialogModal({ session }: EndDialogProps) {
+export function EndDialogModal({ session }: EndDialogModalProps) {
   return (
     <Dialog open={session.showEndDialog} onOpenChange={session.setShowEndDialog}>
       <DialogContent className="border-white/10 bg-slate-900 text-white">

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Phase } from '@/featured/interview/types'
 import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 
-export function useInterviewSession() {
+export function useInterview() {
   const router = useRouter()
 
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -19,6 +19,7 @@ export function useInterviewSession() {
   const [showSetup, setShowSetup] = useState(true)
   const [interviewTitle, setInterviewTitle] = useState('AI 모의 면접')
   const [basePose, setBasePose] = useState<{ pitch: number; yaw: number } | null>(null)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
   const phaseRef = useRef(phase)
   const currentQuestionRef = useRef(currentQuestion)
 
@@ -33,9 +34,11 @@ export function useInterviewSession() {
   const handleSetupComplete = (config: {
     title?: string
     basePose?: { pitch: number; yaw: number } | null
+    stream?: MediaStream | null
   }) => {
     setInterviewTitle(config.title || 'AI 모의 면접')
     setBasePose(config.basePose ?? null)
+    setCameraStream(config.stream ?? null)
     setShowSetup(false)
     setTypingKey((prev) => prev + 1)
     setQuestionRevealed(false)
@@ -98,6 +101,17 @@ export function useInterviewSession() {
 
   const isActive = phase === 'thinking' || phase === 'answering'
 
+  // 면접이 끝나는 즉시 리트림 리소스 정리
+  useEffect(() => {
+    if (phase === 'finished' && cameraStream) {
+      cameraStream.getTracks().forEach((track) => {
+        track.stop()
+        console.log('면접 종료로 인한 트랙 종료')
+      })
+    }
+    setCameraStream(null)
+  }, [phase, cameraStream])
+
   return {
     currentQuestion,
     phase,
@@ -114,6 +128,7 @@ export function useInterviewSession() {
     showSetup,
     interviewTitle,
     basePose,
+    cameraStream,
     isActive,
     handleSetupComplete,
     handleSetupCancel,

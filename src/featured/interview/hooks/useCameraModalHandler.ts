@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import { FaceLandmarker } from '@mediapipe/tasks-vision'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
 import { type PermStatus } from '@/featured/interview/types'
-import { extractSetupEulerAngles } from '@/featured/interview/utils/setupUtils'
-import { ALIGN_DURATION_MS, ALIGN_THRESHOLD } from '@/featured/interview/constants'
+import { validateFacePosition } from '@/featured/interview/utils/setupUtils'
+import { ALIGN_DURATION_MS } from '@/featured/interview/constants'
 
-interface UseCameraSetupReturn {
+interface UseCameraModalHandlerReturn {
   landmarker: FaceLandmarker | null
   cameraStatus: PermStatus
   setCameraStatus: React.Dispatch<React.SetStateAction<PermStatus>>
@@ -15,9 +15,10 @@ interface UseCameraSetupReturn {
   faceDetected: boolean
   requestCamera: () => Promise<void>
   confirmCamera: () => void
+  cameraStream: MediaStream | null
 }
 
-export function useCameraSetup(): UseCameraSetupReturn {
+export function useCameraModalHandler(): UseCameraModalHandlerReturn {
   const { landmarker } = useGazeTracker()
 
   const [cameraStatus, setCameraStatus] = useState<PermStatus>('idle')
@@ -27,10 +28,10 @@ export function useCameraSetup(): UseCameraSetupReturn {
   const [faceDetected, setFaceDetected] = useState(false)
 
   const cameraVideoRef = useRef<HTMLVideoElement>(null)
-  const poseDetectRef = useRef<number | null>(null)
   const cameraStreamRef = useRef<MediaStream | null>(null)
+  const poseDetectRef = useRef<number | null>(null)
 
-  // 카메라 스트림 → video 엘리먼트 연결
+  // 카메라 스트림 → 비디오 엘리먼트 연결
   useEffect(() => {
     if (cameraStatus === 'granted' && cameraVideoRef.current && cameraStream) {
       cameraVideoRef.current.srcObject = cameraStream
@@ -72,30 +73,7 @@ export function useCameraSetup(): UseCameraSetupReturn {
           return
         }
 
-        // 코 중앙 고정 + 얼굴 크기 + 대칭 + 각도 — 4박자 통과 조건
-        const landmarks = result.faceLandmarks[0]
-        const noseTip = landmarks[1]
-        const leftCheek = landmarks[234]
-        const rightCheek = landmarks[454]
-
-        const isNoseCentered =
-          noseTip.x > 0.45 && noseTip.x < 0.55 && noseTip.y > 0.4 && noseTip.y < 0.6
-
-        const faceWidth = Math.abs(leftCheek.x - rightCheek.x)
-        const isProperSize = faceWidth > 0.2 && faceWidth < 0.35
-
-        const leftDist = Math.abs(noseTip.x - leftCheek.x)
-        const rightDist = Math.abs(rightCheek.x - noseTip.x)
-        const symmetryRatio = rightDist > 0 ? leftDist / rightDist : 0
-        const isSymmetric = symmetryRatio > 0.7 && symmetryRatio < 1.3
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawMatrix = (matrixes[0] as any).data ?? matrixes[0]
-        const { pitch, yaw } = extractSetupEulerAngles(rawMatrix)
-        const isStraight = Math.abs(pitch) < ALIGN_THRESHOLD && Math.abs(yaw) < ALIGN_THRESHOLD
-
-        const inPosition = isNoseCentered && isProperSize && isSymmetric && isStraight
-
+        const { inPosition, pitch, yaw } = validateFacePosition(result, matrixes)
         if (inPosition) {
           if (alignStart === null) alignStart = now
           const elapsed = now - alignStart
@@ -109,9 +87,7 @@ export function useCameraSetup(): UseCameraSetupReturn {
           alignStart = null
           setAlignProgress(0)
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
       poseDetectRef.current = requestAnimationFrame(detect)
     }
 
@@ -121,11 +97,14 @@ export function useCameraSetup(): UseCameraSetupReturn {
     }
   }, [cameraStatus, landmarker, basePose])
 
-  // 언마운트 시 스트림 정리
+  // 언마운트 시 리소스 정리 (스트림은 면접 세션을 위해 유지)
   useEffect(() => {
     return () => {
-      if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
-      cameraStreamRef.current?.getTracks().forEach((t) => t.stop())
+      if (poseDetectRef.current) {
+        cancelAnimationFrame(poseDetectRef.current)
+        poseDetectRef.current = null
+      }
+      // 스트림은 다음 단계에서 사용햐야 하므로 여기서 stop() X => useInterview.ts 에서 정리
     }
   }, [])
 
@@ -136,6 +115,9 @@ export function useCameraSetup(): UseCameraSetupReturn {
     setFaceDetected(false)
     setCameraStatus('requesting')
     try {
+      // 1. 하드웨어 장치 목록 한 번 훑어서 브라우저의 권한 캐시 강제로 최신화
+      await navigator.mediaDevices.enumerateDevices()
+      // 2. 그 다음 스트림 요청
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
       cameraStreamRef.current = stream
       setCameraStream(stream)
@@ -145,12 +127,12 @@ export function useCameraSetup(): UseCameraSetupReturn {
     }
   }
 
-  // 카메라 설정 확인 후 스트림 정리 (basePose는 유지)
+  // 카메라 설정 확인 후 스트림 정리 (basePose 유지)
   const confirmCamera = () => {
-    if (poseDetectRef.current) cancelAnimationFrame(poseDetectRef.current)
-    cameraStreamRef.current?.getTracks().forEach((t) => t.stop())
-    cameraStreamRef.current = null
-    setCameraStream(null)
+    if (poseDetectRef.current) {
+      cancelAnimationFrame(poseDetectRef.current)
+      poseDetectRef.current = null
+    }
   }
 
   return {
@@ -163,5 +145,6 @@ export function useCameraSetup(): UseCameraSetupReturn {
     faceDetected,
     requestCamera,
     confirmCamera,
+    cameraStream,
   }
 }

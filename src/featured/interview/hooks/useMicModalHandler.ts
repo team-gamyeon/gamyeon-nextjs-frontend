@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { type PermStatus } from '@/featured/interview/types'
 
-interface UseMicSetupReturn {
+interface useMicModalHandlerReturn {
   micStatus: PermStatus
   setMicStatus: React.Dispatch<React.SetStateAction<PermStatus>>
   audioLevel: number
@@ -9,7 +9,7 @@ interface UseMicSetupReturn {
   confirmMic: () => void
 }
 
-export function useMicSetup(): UseMicSetupReturn {
+export function useMicModalHandler(): useMicModalHandlerReturn {
   const [micStatus, setMicStatus] = useState<PermStatus>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
 

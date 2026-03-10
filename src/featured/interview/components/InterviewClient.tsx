@@ -8,11 +8,11 @@ import { ReadyOverlay } from '@/featured/interview/components/ReadyOverlay'
 import { FinishedOverlay } from '@/featured/interview/components/FinishedOverlay'
 import { ControlBar } from '@/featured/interview/components/ControlBar'
 import { EndDialog } from '@/featured/interview/components/EndDialog'
-import { useInterviewSession } from '@/featured/interview/hooks/useInterviewSession'
+import { useInterview } from '@/featured/interview/hooks/useInterview'
 import { InterviewSetupModal } from './InterviewSetupModal'
 
 export function InterviewClient() {
-  const session = useInterviewSession()
+  const session = useInterview()
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
@@ -33,7 +33,13 @@ export function InterviewClient() {
       />
 
       <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
-        <VideoArea cameraOn={session.cameraOn} micOn={session.micOn} phase={session.phase} basePose={session.basePose} />
+        <VideoArea
+          cameraOn={session.cameraOn}
+          micOn={session.micOn}
+          phase={session.phase}
+          basePose={session.basePose}
+          stream={session.cameraStream}
+        />
 
         <TimerOverlay
           isActive={session.isActive}
@@ -65,7 +71,7 @@ export function InterviewClient() {
 
       <InterviewSetupModal
         open={session.showSetup}
-        onComplete={session.handleSetupComplete}
+        onComplete={(config) => session.handleSetupComplete(config)}
         onCancel={session.handleSetupCancel}
       />
     </div>

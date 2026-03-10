@@ -56,6 +56,5 @@ export function useActivityData() {
     return 'bg-emerald-600'
   }
 
-  // 계산이 끝난 데이터와 색상 함수를 컴포넌트(화면)로 던져줍니다.
   return { mounted, activityData, getLevelColor }
 }

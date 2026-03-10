@@ -150,7 +150,7 @@ export function RadarChart({ data, size = 320 }: RadarChartProps) {
         return (
           <span
             key={index}
-            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-default text-[11px] text-current opacity-60 transition-all duration-150 select-none hover:font-semibold hover:opacity-90"
+            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-default text-[11px] text-current opacity-60 transition-all duration-150 select-none hover:font-semibold hover:opacity-90 whitespace-nowrap"
             style={{ left: x, top: y }}
             onMouseEnter={() => triggerTooltip(index)}
             onMouseLeave={hideTooltip}

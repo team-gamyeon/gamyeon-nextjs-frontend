@@ -126,7 +126,3 @@
   }
 }
 
-/* h-screen overflow-hidden 레이아웃이므로 html 자체는 스크롤되지 않음 */
-html {
-  overflow: hidden;
-}

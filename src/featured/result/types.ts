@@ -26,7 +26,7 @@ export const MOCK_RADAR_DATA: RadarDataPoint[] = [
   },
   {
     label: '시선 집중도',
-    value: 68,
+    value: 25,
     description:
       '면접 중 시선의 흔들림이나 이탈을 분석하여, 질문자(카메라)를 향한 시선의 유지 정도와 태도의 안정감을 측정합니다.',
   },
@@ -44,8 +44,7 @@ export const MOCK_RADAR_DATA: RadarDataPoint[] = [
   {
     label: '시간 관리',
     value: 90,
-    description:
-      '제한된 답변 시간(60초) 내에 핵심 내용을 얼마나 효율적으로 전달했는지 계산합니다.',
+    description: '제한된 답변 시간(60초) 내에 핵심 내용을 얼마나 효율적으로 전달했는지 계산합니다.',
   },
 ]
 

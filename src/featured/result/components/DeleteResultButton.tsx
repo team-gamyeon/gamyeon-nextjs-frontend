@@ -25,7 +25,7 @@ export function DeleteResultButton() {
 
   return (
     <>
-      <Button variant="destructive" className="cursor-pointer gap-2" onClick={() => setOpen(true)}>
+      <Button variant="secondary" className="cursor-pointer gap-2 bg-gray-200 text-gray-500 hover:bg-gray-300" onClick={() => setOpen(true)}>
         <Trash2 className="h-4 w-4" />
         삭제
       </Button>

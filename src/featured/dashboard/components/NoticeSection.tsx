@@ -72,9 +72,9 @@ export function NoticeSection() {
             <Link
               key={item.id}
               href={`/notices/${item.id}`}
-              className="flex flex-col justify-center"
+              className="flex flex-1 flex-col justify-center"
             >
-              <div className="hover:bg-muted/40 flex h-13.5 w-full items-center justify-between gap-4 px-5 transition-colors">
+              <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
                   <span
                     className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${

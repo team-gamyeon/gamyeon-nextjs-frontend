@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { TrendingUp, LayoutGrid, Lightbulb } from 'lucide-react'
@@ -22,22 +22,29 @@ const fadeUp = {
   }),
 }
 
+// 1. 타입 정의 추가 (TypeScript 에러 방지)
+interface ActivityDay {
+  dateObj: Date
+  count: number
+}
+
 export function StatusSection() {
   const [randomTip, setRandomTip] = useState(INTERVIEW_TIPS[0])
   const [mounted, setMounted] = useState(false)
 
+  // 2. 랜덤 잔디 데이터를 담을 빈 상태(State) 생성
+  const [activityData, setActivityData] = useState<ActivityDay[]>([])
+
   useEffect(() => {
+    // 브라우저에 화면이 나타나면(mounted) 실행됨
     setMounted(true)
     setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
-  }, [])
 
-  // --- [Card 3: 8주 잔디 데이터 로직] ---
-  const activityData = useMemo(() => {
-    const data = []
+    // --- [3. 브라우저에서만 랜덤 잔디 데이터 생성] ---
+    const data: ActivityDay[] = []
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // 월요일(0) 시작 ~ 일요일(6)
     const currentDayOfWeek = today.getDay()
     const mappedDay = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
 
@@ -53,12 +60,9 @@ export function StatusSection() {
       let count = 0
       if (currentDate <= today) {
         const rand = Math.random()
-        // 진한 색(5회 이상)이 눈에 잘 띄도록 확률(15%) 상향 조정
-        if (rand > 0.4 && rand <= 0.7)
-          count = Math.floor(Math.random() * 2) + 1 // 1~2회 (연한 에메랄드)
-        else if (rand > 0.7 && rand <= 0.85)
-          count = Math.floor(Math.random() * 2) + 3 // 3~4회 (중간 에메랄드)
-        else if (rand > 0.85) count = Math.floor(Math.random() * 2) + 5 // 5회 이상 (진한 에메랄드)
+        if (rand > 0.4 && rand <= 0.7) count = Math.floor(Math.random() * 2) + 1
+        else if (rand > 0.7 && rand <= 0.85) count = Math.floor(Math.random() * 2) + 3
+        else if (rand > 0.85) count = Math.floor(Math.random() * 2) + 5
       }
 
       data.push({
@@ -66,25 +70,24 @@ export function StatusSection() {
         count: count,
       })
     }
-    return data
+    // 계산이 다 끝나면 상태에 쏙 넣어줌
+    setActivityData(data)
   }, [])
 
-  // 트렌디한 에메랄드(Emerald) 팔레트로 변경
   const getLevelColor = (count: number, dateObj: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    if (dateObj > today) return 'bg-transparent' // 미래 날짜
-    if (count === 0) return 'bg-slate-100' // 활동 없음
-    if (count <= 2) return 'bg-emerald-200' // 적음 (연한 초록)
-    if (count <= 4) return 'bg-emerald-400' // 보통 (중간 초록)
-    return 'bg-emerald-600' // 많음 ( 진한 초록)
+    if (dateObj > today) return 'bg-transparent'
+    if (count === 0) return 'bg-slate-100'
+    if (count <= 2) return 'bg-emerald-200'
+    if (count <= 4) return 'bg-emerald-400'
+    return 'bg-emerald-600'
   }
 
   const formatDate = (dateObj: Date) => {
     return `${dateObj.getFullYear()}년 ${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일`
   }
-  // --- [Card 3 로직 끝] ---
 
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
@@ -124,20 +127,16 @@ export function StatusSection() {
           </CardContent>
         </Card>
 
-        {/* Card 3: 면접 활동 (깃허브 스타일 잔디 UI) */}
+        {/* Card 3: 면접 활동 */}
         <Card className="border-border/50 relative flex h-57.5 flex-col overflow-visible">
           <CardContent className="flex h-full flex-col p-5">
-            {/* 타이틀 영역 & 그라데이션 범례(Legend) */}
             <div className="flex w-full shrink-0 items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* 아이콘과 배경도 에메랄드 테마로 변경 */}
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
                   <LayoutGrid className="h-5 w-5 text-emerald-600" />
                 </div>
                 <h3 className="text-sm font-semibold">면접 활동 (최근 8주)</h3>
               </div>
-
-              {/* Less - 그라데이션 - More 범례 (에메랄드) */}
               <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-medium">
                 <span>Less</span>
                 <div className="h-2.5 w-14 rounded-[3px] bg-linear-to-r from-slate-100 via-emerald-400 to-emerald-600"></div>
@@ -145,9 +144,7 @@ export function StatusSection() {
               </div>
             </div>
 
-            {/* --- X축, Y축 + 전체 그리드 영역 --- */}
             <div className="mt-4 flex min-h-0 w-full flex-1 flex-col">
-              {/* X축 (Week1 ~ Week8) */}
               <div className="mb-1 flex shrink-0 items-end gap-1 sm:gap-1.5">
                 <div className="w-6 shrink-0"></div>
                 <div className="text-muted-foreground grid w-full grid-cols-8 gap-1 text-center text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
@@ -161,9 +158,7 @@ export function StatusSection() {
                 </div>
               </div>
 
-              {/* Y축 + 실제 잔디 그래프 */}
               <div className="flex min-h-0 flex-1 items-stretch gap-1 sm:gap-1.5">
-                {/* Y축 (Mon ~ Sun) */}
                 <div className="text-muted-foreground grid w-6 shrink-0 grid-rows-7 gap-1 text-right text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                     <div key={day} className="flex h-full items-center justify-end">
@@ -172,30 +167,33 @@ export function StatusSection() {
                   ))}
                 </div>
 
-                {/* 잔디(에메랄드) 그리드 - 7행 8열 */}
                 <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 pb-1 sm:gap-1.5">
-                  {activityData.map((item, index) => (
-                    <div key={index} className="group relative h-full w-full">
-                      {/* 잔디 블록 */}
-                      <div
-                        className={`h-full w-full cursor-default rounded-[3px] transition-colors duration-200 ${getLevelColor(item.count, item.dateObj)}`}
-                      />
-
-                      {/* 커스텀 툴팁 */}
-                      {item.dateObj <= new Date() && (
-                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
-                            {formatDate(item.dateObj)}: 면접 {item.count}회
-                          </div>
-                          <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
+                  {/* 4. 초기 SSR 렌더링 시에는 빈 회색 네모 56개를 보여주고, 마운트 후 데이터를 보여줌 */}
+                  {!mounted || activityData.length === 0
+                    ? Array.from({ length: 56 }).map((_, i) => (
+                        <div
+                          key={`empty-${i}`}
+                          className="h-full w-full rounded-[3px] bg-slate-100"
+                        />
+                      ))
+                    : activityData.map((item, index) => (
+                        <div key={index} className="group relative h-full w-full">
+                          <div
+                            className={`h-full w-full cursor-default rounded-[3px] transition-colors duration-200 ${getLevelColor(item.count, item.dateObj)}`}
+                          />
+                          {item.dateObj <= new Date() && (
+                            <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                              <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
+                                {formatDate(item.dateObj)}: 면접 {item.count}회
+                              </div>
+                              <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      ))}
                 </div>
               </div>
             </div>
-            {/* --- 영역 끝 --- */}
           </CardContent>
         </Card>
       </div>

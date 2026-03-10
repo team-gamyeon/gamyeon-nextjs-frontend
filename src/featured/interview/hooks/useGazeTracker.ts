@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { FaceDetector, FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
-import { installMediapipeConsoleFilter } from '@/shared/lib/mediapipeConsoleFilter'
 
 export const useGazeTracker = () => {
   const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(null)
@@ -8,8 +7,6 @@ export const useGazeTracker = () => {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // installMediapipeConsoleFilter()
-
     // 지역변수 선언: 클린업에서 참조하기 위해
     let landmarkerInstance: FaceLandmarker | null = null
     let detectorInstance: FaceDetector | null = null
@@ -53,8 +50,7 @@ export const useGazeTracker = () => {
 
     initModels()
 
-    // 3. 컴포넌트 언마운트 시 메모리 해제
-    // 사용자가 면접 화면이나 카메라 뷰를 벗어났을 때, MediaPipe 인스턴스를 즉각적으로 종료하여 메모리를 반환
+    // 3. 컴포넌트 언마운트 시 메모리 해제: 사용자가 면접 화면이나 카메라 뷰를 벗어났을 때, MediaPipe 인스턴스를 즉각적으로 종료하여 메모리를 반환
     return () => {
       if (landmarkerInstance) {
         landmarkerInstance.close()

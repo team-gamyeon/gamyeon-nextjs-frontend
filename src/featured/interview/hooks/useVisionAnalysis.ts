@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGazeTracker } from '@/featured/interview/hooks/useGazeTracker'
-import Webcam from 'react-webcam'
 import { FocusState, type Phase } from '@/featured/interview/types'
 import {
   calculateEAR,
@@ -17,14 +16,20 @@ interface UseVisionParams {
   phase: Phase
   basePose?: { pitch: number; yaw: number } | null
   canvasRef?: React.RefObject<HTMLCanvasElement | null>
+  videoRef: React.RefObject<HTMLVideoElement | null>
 }
 
-export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseVisionParams) {
+export function useVisionAnalysis({
+  cameraOn,
+  phase,
+  basePose,
+  canvasRef,
+  videoRef,
+}: UseVisionParams) {
   const { landmarker, detector } = useGazeTracker()
   const { blinkCountRef, updateBlink } = useBlinkDetector()
   const { rawDataRef, eventsRef, lastBatchTimeRef, handleSendBatch } = useBatchSender()
 
-  const webcamRef = useRef<Webcam>(null)
   const requestRef = useRef<number | null>(null)
 
   const lastSampleTimeRef = useRef(0)
@@ -40,46 +45,13 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
     gaze: { left: { x: 0, y: 0 }, right: { x: 0, y: 0 } },
   })
 
-  const [uiLogs, setUiLogs] = useState<any[]>([])
-
   useEffect(() => {
-    // 추후 제거 예정(불필요한 ui)
-    const updateUiLogs = (
-      currentFocus: FocusState,
-      type: 'AWAY_START' | 'AWAY_END',
-      pitch: number,
-      yaw: number,
-      roll: number,
-      gaze: { left: { x: number; y: number }; right: { x: number; y: number } },
-    ) => {
-      setUiLogs((prev) => {
-        const newLog = {
-          timestamp: new Date().toLocaleTimeString([], {
-            hour12: false,
-            minute: '2-digit',
-            second: '2-digit',
-          }),
-          focusState: currentFocus,
-          blinkCount: blinkCountRef.current,
-          pitch: pitch.toFixed(1),
-          yaw: yaw.toFixed(1),
-          roll: roll.toFixed(1),
-          gaze: {
-            left: { x: gaze.left.x, y: gaze.left.y },
-            right: { x: gaze.right.x, y: gaze.right.y },
-          },
-          eventType: type === 'AWAY_END' ? 'RECOVERY' : 'ANOMALY',
-        }
-        return [newLog, ...prev].slice(0, 5)
-      })
-    }
-
     const detectGaze = () => {
       requestRef.current = requestAnimationFrame(detectGaze)
 
       const now = performance.now()
 
-      const video = webcamRef.current?.video
+      const video = videoRef.current
       if (!landmarker || !detector || !video || video.readyState !== 4) return
 
       try {
@@ -181,7 +153,6 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
               direction: currentFocus !== 'CENTER' ? currentFocus : 'CENTER',
             })
 
-            updateUiLogs(currentFocus, type, pitch, yaw, roll, gaze)
             lastLoggedStateRef.current = currentFocus
             console.warn(`상태 변경: ${lastLoggedStateRef.current} -> ${currentFocus}`)
           }
@@ -212,12 +183,10 @@ export function useVisionAnalysis({ cameraOn, phase, basePose, canvasRef }: UseV
         handleSendBatch(blinkCountRef.current)
       }
     }
-  }, [landmarker, detector, cameraOn, phase, basePose, handleSendBatch])
+  }, [landmarker, detector, cameraOn, phase, basePose, handleSendBatch, videoRef])
 
   return {
-    uiLogs,
     realtimeStats,
-    webcamRef,
     landmarker,
   }
 }

@@ -1,29 +1,25 @@
-'use client'
+import { ProcessBar } from '@/featured/interview/components/interview/ProcessBar'
+import { QuestionBanner } from '@/featured/interview/components/interview/QuestionBanner'
+import { VideoArea } from '@/featured/interview/components/interview/VideoArea'
+import { TimerWidget } from '@/featured/interview/components/interview/TimerWidget'
+import { FinishedOverlay } from '@/featured/interview/components/interview/FinishedOverlay'
+import { ControlBar } from '@/featured/interview/components/interview/ControlBar'
+import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
-import { InterviewTopBar } from '@/featured/interview/components/InterviewTopBar'
-import { QuestionBanner } from '@/featured/interview/components/QuestionBanner'
-import { VideoArea } from '@/featured/interview/components/VideoArea'
-import { TimerOverlay } from '@/featured/interview/components/TimerOverlay'
-import { ReadyOverlay } from '@/featured/interview/components/ReadyOverlay'
-import { FinishedOverlay } from '@/featured/interview/components/FinishedOverlay'
-import { ControlBar } from '@/featured/interview/components/ControlBar'
-import { EndDialog } from '@/featured/interview/components/EndDialog'
-import { useInterviewSession } from '@/featured/interview/hooks/useInterviewSession'
-import { InterviewSetupModal } from './InterviewSetupModal'
+interface InterviewPageProps {
+  session: ReturnType<typeof useInterview>
+}
 
-export function InterviewClient() {
-  const session = useInterviewSession()
-
+export function InterviewContainer({ session }: InterviewPageProps) {
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
-      <InterviewTopBar
+      <ProcessBar
         interviewTitle={session.interviewTitle}
         currentQuestion={session.currentQuestion}
         phase={session.phase}
         isActive={session.isActive}
         onEndClick={() => session.setShowEndDialog(true)}
       />
-
       <QuestionBanner
         currentQuestion={session.currentQuestion}
         isActive={session.isActive}
@@ -31,16 +27,15 @@ export function InterviewClient() {
         questionRevealed={session.questionRevealed}
         onTypingComplete={() => session.setQuestionRevealed(true)}
       />
-
       <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
         <VideoArea
           cameraOn={session.cameraOn}
           micOn={session.micOn}
           phase={session.phase}
           basePose={session.basePose}
+          stream={session.cameraStream}
         />
-
-        <TimerOverlay
+        <TimerWidget
           isActive={session.isActive}
           timeLeft={session.timeLeft}
           phase={session.phase}
@@ -48,12 +43,8 @@ export function InterviewClient() {
           onStartAnswering={session.startAnswering}
           onNext={session.handleNext}
         />
-
-        <ReadyOverlay phase={session.phase} onStart={session.startInterview} />
-
         <FinishedOverlay phase={session.phase} />
       </div>
-
       <ControlBar
         micOn={session.micOn}
         cameraOn={session.cameraOn}
@@ -64,14 +55,6 @@ export function InterviewClient() {
         onStartInterview={session.startInterview}
         onStartAnswering={session.startAnswering}
         onNext={session.handleNext}
-      />
-
-      <EndDialog open={session.showEndDialog} onOpenChange={session.setShowEndDialog} />
-
-      <InterviewSetupModal
-        open={session.showSetup}
-        onComplete={session.handleSetupComplete}
-        onCancel={session.handleSetupCancel}
       />
     </div>
   )

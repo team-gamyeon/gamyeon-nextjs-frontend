@@ -7,7 +7,7 @@ import { QUESTIONS } from '@/featured/interview/constants'
 import type { Phase } from '@/featured/interview/types'
 import Image from 'next/image'
 
-interface InterviewTopBarProps {
+interface TopBarProps {
   interviewTitle: string
   currentQuestion: number
   phase: Phase
@@ -15,13 +15,13 @@ interface InterviewTopBarProps {
   onEndClick: () => void
 }
 
-export function InterviewTopBar({
+export function ProcessBar({
   interviewTitle,
   currentQuestion,
   phase,
   isActive,
   onEndClick,
-}: InterviewTopBarProps) {
+}: TopBarProps) {
   return (
     <header className="relative z-20 flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-4 py-3 backdrop-blur">
       <div className="flex items-center gap-3">

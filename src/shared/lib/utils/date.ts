@@ -8,7 +8,7 @@ export const formatDateKorean = (dateObj: Date) => {
 }
 
 /**
- * Date 객체를 "YYYY.MM.DD" 포맷의 문자열로 변환합니다. (팀원분이 말씀하신 리포트용)
+ * Date 객체를 "YYYY.MM.DD" 포맷의 문자열로 변환합니다. 
  * @param dateObj 변환할 Date 객체
  * @returns 예: "2026.03.05"
  */

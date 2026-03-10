@@ -10,15 +10,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/shared/ui/dialog'
+import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
 interface EndDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  session: ReturnType<typeof useInterview>
 }
 
-export function EndDialog({ open, onOpenChange }: EndDialogProps) {
+export function EndDialogModal({ session }: EndDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={session.showEndDialog} onOpenChange={session.setShowEndDialog}>
       <DialogContent className="border-white/10 bg-slate-900 text-white">
         <DialogHeader>
           <DialogTitle>정말 면접을 중단하시겠습니까?</DialogTitle>
@@ -34,7 +34,7 @@ export function EndDialog({ open, onOpenChange }: EndDialogProps) {
           <Button
             variant="ghost"
             className="text-white/70 hover:bg-white/10 hover:text-white"
-            onClick={() => onOpenChange(false)}
+            onClick={() => session.setShowEndDialog(false)}
           >
             계속하기
           </Button>

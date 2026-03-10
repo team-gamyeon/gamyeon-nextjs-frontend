@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import { type StepStatus, type InterviewSetupConfig } from '@/featured/interview/types'
+import { type StepStatus } from '@/featured/interview/types'
 import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModalHandler'
 import { useMicModalHandler } from '@/featured/interview/hooks/useMicModalHandler'
 import { SetupSidebar } from '@/featured/interview/components/setup/SetupSidebar'
@@ -13,14 +13,13 @@ import { TitleStep } from '@/featured/interview/components/setup/TitleStep'
 import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
 import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
 import { MicStep } from '@/featured/interview/components/setup/MicStep'
+import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
 interface Props {
-  open: boolean
-  onComplete: (config: InterviewSetupConfig) => void
-  onCancel: () => void
+  session: ReturnType<typeof useInterview>
 }
 
-export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
+export function InterviewSetupModal({ session }: Props) {
   const [statuses, setStatuses] = useState<StepStatus[]>([
     'active',
     'pending',
@@ -124,9 +123,9 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
 
   return (
     <Dialog
-      open={open}
+      open={session.showSetup}
       onOpenChange={(isOpen) => {
-        if (!isOpen) onCancel()
+        if (!isOpen) session.handleSetupCancel()
       }}
     >
       <DialogContent
@@ -153,7 +152,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
               </AnimatePresence>
             </div>
             <div className="border-border/50 flex items-center justify-between border-t px-8 py-4">
-              <Button variant="ghost" size="sm" onClick={onCancel}>
+              <Button variant="ghost" size="sm" onClick={session.handleSetupCancel}>
                 취소
               </Button>
               <Button
@@ -163,7 +162,7 @@ export function InterviewSetupModal({ open, onComplete, onCancel }: Props) {
                     console.error('스트림이 아직 준비되지 않았습니다.')
                     return
                   }
-                  onComplete({
+                  session.handleSetupComplete({
                     title: title.trim() || '모의 면접',
                     basePose: camera.basePose,
                     stream: camera.cameraStream,

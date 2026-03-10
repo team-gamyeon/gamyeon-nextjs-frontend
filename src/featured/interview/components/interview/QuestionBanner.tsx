@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
-import { TypingText } from '@/featured/interview/components/TypingText'
+import { TypingText } from '@/featured/interview/components/interview/TypingText'
 import { QUESTIONS } from '@/featured/interview/constants'
 
 interface QuestionBannerProps {

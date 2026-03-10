@@ -102,15 +102,17 @@ export function useInterview() {
   const isActive = phase === 'thinking' || phase === 'answering'
 
   // 면접이 끝나는 즉시 리트림 리소스 정리
-  useEffect(() => {
-    if (phase === 'finished' && cameraStream) {
-      cameraStream.getTracks().forEach((track) => {
-        track.stop()
-        console.log('면접 종료로 인한 트랙 종료')
-      })
-    }
-    setCameraStream(null)
-  }, [phase, cameraStream])
+  // useEffect(() => {
+  //   return () => {
+  //     if (cameraStream) {
+  //       cameraStream.getTracks().forEach((track) => {
+  //         track.stop()
+  //         console.log('면접 종료로 인한 트랙 종료')
+  //       })
+  //     }
+  //     setCameraStream(null)
+  //   }
+  // }, [cameraStream])
 
   return {
     currentQuestion,

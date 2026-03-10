@@ -20,24 +20,24 @@ export interface NextAction {
 export const MOCK_RADAR_DATA: RadarDataPoint[] = [
   {
     label: '답변 구성력',
-    value: 30,
+    value: 90,
     description:
       '결론부터 말하는 두괄식 구조를 갖추었는지, 그리고 이유와 사례를 논리적인 순서로 배치하여 전달했는지 평가합니다.',
   },
   {
     label: '시선 집중도',
-    value: 25,
+    value: 90,
     description:
       '면접 중 시선의 흔들림이나 이탈을 분석하여, 질문자(카메라)를 향한 시선의 유지 정도와 태도의 안정감을 측정합니다.',
   },
   {
     label: '키워드',
-    value: 72,
+    value: 90,
     description: '지원 직무와 관련된 핵심 어휘를 적절히 사용했는지와 답변 내 빈도수를 체크합니다.',
   },
   {
     label: '논리성',
-    value: 75,
+    value: 90,
     description:
       '답변의 전개 방식이 타당하며, 질문의 의도에 부합하는 결론을 도출하고 있는지 평가합니다.',
   },

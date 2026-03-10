@@ -12,6 +12,13 @@ interface ScoreSummaryCardProps {
   aiConfidence?: AiConfidenceLevel
 }
 
+function getScoreChartColor(score: number): string {
+  if (score >= 75) return '#22c55e' // green-500
+  if (score >= 50) return '#0d9488' // teal-600
+  if (score >= 25) return '#eab308' // yellow-500
+  return '#ef4444' // red-500
+}
+
 export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: ScoreSummaryCardProps) {
   return (
     <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-0 py-6 shadow-lg">
@@ -39,7 +46,7 @@ export function ScoreSummaryCard({ overallScore, aiConfidence = '높음' }: Scor
                 cy="100"
                 r="88"
                 fill="none"
-                stroke="oklch(0.546 0.245 262.881)"
+                stroke={getScoreChartColor(overallScore)}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 88}

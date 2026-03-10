@@ -31,7 +31,7 @@ export function QuickStartCard({
 }: QuickStartCardProps) {
   const CardContainer = (
     <Card
-      className={`group flex h-full flex-col py-4 transition-all ${
+      className={`group flex h-full flex-col transition-all ${
         isDisabled
           ? 'border-border/50 cursor-not-allowed bg-slate-50'
           : 'border-border/50 hover:border-primary/30 hover:shadow-primary/5 cursor-pointer hover:shadow-md'

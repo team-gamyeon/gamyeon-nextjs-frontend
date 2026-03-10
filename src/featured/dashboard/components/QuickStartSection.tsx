@@ -24,7 +24,8 @@ export function QuickStartSection() {
       <h2 className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
         빠른 시작
       </h2>
-      <div className="flex h-57.5 flex-row gap-4">
+      {/* h-57.5 를 min-h-[160px] 로 수정했습니다 */}
+      <div className="flex min-h-40 flex-row gap-4">
         <motion.div
           initial="hidden"
           animate="visible"

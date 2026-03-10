@@ -167,7 +167,7 @@ export function StatusSection() {
                   ))}
                 </div>
 
-                <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 pb-1 sm:gap-1.5">
+                <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 sm:gap-1.5">
                   {/* 4. 초기 SSR 렌더링 시에는 빈 회색 네모 56개를 보여주고, 마운트 후 데이터를 보여줌 */}
                   {!mounted || activityData.length === 0
                     ? Array.from({ length: 56 }).map((_, i) => (

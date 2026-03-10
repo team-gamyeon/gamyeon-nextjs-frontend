@@ -1,41 +1,13 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChartSpline, LayoutGrid, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ScoreTrendChart } from './ScoreTrendChart'
-import { MOCK_RECORDS } from '@/featured/history/types'
-
-function parseDate(str: string): Date {
-  const [y, m, d] = str.split('.').map(Number)
-  return new Date(y, m - 1, d)
-}
-
-function getMondayOf(date: Date): Date {
-  const d = new Date(date)
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
-  return d
-}
-
-function addDays(d: Date, n: number): Date {
-  const r = new Date(d)
-  r.setDate(r.getDate() + n)
-  return r
-}
-import { TrendingUp, LayoutGrid, Lightbulb } from 'lucide-react'
 import { useActivityData } from '@/featured/dashboard/hooks/useActivityData'
+import { useRandomTip } from '@/featured/dashboard/hooks/useRandomTip'
+import { useWeekNavigation } from '@/featured/dashboard/hooks/useWeekNavigation'
 import { formatDateKorean } from '@/shared/lib/utils/date'
-
-const INTERVIEW_TIPS = [
-  "답변 시 결론부터 말씀하시는 '두괄식' 화법은 면접관의 집중도를 높여줍니다.",
-  "예상치 못한 질문에는 당황하지 않고, '잠시 생각할 시간을 주시겠습니까?'라고 여유를 가져보세요.",
-  '자신의 경험을 STAR 기법(상황-과제-행동-결과)으로 구조화해서 답변해 보세요.',
-  '면접은 대화입니다. 외운 것을 암기하듯 말하기보다 자연스럽게 소통하는 것이 중요합니다.',
-  '마지막으로 하고 싶은 말이나 질문을 미리 준비해 가면 긍정적인 인상을 남길 수 있습니다.',
-]
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -47,47 +19,8 @@ const fadeUp = {
 }
 
 export function StatusSection() {
-  const [randomTip, setRandomTip] = useState(INTERVIEW_TIPS[0])
-  const [mounted, setMounted] = useState(false)
-
-  // 주간 네비게이션 상태
-  const sessions = useMemo(() => {
-    return MOCK_RECORDS.filter((r) => r.status === 'completed' && r.score !== null)
-      .map((r) => ({ ...r, dateObj: parseDate(r.date) }))
-      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
-  }, [])
-
-  const baseMonday = useMemo(
-    () =>
-      sessions.length > 0
-        ? getMondayOf(sessions[sessions.length - 1].dateObj)
-        : getMondayOf(new Date()),
-    [sessions],
-  )
-
-  const [weekOffset, setWeekOffset] = useState(0)
-
-  const weekStart = useMemo(() => addDays(baseMonday, weekOffset * 7), [baseMonday, weekOffset])
-  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart])
-
-  const todayMonday = useMemo(() => getMondayOf(new Date()), [])
-
-  const canPrev = true
-  const canNext = weekStart < todayMonday
-
-  const fmt = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`
-  const weekLabel = `${fmt(weekStart)} ~ ${fmt(weekEnd)}`
-
-  // 2. 랜덤 잔디 데이터를 담을 빈 상태(State) 생성
-  const [activityData, setActivityData] = useState<ActivityDay[]>([])
-  const [tipMounted, setTipMounted] = useState(false)
-
-  useEffect(() => {
-    setTipMounted(true)
-    setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
-  }, [])
-
-  // 커스텀 훅 사용
+  const { tip } = useRandomTip()
+  const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation()
   const { mounted, activityData, getLevelColor } = useActivityData()
 
   return (
@@ -106,9 +39,7 @@ export function StatusSection() {
               <h3 className="text-sm font-semibold">오늘의 면접 팁</h3>
             </div>
             <div className="flex flex-1 items-center">
-              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">
-                {tipMounted ? randomTip : INTERVIEW_TIPS[0]}
-              </p>
+              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">{tip}</p>
             </div>
           </CardContent>
         </Card>

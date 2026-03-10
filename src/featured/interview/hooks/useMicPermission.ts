@@ -1,15 +1,20 @@
 import { useState, useRef, useEffect } from 'react'
 import { type PermStatus } from '@/featured/interview/types'
 
-interface useMicModalHandlerReturn {
+export interface UseMicPermissionReturn {
   micStatus: PermStatus
   setMicStatus: React.Dispatch<React.SetStateAction<PermStatus>>
+  // VuMeter에 전달할 실시간 음량 (0~1)
   audioLevel: number
+  // 녹음 훅에서 사용할 마이크 스트림 ref
+  micStreamRef: React.MutableRefObject<MediaStream | null>
+  // 브라우저 마이크 권한 요청 및 AudioContext·AnalyserNode 초기화
   requestMic: () => Promise<void>
-  confirmMic: () => void
+  // 마이크 스트림·오디오 컨텍스트 정리
+  cleanupMic: () => void
 }
 
-export function useMicModalHandler(): useMicModalHandlerReturn {
+export function useMicPermission(): UseMicPermissionReturn {
   const [micStatus, setMicStatus] = useState<PermStatus>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
 
@@ -18,7 +23,7 @@ export function useMicModalHandler(): useMicModalHandlerReturn {
   const micStreamRef = useRef<MediaStream | null>(null)
   const levelIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // 마이크 허용 후 오디오 레벨 폴링
+  // 마이크 허용 후 오디오 레벨 폴링 (80ms 간격)
   useEffect(() => {
     if (micStatus !== 'granted') return
     levelIntervalRef.current = setInterval(() => {
@@ -42,7 +47,6 @@ export function useMicModalHandler(): useMicModalHandlerReturn {
     }
   }, [])
 
-  // 마이크 권한 요청 및 AudioContext·AnalyserNode 초기화
   const requestMic = async () => {
     setMicStatus('requesting')
     try {
@@ -60,8 +64,7 @@ export function useMicModalHandler(): useMicModalHandlerReturn {
     }
   }
 
-  // 마이크 설정 확인 후 오디오 리소스 정리
-  const confirmMic = () => {
+  const cleanupMic = () => {
     if (levelIntervalRef.current) clearInterval(levelIntervalRef.current)
     audioCtxRef.current?.close()
     audioCtxRef.current = null
@@ -74,7 +77,8 @@ export function useMicModalHandler(): useMicModalHandlerReturn {
     micStatus,
     setMicStatus,
     audioLevel,
+    micStreamRef,
     requestMic,
-    confirmMic,
+    cleanupMic,
   }
 }

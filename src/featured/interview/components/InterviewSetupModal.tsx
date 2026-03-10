@@ -7,7 +7,8 @@ import { Button } from '@/shared/ui/button'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
 import { type StepStatus } from '@/featured/interview/types'
 import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModalHandler'
-import { useMicModalHandler } from '@/featured/interview/hooks/useMicModalHandler'
+import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
+import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
 import { SetupSidebar } from '@/featured/interview/components/setup/SetupSidebar'
 import { TitleStep } from '@/featured/interview/components/setup/TitleStep'
 import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
@@ -32,7 +33,8 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   const [selfIntro, setSelfIntro] = useState<File | null>(null)
 
   const camera = useCameraModalHandler()
-  const mic = useMicModalHandler()
+  const micPerm = useMicPermission()
+  const micRec = useMicRecorder(micPerm.micStreamRef)
 
   const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
   const doneCount = statuses.filter((s) => s === 'done').length
@@ -53,7 +55,8 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   }
 
   const handleMicConfirm = () => {
-    mic.confirmMic()
+    micPerm.cleanupMic()
+    micRec.cleanupRecorder()
     completeStep(4)
   }
 
@@ -100,12 +103,19 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
       case 4:
         return (
           <MicStep
-            micStatus={mic.micStatus}
-            audioLevel={mic.audioLevel}
-            onRequest={mic.requestMic}
+            micStatus={micPerm.micStatus}
+            audioLevel={micPerm.audioLevel}
+            onRequest={micPerm.requestMic}
             onConfirm={handleMicConfirm}
-            onRetry={() => mic.setMicStatus('idle')}
+            onRetry={() => micPerm.setMicStatus('idle')}
             onSkip={() => completeStep(4)}
+            recordingStatus={micRec.recordingStatus}
+            isPlaying={micRec.isPlaying}
+            recordedDuration={micRec.recordedDuration}
+            playbackProgress={micRec.playbackProgress}
+            onStartRecording={micRec.startRecording}
+            onStopRecording={micRec.stopRecording}
+            onPlayRecording={micRec.playRecording}
           />
         )
       default:

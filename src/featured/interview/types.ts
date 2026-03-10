@@ -2,6 +2,7 @@ export type Phase = 'ready' | 'thinking' | 'answering' | 'transition' | 'finishe
 
 export type StepStatus = 'pending' | 'active' | 'done'
 export type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
+export type RecordingStatus = 'idle' | 'recording' | 'recorded'
 
 export interface InterviewSetupConfig {
   title: string

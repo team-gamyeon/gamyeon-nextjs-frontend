@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BrainCircuit } from 'lucide-react'
+import Image from 'next/image'
 
 export function Footer() {
   return (
@@ -7,11 +8,14 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-                <BrainCircuit className="text-primary-foreground h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold">InterviewAI</span>
+            <Link href="/dashboard" className="flex items-center">
+              <Image
+                src="/images/Gamyeon_Logo.png"
+                alt="Gamyeon logo"
+                width={1024}
+                height={768}
+                style={{ height: '32px', width: 'auto' }}
+              />
             </Link>
             <p className="text-muted-foreground text-sm">
               AI 기반 면접 시뮬레이터로

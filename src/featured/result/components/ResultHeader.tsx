@@ -29,18 +29,17 @@ export function ResultHeader() {
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
         <Link href="/dashboard" className="flex items-center">
           <Image
-            src="/images/Gamyeon_Logo.svg"
+            src="/images/Gamyeon_Logo.png"
             alt="Gamyeon logo"
             width={1024}
             height={768}
             style={{ height: '32px', width: 'auto' }}
           />
-          <span className="text-primary text-lg font-bold tracking-tight">amyeon</span>
         </Link>
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <button className="ring-primary/40 flex items-center rounded-full outline-none transition hover:ring-2">
+            <button className="ring-primary/40 flex items-center rounded-full transition outline-none hover:ring-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                   {initials}

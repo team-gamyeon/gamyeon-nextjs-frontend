@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
-import { TrendingUp, BarChart3, Lightbulb } from 'lucide-react'
+import { TrendingUp, LayoutGrid, Lightbulb } from 'lucide-react'
 
 const INTERVIEW_TIPS = [
   "답변 시 결론부터 말씀하시는 '두괄식' 화법은 면접관의 집중도를 높여줍니다.",
@@ -25,32 +25,62 @@ const fadeUp = {
 export function StatusSection() {
   const [randomTip, setRandomTip] = useState(INTERVIEW_TIPS[0])
   const [mounted, setMounted] = useState(false)
-  const [contributionData, setContributionData] = useState<Array<{ date: string; count: number }>>(
-    Array(28).fill({ date: '', count: 0 }),
-  )
 
   useEffect(() => {
     setMounted(true)
     setRandomTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
+  }, [])
 
-    // 최근 4주(28일) 간의 잔디 그래프용 Mock 데이터 생성
+  // --- [Card 3: 8주 잔디(초록색) 데이터 로직] ---
+  const activityData = useMemo(() => {
     const data = []
     const today = new Date()
-    // 28일치 임의의 패턴
-    const mockCounts = [
-      0, 1, 0, 0, 2, 4, 0, 0, 5, 1, 0, 0, 0, 3, 0, 1, 2, 0, 0, 0, 6, 0, 1, 0, 0, 2, 0, 0,
-    ]
+    today.setHours(0, 0, 0, 0)
 
-    for (let i = 27; i >= 0; i--) {
-      const d = new Date(today)
-      d.setDate(today.getDate() - i)
+    // 월요일(0) 시작 ~ 일요일(6) 끝을 위한 보정
+    const currentDayOfWeek = today.getDay()
+    const mappedDay = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
+
+    const daysToSunday = 6 - mappedDay
+    const endDate = new Date(today)
+    endDate.setDate(today.getDate() + daysToSunday)
+
+    for (let i = 55; i >= 0; i--) {
+      const currentDate = new Date(endDate)
+      currentDate.setDate(endDate.getDate() - i)
+      currentDate.setHours(0, 0, 0, 0)
+
+      let count = 0
+      if (currentDate <= today) {
+        const rand = Math.random()
+        if (rand > 0.6 && rand <= 0.85) count = Math.floor(Math.random() * 2) + 1
+        else if (rand > 0.85 && rand <= 0.95) count = Math.floor(Math.random() * 2) + 3
+        else if (rand > 0.95) count = Math.floor(Math.random() * 3) + 5
+      }
+
       data.push({
-        date: d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
-        count: mockCounts[27 - i],
+        dateObj: currentDate,
+        count: count,
       })
     }
-    setContributionData(data)
+    return data
   }, [])
+
+  const getLevelColor = (count: number, dateObj: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (dateObj > today) return 'bg-transparent' // 미래 날짜
+    if (count === 0) return 'bg-slate-100' // 활동 없음
+    if (count <= 2) return 'bg-green-300' // 적음
+    if (count <= 4) return 'bg-green-500' // 보통
+    return 'bg-green-700' // 많음
+  }
+
+  const formatDate = (dateObj: Date) => {
+    return `${dateObj.getFullYear()}년 ${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일`
+  }
+  // --- [Card 3 로직 끝] ---
 
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
@@ -58,8 +88,8 @@ export function StatusSection() {
         나의 현황
       </h2>
       <div className="grid gap-4 sm:grid-cols-3">
-        {/* Card 1: 오늘의 면접 팁 (유지) */}
-        <Card className="border-border/50 flex min-h-[160px] flex-col">
+        {/* Card 1: 오늘의 면접 팁 */}
+        <Card className="border-border/50 flex h-[230px] flex-col">
           <CardContent className="flex h-full flex-col justify-between p-5">
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-50">
@@ -68,15 +98,15 @@ export function StatusSection() {
               <h3 className="text-sm font-semibold">오늘의 면접 팁</h3>
             </div>
             <div className="flex flex-1 items-center">
-              <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
+              <p className="text-muted-foreground line-clamp-4 text-sm leading-relaxed">
                 {mounted ? randomTip : INTERVIEW_TIPS[0]}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 2: 최근 점수 추이 (승일님 ui추가 예정) */}
-        <Card className="border-border/50 flex min-h-[160px] flex-col">
+        {/* Card 2: 최근 점수 추이 */}
+        <Card className="border-border/50 flex h-[230px] flex-col">
           <CardContent className="flex h-full flex-col justify-between p-5">
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
@@ -84,41 +114,85 @@ export function StatusSection() {
               </div>
               <h3 className="text-sm font-semibold">최근 점수 추이</h3>
             </div>
-            {/* 승일님이 차트를 넣으실 빈 공간 */}
             <div className="mt-2 flex w-full flex-1 items-center justify-center">
               <span className="text-muted-foreground/50 text-sm">차트 영역</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 3: 면접 활동 (날짜별) */}
-        <Card className="border-border/50 flex min-h-[160px] flex-col">
-          <CardContent className="flex h-full flex-col justify-between p-5">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
+        {/* Card 3: 면접 활동 (깃허브 스타일 잔디 UI) */}
+        <Card className="border-border/50 relative flex h-[230px] flex-col overflow-visible">
+          <CardContent className="flex h-full flex-col p-5">
+            {/* 타이틀 영역 & 그라데이션 범례(Legend) */}
+            <div className="flex w-full shrink-0 items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                  <LayoutGrid className="h-5 w-5 text-green-600" />
+                </div>
+                <h3 className="text-sm font-semibold">면접 활동 (최근 8주)</h3>
               </div>
-              <h3 className="text-sm font-semibold">면접 활동 (날짜별)</h3>
-            </div>
-            <div className="mt-2 flex flex-1 items-center justify-center">
-              <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-                {contributionData.map((d, i) => (
-                  <div
-                    key={i}
-                    title={mounted && d.date ? `${d.date}: 면접 ${d.count}회` : undefined}
-                    className={`h-3 w-3 cursor-default rounded-sm transition-colors sm:h-3.5 sm:w-3.5 ${
-                      d.count === 0
-                        ? 'bg-slate-100'
-                        : d.count <= 2
-                          ? 'bg-emerald-200'
-                          : d.count <= 4
-                            ? 'bg-emerald-400'
-                            : 'bg-emerald-600'
-                    }`}
-                  />
-                ))}
+
+              {/* Less - 그라데이션 - More 범례 */}
+              <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-medium">
+                <span>Less</span>
+                <div className="h-2.5 w-14 rounded-[3px] bg-gradient-to-r from-slate-100 via-green-400 to-green-700"></div>
+                <span>More</span>
               </div>
             </div>
+
+            {/* --- X축, Y축 + 전체 그리드 영역 --- */}
+            <div className="mt-4 flex min-h-0 w-full flex-1 flex-col">
+              {/* X축 (Week1 ~ Week8) */}
+              <div className="mb-1 flex shrink-0 items-end gap-1 sm:gap-1.5">
+                <div className="w-6 shrink-0"></div> {/* Y축 공간 확보 */}
+                <div className="text-muted-foreground grid w-full grid-cols-8 gap-1 text-center text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
+                  {['Week1', 'Week2', 'Week3', 'Week4', 'Week5', 'Week6', 'Week7', 'Week8'].map(
+                    (week, i) => (
+                      <div key={i} className="truncate">
+                        {week}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {/* Y축 + 실제 잔디 그래프 */}
+              <div className="flex min-h-0 flex-1 items-stretch gap-1 sm:gap-1.5">
+                {/* Y축 (Mon ~ Sun 전체 표시) */}
+                <div className="text-muted-foreground grid w-6 shrink-0 grid-rows-7 gap-1 text-right text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                    <div key={day} className="flex h-full items-center justify-end">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 잔디(초록색) 그리드 - 7행 8열 */}
+                <div className="grid h-full min-h-0 w-full grid-flow-col grid-rows-7 gap-1 pb-1 sm:gap-1.5">
+                  {activityData.map((item, index) => (
+                    // group 속성을 추가하여 hover 상태 제어
+                    <div key={index} className="group relative h-full w-full">
+                      {/* 잔디 블록 */}
+                      <div
+                        className={`h-full w-full cursor-default rounded-[3px] transition-colors duration-200 ${getLevelColor(item.count, item.dateObj)}`}
+                      />
+
+                      {/* 커스텀 툴팁 (가장자리 둥글게, 화살표 포함) */}
+                      {item.dateObj <= new Date() && (
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 w-max -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
+                            {formatDate(item.dateObj)}: 면접 {item.count}회
+                          </div>
+                          {/* 툴팁 아래 뾰족한 화살표 부분 */}
+                          <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* --- 영역 끝 --- */}
           </CardContent>
         </Card>
       </div>

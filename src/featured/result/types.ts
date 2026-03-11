@@ -4,11 +4,20 @@ export interface RadarDataPoint {
   description: string
 }
 
+// export interface FeedbackItem {
+//   question: string
+//   score: number
+//   feedback: string
+//   tags: string[]
+//   videoUrl?: string
+// }
+
 export interface FeedbackItem {
   question: string
+  answer_summary: string // 답변 요약 추가
   score: number
   feedback: string
-  tags: string[]
+  feedback_badges: string[] //tags -> feedback_badges로 변경
   videoUrl?: string
 }
 
@@ -51,34 +60,42 @@ export const MOCK_RADAR_DATA: RadarDataPoint[] = [
 export const MOCK_FEEDBACKS: FeedbackItem[] = [
   {
     question: '자기소개를 부탁드립니다.',
+    answer_summary:
+      '프론트엔드 개발자로서의 기술적 강점과 협업 능력을 중심으로 1분간 답변을 진행했습니다.',
     score: 85,
     feedback:
-      '핵심 역량을 잘 정리하여 전달했습니다. 지원 동기와 연결하여 더 구체적으로 말씀하시면 좋겠습니다.',
-    tags: ['좋은 구조', '동기 보완 필요'],
+      '핵심 역량을 잘 정리하여 전달했습니다. 지원 동기와 연결하여 본인의 성장이 회사에 어떤 기여를 할 수 있을지 더 구체적으로 말씀하시면 완벽할 것 같습니다.',
+    feedback_badges: ['좋은 구조', '동기 보완 필요'],
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
     question: '가장 어려웠던 기술적 도전은?',
+    answer_summary:
+      'React 프로젝트 중 성능 최적화 과정에서 발생한 메모리 누수 문제를 해결한 경험을 설명했습니다.',
     score: 72,
     feedback:
-      '문제 상황 설명은 잘했으나, 해결 과정을 STAR 기법으로 구조화하면 더 설득력이 높아집니다.',
-    tags: ['구체적 사례', 'STAR 기법 활용 권장'],
+      '문제 상황 설명은 매우 구체적이어서 좋았습니다. 다만, 해결 과정을 STAR 기법(상황-과제-행동-결과)으로 더 명확히 구분하여 구조화하면 설득력이 더욱 높아집니다.',
+    feedback_badges: ['구체적 사례', 'STAR 기법 활용 권장'],
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
     question: '팀 내 의견 충돌 대처 방법은?',
+    answer_summary:
+      '코드 리뷰 중 발생한 의견 차이를 데이터 기반의 근거 제시를 통해 조율했던 경험을 언급했습니다.',
     score: 68,
     feedback:
-      '협업 경험이 부족한 느낌입니다. 구체적인 갈등 사례와 본인의 역할을 더 명확히 설명해주세요.',
-    tags: ['사례 부족', '역할 명확화 필요'],
+      '상황 설명에 비해 본인이 구체적으로 어떤 액션을 취했는지에 대한 설명이 다소 부족합니다. 본인의 소통 역량이 드러나는 행동을 더 강조해보세요.',
+    feedback_badges: ['사례 부족', '역할 명확화 필요'],
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
     question: '5년 후 커리어 목표는?',
+    answer_summary:
+      '전문적인 시니어 개발자로 거듭나 팀의 기술적 의사결정을 주도하고 싶다는 포부를 밝혔습니다.',
     score: 78,
     feedback:
-      '비전이 명확하고 현실적입니다. 회사의 성장과 연결 지으면 더 좋은 인상을 줄 수 있습니다.',
-    tags: ['명확한 비전', '회사 연계 보완'],
+      '개인적인 성장에 대한 비전이 매우 명확합니다. 여기에 더해 회사의 비즈니스 방향성과 본인의 성장을 결합하여 시너지를 낼 수 있음을 보여주면 더욱 매력적입니다.',
+    feedback_badges: ['명확한 비전', '회사 연계 보완'],
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
 ]

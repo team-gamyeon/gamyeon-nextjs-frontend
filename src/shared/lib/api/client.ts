@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { ApiError, NetworkError, type RequestConfig } from './types'
+import { NetworkError, type RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
@@ -23,7 +23,9 @@ async function refreshOnce(): Promise<boolean> {
     method: 'POST',
     credentials: 'include',
   })
-  return res.ok
+  if (!res.ok) return false
+  const data = await res.json()
+  return data.success === true
 }
 
 /**
@@ -116,7 +118,7 @@ export async function clientFetch<T>(
   const refreshed = await attemptRefresh()
   if (!refreshed) {
     redirectToSignin()
-    throw new ApiError(401, '인증이 만료되었습니다. 다시 로그인해 주세요.', 'AUTH_EXPIRED')
+    return null
   }
 
   // ── refresh 성공 → 원래 요청 재시도 ──

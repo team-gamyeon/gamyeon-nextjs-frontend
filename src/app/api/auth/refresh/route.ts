@@ -24,13 +24,12 @@ export async function POST() {
       body: JSON.stringify({ refreshToken }),
     })
 
-    if (!res.ok) {
-      return NextResponse.json({ success: false }, { status: res.status })
-    }
-
     const data = await res.json()
     if (!data.success || !data.data?.accessToken) {
-      return NextResponse.json({ success: false }, { status: 401 })
+      return NextResponse.json(
+        { success: false, code: data.code, message: data.message },
+        { status: res.status },
+      )
     }
 
     const response = NextResponse.json({ success: true })

@@ -25,13 +25,12 @@ export async function proxy(request: NextRequest) {
       body: JSON.stringify({ refreshToken }),
     })
 
-    if (!res.ok) {
-      return NextResponse.redirect(new URL('/signin', request.url))
-    }
-
     const data = await res.json()
     if (!data.success || !data.data?.accessToken) {
-      return NextResponse.redirect(new URL('/signin', request.url))
+      const redirect = NextResponse.redirect(new URL('/signin', request.url))
+      redirect.cookies.delete('accessToken')
+      redirect.cookies.delete('refreshToken')
+      return redirect
     }
 
     const response = NextResponse.next()
@@ -55,7 +54,10 @@ export async function proxy(request: NextRequest) {
 
     return response
   } catch {
-    return NextResponse.redirect(new URL('/signin', request.url))
+    const redirect = NextResponse.redirect(new URL('/signin', request.url))
+    redirect.cookies.delete('accessToken')
+    redirect.cookies.delete('refreshToken')
+    return redirect
   }
 }
 

@@ -8,7 +8,7 @@ interface FailedCardProps {
 export function FailedCard({ record }: FailedCardProps) {
   return (
     <div className="flex h-full flex-col">
-      <div className="bg-gradient-to-br from-red-500 to-red-600 p-2 pb-5 text-white @[180px]:p-3 @[180px]:pb-6 @[220px]:p-4 @[220px]:pb-8 @[280px]:p-6 @[280px]:pb-10">
+      <div className="bg-linear-to-br from-rose-500 to-red-600 px-2 py-3.5 text-white @[180px]:px-3 @[180px]:py-4 @[220px]:px-4 @[220px]:py-6 @[280px]:px-6 @[280px]:py-8">
         <div className="flex items-center justify-center">
           <div className="rounded-full bg-white/20 p-2 @[180px]:p-2.5 @[220px]:p-3 @[280px]:p-4">
             <AlertTriangle className="h-6 w-6 @[180px]:h-8 @[180px]:w-8 @[220px]:h-10 @[220px]:w-10 @[280px]:h-12 @[280px]:w-12" />
@@ -30,11 +30,11 @@ export function FailedCard({ record }: FailedCardProps) {
           </div>
 
           <div className="rounded-md bg-red-50 p-1.5 @[180px]:p-2 @[220px]:rounded-lg @[220px]:p-2.5 @[280px]:p-3">
-            <p className="mb-0.5 text-[10px] font-semibold leading-tight text-red-900 @[220px]:text-xs @[280px]:text-sm">
+            <p className="mb-0.5 text-[10px] leading-tight font-semibold text-red-900 @[220px]:text-xs @[280px]:text-sm">
               리포트 발행 실패
             </p>
             <p className="line-clamp-2 text-[9px] leading-tight text-red-700 @[220px]:text-[10px] @[280px]:text-xs">
-              면접 데이터 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.
+              면접 데이터 처리 중 오류가 발생했습니다. <br></br> 관리자에게 문의해주세요.
             </p>
           </div>
         </div>

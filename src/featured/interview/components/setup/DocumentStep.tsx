@@ -9,7 +9,6 @@ interface DocumentStepProps {
   setPortfolio: (f: File | null) => void
   setSelfIntro: (f: File | null) => void
   onComplete: () => void
-  onSkip: () => void
 }
 
 const makeFileHandler =
@@ -25,7 +24,6 @@ export function DocumentStep({
   setPortfolio,
   setSelfIntro,
   onComplete,
-  onSkip,
 }: DocumentStepProps) {
   const hasAnyDoc = !!(resume || portfolio || selfIntro)
 
@@ -81,9 +79,6 @@ export function DocumentStep({
         <Button size="sm" disabled={!hasAnyDoc} className="gap-2" onClick={onComplete}>
           완료
           <ChevronRight className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onSkip}>
-          건너뛰기
         </Button>
       </div>
     </div>

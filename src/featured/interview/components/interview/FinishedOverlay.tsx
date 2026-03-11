@@ -18,7 +18,7 @@ export function FinishedOverlay({ phase }: FinishedOverlayProps) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-slate-950/70 backdrop-blur-sm"
         >
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">

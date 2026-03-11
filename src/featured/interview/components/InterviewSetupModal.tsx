@@ -82,7 +82,6 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             setPortfolio={setPortfolio}
             setSelfIntro={setSelfIntro}
             onComplete={() => completeStep(2)}
-            onSkip={() => completeStep(2)}
           />
         )
       case 3:

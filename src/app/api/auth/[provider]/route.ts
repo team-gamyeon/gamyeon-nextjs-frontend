@@ -37,6 +37,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     const data = await res.json()
+
+    if (!data.success) {
+      data.message = '로그인 인증에 실패했습니다.'
+    }
+
     const response = NextResponse.json(data, { status: res.status })
 
     if (data.success && data.data) {

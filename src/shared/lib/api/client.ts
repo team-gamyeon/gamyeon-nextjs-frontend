@@ -29,7 +29,7 @@ async function refreshOnce(): Promise<boolean> {
 }
 
 /**
- * refresh를 최대 2번 시도.
+ * refresh 1회 시도.
  * 동시에 여러 요청이 401을 받아도 refresh는 1번만 실행됨.
  */
 async function attemptRefresh(): Promise<boolean> {
@@ -37,17 +37,9 @@ async function attemptRefresh(): Promise<boolean> {
 
   isRefreshing = true
   try {
-    // 1차 refresh
-    const first = await refreshOnce()
-    if (first) {
-      resolveQueue(true)
-      return true
-    }
-
-    // 2차 refresh (1차 실패 시)
-    const second = await refreshOnce()
-    resolveQueue(second)
-    return second
+    const success = await refreshOnce()
+    resolveQueue(success)
+    return success
   } catch {
     resolveQueue(false)
     return false

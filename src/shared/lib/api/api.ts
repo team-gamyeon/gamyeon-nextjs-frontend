@@ -23,14 +23,14 @@ function requestWithBody<T>(
 
 /**
  * 클라이언트 컴포넌트 전용 API 인터페이스.
- * 에러 발생 시 throw — 호출 측에서 try/catch 또는 safeApi 사용.
+ * 에러 발생 시 throw — 호출 측에서 try/catch 사용.
  *
  * @example
- * const data = await api.get<User[]>('/users')
- * await api.post('/login', { email, password })
- * await api.get('/users', { silent: true })  // toast 비활성화
+ * const data = await clientApi.get<User[]>('/users')
+ * await clientApi.post('/login', { email, password })
+ * await clientApi.get('/users', { silent: true })  // toast 비활성화
  */
-export const api = {
+export const clientApi = {
   get: <T>(endpoint: string, config?: RequestConfig) =>
     requestWithoutBody<T>('GET', endpoint, config),
 

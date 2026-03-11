@@ -108,7 +108,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                       </p>
                     </div>
 
-                    {/* 피드백: 기존 Amber(노란색) 계열 유지 */}
+                    {/* 피드백 */}
                     <div className="flex items-start gap-3.5">
                       <div className="mt-0.5 rounded-full bg-amber-50 p-1.5">
                         <Lightbulb className="h-4 w-4 text-amber-600" />

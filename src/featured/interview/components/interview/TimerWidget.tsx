@@ -1,29 +1,17 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/shared/ui/button'
-import { Mic, SkipForward, CheckCircle2 } from 'lucide-react'
 import { CircularTimer } from '@/featured/interview/components/interview/CircularTimer'
 import type { Phase } from '@/featured/interview/types'
-import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
+import { TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 
 interface TimerWidgetProps {
   isActive: boolean
   phase: Phase
   timeLeft: number
-  currentQuestion: number
-  onStartAnswering: () => void
-  onNext: () => void
 }
 
-export function TimerWidget({
-  isActive,
-  phase,
-  timeLeft,
-  currentQuestion,
-  onStartAnswering,
-  onNext,
-}: TimerWidgetProps) {
+export function TimerWidget({ isActive, phase, timeLeft }: TimerWidgetProps) {
   return (
     <AnimatePresence>
       {isActive && (
@@ -41,32 +29,6 @@ export function TimerWidget({
               mode={phase as 'thinking' | 'answering'}
               size={120}
             />
-            {phase === 'thinking' && (
-              <Button size="sm" className="w-full gap-1.5 text-xs" onClick={onStartAnswering}>
-                <Mic className="h-3.5 w-3.5" />
-                답변 시작
-              </Button>
-            )}
-            {phase === 'answering' && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full gap-1.5 text-xs"
-                onClick={onNext}
-              >
-                {currentQuestion < QUESTIONS.length - 1 ? (
-                  <>
-                    <SkipForward className="h-3.5 w-3.5" />
-                    다음 질문
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    완료
-                  </>
-                )}
-              </Button>
-            )}
           </div>
         </motion.div>
       )}

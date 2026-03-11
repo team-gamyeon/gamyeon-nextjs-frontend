@@ -39,9 +39,6 @@ export function InterviewContainer({ session }: InterviewPageProps) {
           isActive={session.isActive}
           timeLeft={session.timeLeft}
           phase={session.phase}
-          currentQuestion={session.currentQuestion}
-          onStartAnswering={session.startAnswering}
-          onNext={session.handleNext}
         />
         <FinishedOverlay phase={session.phase} />
       </div>

@@ -116,67 +116,7 @@ export function SigninForm() {
               에 동의하는 것으로 간주됩니다.
             </p>
 
-            {/* <div className="relative">
-              <Separator />
-              <span className="bg-card text-muted-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-xs">
-                또는 이메일로 로그인
-              </span>
-            </div>
-
-            <form onSubmit={handleSignin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">이메일</Label>
-                <div className="relative">
-                  <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    className="pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">비밀번호</Label>
-                  <Link href="#" className="text-primary text-xs hover:underline">
-                    비밀번호 찾기
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="비밀번호를 입력하세요"
-                    className="pr-10 pl-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" size="lg">
-                로그인
-              </Button>
-            </form>
-
-            <p className="text-muted-foreground text-center text-sm">
-              아직 계정이 없으신가요?{' '}
-              <Link href="/signup" className="text-primary font-medium hover:underline">
-                회원가입
-              </Link>
-            </p> */}
+          
           </CardContent>
         </Card>
       </motion.div>

@@ -1,23 +1,94 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Separator } from '@/shared/ui/separator'
 import Image from 'next/image'
+import { useAuthStore } from '@/featured/auth/store'
+import type { OAuthLoginData } from '@/featured/auth/types'
+import type { ApiResponse } from '@/shared/lib/api/types'
+
+const GOOGLE_AUTH_URL = (() => {
+  const params = new URLSearchParams({
+    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+    redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI!,
+    response_type: process.env.NEXT_PUBLIC_GOOGLE_RESPONSE_TYPE!,
+    scope: process.env.NEXT_PUBLIC_GOOGLE_SCOPE!,
+    state: 'google',
+  })
+  return `${process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL}?${params.toString()}`
+})()
+
+const KAKAO_AUTH_URL = (() => {
+  const params = new URLSearchParams({
+    client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,
+    redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!,
+    response_type: process.env.NEXT_PUBLIC_KAKAO_RESPONSE_TYPE!,
+    state: 'kakao',
+  })
+  return `${process.env.NEXT_PUBLIC_KAKAO_AUTH_URL}?${params.toString()}`
+})()
 
 export function SigninForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { signin } = useAuthStore()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // 임시 로그인 핸들러 (백엔드 연동 전 UI 테스트용)
-  const handleMockLogin = (provider: 'kakao' | 'google') => {
-    // 실제 개발 시 이 부분을 next-auth의 signIn 함수로 교체하면 됩니다.
-    console.log(`${provider} 로그인 시도`)
+  useEffect(() => {
+    const code = searchParams.get('code')
+    const provider = searchParams.get('state')
+    if (!code || !provider) return
 
-    // 임시로 바로 대시보드로 이동시킵니다.
-    router.push('/dashboard')
+    const loginWithOAuth = async () => {
+      setIsLoading(true)
+      setErrorMessage(null)
+
+      try {
+        const res = await fetch(`/api/auth/${provider}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ authorizationCode: code }),
+        })
+
+        const json: ApiResponse<OAuthLoginData> = await res.json()
+
+        if (!json.success || !json.data) {
+          setErrorMessage(json.message ?? '로그인에 실패했습니다.')
+          setIsLoading(false)
+          return
+        }
+
+        signin(json.data.user, json.data.accessToken)
+        router.replace('/dashboard')
+      } catch {
+        setErrorMessage('서버 연결에 실패했습니다.')
+        setIsLoading(false)
+      }
+    }
+
+    loginWithOAuth()
+  }, [searchParams, signin, router])
+
+  const handleKakaoLogin = () => {
+    window.location.href = KAKAO_AUTH_URL
+  }
+
+  const handleGoogleLogin = () => {
+    window.location.href = GOOGLE_AUTH_URL
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground text-sm">로그인 처리 중...</p>
+      </div>
+    )
   }
 
   return (
@@ -54,12 +125,16 @@ export function SigninForm() {
           <Separator className="mx-6 w-auto!" />
 
           <CardContent className="space-y-4 pt-4">
+            {errorMessage && (
+              <p className="text-destructive text-center text-sm">{errorMessage}</p>
+            )}
+
             <div className="flex flex-col gap-2.5">
               {/* 카카오 로그인 버튼 */}
               <Button
                 type="button"
                 className="w-full cursor-pointer gap-2.5 bg-[#FEE500] py-6 font-medium text-[#3C1E1E] transition-colors hover:bg-[#F0D900] active:bg-[#E8CF00]"
-                onClick={() => handleMockLogin('kakao')}
+                onClick={handleKakaoLogin}
               >
                 <svg
                   className="h-5 w-5 shrink-0"
@@ -77,7 +152,7 @@ export function SigninForm() {
                 type="button"
                 variant="outline"
                 className="active:bg-muted/50 w-full cursor-pointer gap-2.5 py-6 transition-colors"
-                onClick={() => handleMockLogin('google')}
+                onClick={handleGoogleLogin}
               >
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path

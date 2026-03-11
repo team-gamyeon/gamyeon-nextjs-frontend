@@ -13,12 +13,12 @@ export function useSigninForm() {
 
   const handleSignin = (e: React.FormEvent) => {
     e.preventDefault()
-    signin()
+    signin({ email, nickname: '홍길동' }, 'mock-token')
     router.push('/dashboard')
   }
 
   const handleSocialSignin = () => {
-    signin()
+    signin({ email: 'mock@example.com', nickname: '홍길동' }, 'mock-token')
     router.push('/dashboard')
   }
 

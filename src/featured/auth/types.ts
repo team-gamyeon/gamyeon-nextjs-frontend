@@ -1,13 +1,18 @@
 export interface User {
-  name: string
+  id?: number
   email: string
+  nickname: string
+  name?: string
   avatar?: string
+  provider?: string
+  status?: string
 }
 
 export interface AuthState {
   user: User | null
+  accessToken: string | null
   isLoggedIn: boolean
-  signin: (user?: User) => void
+  signin: (user: User, accessToken: string) => void
   logout: () => void
 }
 
@@ -22,3 +27,12 @@ export interface SignupFormData {
   password: string
   confirmPassword: string
 }
+
+export interface OAuthLoginData {
+  accessToken: string
+  refreshToken: string
+  user: User
+}
+
+/** @deprecated use OAuthLoginData */
+export type GoogleLoginData = OAuthLoginData

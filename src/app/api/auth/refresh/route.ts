@@ -12,32 +12,41 @@ export async function POST() {
   try {
     const cookieStore = await cookies()
 
-    // TODO: 백엔드 refresh 엔드포인트 연동
-    // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-    //   method: 'POST',
-    //   headers: {
-    //     Cookie: cookieStore.toString(),
-    //   },
-    // })
-    //
-    // if (!res.ok) {
-    //   return NextResponse.json({ success: false }, { status: res.status })
-    // }
-    //
-    // // 백엔드가 내려준 새 쿠키를 클라이언트에 전달
-    // const setCookie = res.headers.get('set-cookie')
-    // const response = NextResponse.json({ success: true })
-    // if (setCookie) {
-    //   response.headers.set('set-cookie', setCookie)
-    // }
-    // return response
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
+    const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
+      method: 'POST',
+      headers: { Cookie: cookieStore.toString() },
+    })
 
-    void cookieStore // 사용 예정
+    if (!res.ok) {
+      return NextResponse.json({ success: false }, { status: res.status })
+    }
 
-    return NextResponse.json(
-      { success: false, message: 'refresh 엔드포인트 미구현' },
-      { status: 501 },
-    )
+    const data = await res.json()
+    if (!data.success || !data.data?.accessToken) {
+      return NextResponse.json({ success: false }, { status: 401 })
+    }
+
+    const response = NextResponse.json({ success: true })
+    const isProd = process.env.NODE_ENV === 'production'
+
+    response.cookies.set('accessToken', data.data.accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+    })
+
+    if (data.data.refreshToken) {
+      response.cookies.set('refreshToken', data.data.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        path: '/',
+      })
+    }
+
+    return response
   } catch {
     return NextResponse.json({ success: false }, { status: 500 })
   }

@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+const PUBLIC_PATHS = ['/', '/signin', '/terms', '/privacy']
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  const isPublic = PUBLIC_PATHS.some((path) => pathname === path)
+  if (isPublic) return NextResponse.next()
+
+  const accessToken = request.cookies.get('accessToken')?.value
+  if (accessToken) return NextResponse.next()
+
+  // accessToken 없으면 refreshToken으로 재발급 시도
+  const refreshToken = request.cookies.get('refreshToken')?.value
+  if (!refreshToken) {
+    return NextResponse.redirect(new URL('/signin', request.url))
+  }
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
+    const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
+      method: 'POST',
+      headers: { Cookie: `refreshToken=${refreshToken}` },
+    })
+
+    if (!res.ok) {
+      return NextResponse.redirect(new URL('/signin', request.url))
+    }
+
+    const data = await res.json()
+    if (!data.success || !data.data?.accessToken) {
+      return NextResponse.redirect(new URL('/signin', request.url))
+    }
+
+    const response = NextResponse.next()
+    const isProd = process.env.NODE_ENV === 'production'
+
+    response.cookies.set('accessToken', data.data.accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+    })
+
+    if (data.data.refreshToken) {
+      response.cookies.set('refreshToken', data.data.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        path: '/',
+      })
+    }
+
+    return response
+  } catch {
+    return NextResponse.redirect(new URL('/signin', request.url))
+  }
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images).*)'],
+}

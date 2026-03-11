@@ -19,7 +19,6 @@ interface MicStepProps {
   onRequest: () => void
   onConfirm: () => void
   onRetry: () => void
-  onSkip: () => void
   recordingStatus: RecordingStatus
   isPlaying: boolean
   recordedDuration: number
@@ -49,7 +48,6 @@ export function MicStep({
   onRequest,
   onConfirm,
   onRetry,
-  onSkip,
   recordingStatus,
   isPlaying,
   recordedDuration,
@@ -199,12 +197,9 @@ export function MicStep({
               설정 완료 및 마이크 테스트 시작
             </Button>
 
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center">
               <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onRetry}>
                 다시 시도
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onSkip}>
-                건너뛰기
               </Button>
             </div>
           </div>

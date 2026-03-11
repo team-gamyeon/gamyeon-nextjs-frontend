@@ -1,32 +1,34 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
-import { Button } from '@/shared/ui/button'
+import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import { type StepStatus } from '@/featured/interview/types'
-import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModalHandler'
-import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
-import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
+import { useCallback, useEffect, useState } from 'react'
+import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
+import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
+import { MicStep } from '@/featured/interview/components/setup/MicStep'
 import { SetupSidebar } from '@/featured/interview/components/setup/SetupSidebar'
 import { TitleStep } from '@/featured/interview/components/setup/TitleStep'
-import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
-import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
-import { MicStep } from '@/featured/interview/components/setup/MicStep'
+import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModalHandler'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
+import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
+import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
+import {
+  createInterview,
+  updateInterviewTitle,
+} from '@/featured/interview/services/interviewService'
+import { type StepStatus } from '@/featured/interview/types'
+import { Button } from '@/shared/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
 }
 
 export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
-  const [statuses, setStatuses] = useState<StepStatus[]>([
-    'active',
-    'pending',
-    'pending',
-    'pending',
-  ])
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+  const [currentStep, setCurrentStep] = useState(1)
+  const [maxReachedStep, setMaxReachedStep] = useState(1)
+  const [interviewId, setInterviewId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
   const [resume, setResume] = useState<File | null>(null)
   const [portfolio, setPortfolio] = useState<File | null>(null)
@@ -36,18 +38,73 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   const micPerm = useMicPermission()
   const micRec = useMicRecorder(micPerm.micStreamRef)
 
-  const currentStep = statuses.findIndex((s) => s === 'active') + 1 || 5
-  const doneCount = statuses.filter((s) => s === 'done').length
+  const { cleanupCamera } = camera
+  const { cleanupMic } = micPerm
+  const cleanupSetupDevices = useCallback(() => {
+    cleanupCamera()
+    cleanupMic()
+  }, [cleanupCamera, cleanupMic])
+
+  const handleCancel = useCallback(() => {
+    cleanupSetupDevices()
+    session.handleSetupCancel()
+  }, [cleanupSetupDevices, session])
+
+  useEffect(() => {
+    if (!session.showSetup) return
+
+    const handleHistoryBack = () => {
+      cleanupSetupDevices()
+    }
+
+    window.addEventListener('popstate', handleHistoryBack)
+    return () => {
+      window.removeEventListener('popstate', handleHistoryBack)
+    }
+  }, [cleanupSetupDevices, session.showSetup])
+
+  const statuses: StepStatus[] = [1, 2, 3, 4].map((step) => {
+    if (step === currentStep) return 'active'
+    if (completedSteps.has(step)) return 'done'
+    return 'pending'
+  })
+
+  const doneCount = completedSteps.size
   const allDone = doneCount === 4
 
   const completeStep = (step: number) => {
-    setStatuses((prev) => {
-      const next = [...prev] as StepStatus[]
-      next[step - 1] = 'done'
-      if (step < 4) next[step] = 'active'
+    const newCompleted = new Set([...completedSteps, step])
+    setCompletedSteps(newCompleted)
+    const nextStep = [1, 2, 3, 4].find((s) => !newCompleted.has(s))
+    const dest = nextStep ?? 5
+    setCurrentStep(dest)
+    if (dest > maxReachedStep) setMaxReachedStep(dest)
+  }
+
+  const resetStep = (step: number) => {
+    setCompletedSteps((prev) => {
+      const next = new Set(prev)
+      next.delete(step)
       return next
     })
   }
+
+  const navigateToStep = (step: number) => {
+    if (maxReachedStep >= 4 || completedSteps.has(step)) {
+      setCurrentStep(step)
+    }
+  }
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (completedSteps.has(1)) resetStep(1)
+  }
+
+  const handleDocumentChange =
+    (setter: (file: File | null) => void) => (file: File | null) => {
+      setter(file)
+      if (completedSteps.has(2)) resetStep(2)
+    }
 
   const handleCameraConfirm = () => {
     camera.confirmCamera()
@@ -55,9 +112,17 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   }
 
   const handleMicConfirm = () => {
-    micPerm.cleanupMic()
-    micRec.cleanupRecorder()
     completeStep(4)
+  }
+
+  const handleTitleConfirm = async () => {
+    if (interviewId) {
+      await updateInterviewTitle(interviewId, title)
+    } else {
+      const result = await createInterview(title)
+      if (result.data) setInterviewId(result.data.intvId)
+    }
+    completeStep(1)
   }
 
   const renderStep = () => {
@@ -66,10 +131,8 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
         return (
           <TitleStep
             title={title}
-            onChange={setTitle}
-            onConfirm={() => {
-              if (title.trim()) completeStep(1)
-            }}
+            onChange={handleTitleChange}
+            onConfirm={handleTitleConfirm}
           />
         )
       case 2:
@@ -78,9 +141,9 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             resume={resume}
             portfolio={portfolio}
             selfIntro={selfIntro}
-            setResume={setResume}
-            setPortfolio={setPortfolio}
-            setSelfIntro={setSelfIntro}
+            setResume={handleDocumentChange(setResume)}
+            setPortfolio={handleDocumentChange(setPortfolio)}
+            setSelfIntro={handleDocumentChange(setSelfIntro)}
             onComplete={() => completeStep(2)}
           />
         )
@@ -95,8 +158,6 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             faceDetected={camera.faceDetected}
             onRequest={camera.requestCamera}
             onConfirm={handleCameraConfirm}
-            onRetry={() => camera.setCameraStatus('idle')}
-            onSkip={() => completeStep(3)}
           />
         )
       case 4:
@@ -107,7 +168,6 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             onRequest={micPerm.requestMic}
             onConfirm={handleMicConfirm}
             onRetry={() => micPerm.setMicStatus('idle')}
-            onSkip={() => completeStep(4)}
             recordingStatus={micRec.recordingStatus}
             isPlaying={micRec.isPlaying}
             recordedDuration={micRec.recordedDuration}
@@ -123,8 +183,10 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
               <CheckCircle2 className="h-8 w-8 text-green-500" />
             </div>
-            <h3 className="text-lg font-bold">모든 설정이 완료되었습니다!</h3>
-            <p className="text-muted-foreground mt-1.5 text-sm">면접을 시작할 준비가 되었습니다.</p>
+            <h3 className="text-lg font-bold">모든 설정이 완료되었습니다.</h3>
+            <p className="text-muted-foreground mt-1.5 text-sm">
+              면접을 시작할 준비가 완료되었습니다.
+            </p>
           </div>
         )
     }
@@ -134,18 +196,23 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
     <Dialog
       open={session.showSetup}
       onOpenChange={(isOpen) => {
-        if (!isOpen) session.handleSetupCancel()
+        if (!isOpen) handleCancel()
       }}
     >
       <DialogContent
         showCloseButton={false}
         className="max-w-7xl min-w-4xl overflow-hidden p-0"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(event) => event.preventDefault()}
+        onEscapeKeyDown={(event) => event.preventDefault()}
       >
         <DialogTitle className="sr-only">면접 환경 설정</DialogTitle>
         <div className="flex min-h-155">
-          <SetupSidebar statuses={statuses} doneCount={doneCount} />
+          <SetupSidebar
+            statuses={statuses}
+            doneCount={doneCount}
+            onStepClick={navigateToStep}
+            freeNavigation={maxReachedStep >= 4}
+          />
           <div className="flex flex-1 flex-col">
             <div className="flex-1 overflow-y-auto px-8 py-8">
               <AnimatePresence mode="wait">
@@ -161,16 +228,17 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
               </AnimatePresence>
             </div>
             <div className="border-border/50 flex items-center justify-between border-t px-8 py-4">
-              <Button variant="ghost" size="sm" onClick={session.handleSetupCancel}>
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
                 취소
               </Button>
               <Button
-                disabled={!allDone || !camera.cameraStream}
+                disabled={!allDone || !camera.cameraStream || !title.trim() || !resume}
                 onClick={() => {
                   if (!camera.cameraStream) {
-                    console.error('스트림이 아직 준비되지 않았습니다.')
+                    console.error('카메라 스트림이 아직 준비되지 않았습니다.')
                     return
                   }
+
                   session.handleSetupComplete({
                     title: title.trim() || '모의 면접',
                     basePose: camera.basePose,

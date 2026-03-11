@@ -60,6 +60,12 @@ export interface GazeEvent {
   direction: FocusState
 }
 
+export interface CreateInterviewResponse {
+  intvId: number
+  title: string
+  status: string
+}
+
 export interface InterviewBatchPayload {
   meta: {
     interviewId: string

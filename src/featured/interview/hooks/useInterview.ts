@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Phase } from '@/featured/interview/types'
 import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
+import type { Phase } from '@/featured/interview/types'
 
 export function useInterview() {
   const router = useRouter()
@@ -23,6 +23,7 @@ export function useInterview() {
 
   const phaseRef = useRef(phase)
   const currentQuestionRef = useRef(currentQuestion)
+  const cameraStreamRef = useRef<MediaStream | null>(null)
 
   const isActive = phase === 'thinking' || phase === 'answering'
 
@@ -33,6 +34,24 @@ export function useInterview() {
   useEffect(() => {
     currentQuestionRef.current = currentQuestion
   }, [currentQuestion])
+
+  useEffect(() => {
+    cameraStreamRef.current = cameraStream
+  }, [cameraStream])
+
+  const cleanupInterviewMedia = useCallback(() => {
+    const stream = cameraStreamRef.current
+    if (!stream) return
+
+    stream.getTracks().forEach((track) => {
+      if (track.readyState === 'live') {
+        track.stop()
+      }
+    })
+
+    cameraStreamRef.current = null
+    setCameraStream(null)
+  }, [])
 
   const handleSetupComplete = (config: {
     title?: string
@@ -50,12 +69,14 @@ export function useInterview() {
   }
 
   const handleSetupCancel = () => {
+    cleanupInterviewMedia()
     router.push('/dashboard')
   }
 
   const handleNext = useCallback(() => {
-    const q = currentQuestionRef.current
-    if (q < QUESTIONS.length - 1) {
+    const questionIndex = currentQuestionRef.current
+
+    if (questionIndex < QUESTIONS.length - 1) {
       setPhase('transition')
       setTimeout(() => {
         setCurrentQuestion((prev) => prev + 1)
@@ -64,9 +85,10 @@ export function useInterview() {
         setPhase('thinking')
         setTimeLeft(TOTAL_THINK_TIME)
       }, 600)
-    } else {
-      setPhase('finished')
+      return
     }
+
+    setPhase('finished')
   }, [])
 
   useEffect(() => {
@@ -78,17 +100,35 @@ export function useInterview() {
           if (phaseRef.current === 'thinking') {
             setPhase('answering')
             return TOTAL_ANSWER_TIME
-          } else {
-            handleNext()
-            return 0
           }
+
+          handleNext()
+          return 0
         }
+
         return prev - 1
       })
     }, 1000)
 
     return () => clearInterval(interval)
   }, [phase, handleNext])
+
+  useEffect(() => {
+    const handlePageExit = () => {
+      cleanupInterviewMedia()
+    }
+
+    window.addEventListener('pagehide', handlePageExit)
+    window.addEventListener('beforeunload', handlePageExit)
+    window.addEventListener('popstate', handlePageExit)
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageExit)
+      window.removeEventListener('beforeunload', handlePageExit)
+      window.removeEventListener('popstate', handlePageExit)
+      cleanupInterviewMedia()
+    }
+  }, [cleanupInterviewMedia])
 
   const startInterview = () => {
     setTypingKey((prev) => prev + 1)
@@ -101,20 +141,6 @@ export function useInterview() {
     setPhase('answering')
     setTimeLeft(TOTAL_ANSWER_TIME)
   }
-
-  // 면접이 끝나는 즉시 스트림 리소스 정리
-  useEffect(() => {
-    return () => {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach((track) => {
-          if (track.readyState === 'live') {
-            track.stop()
-            console.log('면접 종료로 인한 스트림 트랙 종료')
-          }
-        })
-      }
-    }
-  }, [cameraStream])
 
   return {
     currentQuestion,
@@ -136,6 +162,7 @@ export function useInterview() {
     isActive,
     handleSetupComplete,
     handleSetupCancel,
+    cleanupInterviewMedia,
     handleNext,
     startInterview,
     startAnswering,

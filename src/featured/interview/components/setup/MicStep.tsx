@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import {
   Mic,
   ChevronRight,
@@ -19,7 +20,6 @@ interface MicStepProps {
   onRequest: () => void
   onConfirm: () => void
   onRetry: () => void
-  onSkip: () => void
   recordingStatus: RecordingStatus
   isPlaying: boolean
   recordedDuration: number
@@ -49,7 +49,6 @@ export function MicStep({
   onRequest,
   onConfirm,
   onRetry,
-  onSkip,
   recordingStatus,
   isPlaying,
   recordedDuration,
@@ -187,9 +186,24 @@ export function MicStep({
             <div className="space-y-1">
               <p className="font-bold">마이크 접근이 차단되었습니다.</p>
               <p className="text-xs leading-relaxed opacity-90">
-                주소창 왼쪽의 <b>설정</b> 아이콘을 클릭하여 마이크 권한을 <b>'허용'</b>으로 변경한
-                뒤 아래 버튼을 눌러주세요.
+                브라우저 주소창 왼쪽의 <b>🔒 또는 ⓘ 아이콘</b>을 클릭하여 마이크 권한을{' '}
+                <b>&apos;허용&apos;</b>으로 변경한 뒤 아래 버튼을 눌러주세요.
               </p>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border">
+            <div className="bg-muted/40 px-4 py-2.5 text-xs font-medium text-gray-600">
+              권한 설정 방법
+            </div>
+            <div className="relative aspect-video w-full bg-gray-100">
+              <Image
+                src="/images/permission_guide.png"
+                alt="브라우저 권한 설정 가이드 — 주소창 좌측 아이콘 클릭 후 마이크 허용"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
           </div>
 
@@ -199,12 +213,9 @@ export function MicStep({
               설정 완료 및 마이크 테스트 시작
             </Button>
 
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center">
               <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onRetry}>
                 다시 시도
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onSkip}>
-                건너뛰기
               </Button>
             </div>
           </div>

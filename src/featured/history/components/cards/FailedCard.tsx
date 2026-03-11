@@ -22,19 +22,12 @@ export function FailedCard({ record }: FailedCardProps) {
             <h3 className="mb-0.5 text-[11px] font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
               {record.position}
             </h3>
-            <p className="text-[9px] text-gray-500 @[180px]:text-[10px] @[220px]:text-xs">
-              {record.questionCount}개 질문
-            </p>
           </div>
 
-          <div className="space-y-1 py-1 @[180px]:space-y-1.5 @[220px]:space-y-2 @[220px]:py-1.5 @[280px]:py-2">
+          <div className="space-y-1 @[180px]:space-y-1 @[220px]:space-y-1.5 @[220px]:py-1 @[280px]:py-1.5">
             <div className="flex items-center gap-1 text-[10px] text-gray-600 @[180px]:gap-1.5 @[180px]:text-[11px] @[220px]:gap-2 @[220px]:text-xs @[280px]:text-sm">
               <Calendar className="h-2.5 w-2.5 shrink-0 text-blue-500 @[180px]:h-3 @[180px]:w-3 @[220px]:h-3.5 @[220px]:w-3.5 @[280px]:h-4 @[280px]:w-4" />
               <span>{record.date}</span>
-            </div>
-            <div className="flex items-center gap-1 text-[10px] text-gray-600 @[180px]:gap-1.5 @[180px]:text-[11px] @[220px]:gap-2 @[220px]:text-xs @[280px]:text-sm">
-              <Clock className="h-2.5 w-2.5 shrink-0 text-blue-500 @[180px]:h-3 @[180px]:w-3 @[220px]:h-3.5 @[220px]:w-3.5 @[280px]:h-4 @[280px]:w-4" />
-              <span>{record.duration}</span>
             </div>
           </div>
 

@@ -16,9 +16,9 @@ const fadeUp = {
 }
 
 const mockRecentHistory: RecentHistoryItem[] = [
-  { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25', diff: +8 },
-  { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22', diff: +3 },
-  { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18', diff: null },
+  { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25' },
+  { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22' },
+  { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18' },
 ]
 
 export interface RecentHistorySectionProps {
@@ -87,14 +87,6 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
                     <p className="truncate text-sm font-medium">{item.position}</p>
                     <p className="text-muted-foreground text-xs">{item.date}</p>
                   </div>
-                  {item.diff !== null ? (
-                    <span
-                      className={`text-xs font-medium ${item.diff > 0 ? 'text-green-600' : 'text-red-500'}`}
-                    >
-                      {item.diff > 0 ? '+' : ''}
-                      {item.diff}점
-                    </span>
-                  ) : null}
                   <ChevronRight className="text-muted-foreground h-4 w-4" />
                 </div>
               </Link>

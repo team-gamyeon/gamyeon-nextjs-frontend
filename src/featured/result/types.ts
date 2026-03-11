@@ -14,10 +14,10 @@ export interface RadarDataPoint {
 
 export interface FeedbackItem {
   question: string
-  answer_summary: string // 답변 요약 추가
+  answer_summary: string
   score: number
   feedback: string
-  feedback_badges: string[] //tags -> feedback_badges로 변경
+  feedback_badges: string[]
   videoUrl?: string
 }
 

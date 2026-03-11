@@ -12,10 +12,16 @@ export async function POST() {
   try {
     const cookieStore = await cookies()
 
+    const refreshToken = cookieStore.get('refreshToken')?.value
+    if (!refreshToken) {
+      return NextResponse.json({ success: false }, { status: 401 })
+    }
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
     const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
       method: 'POST',
-      headers: { Cookie: cookieStore.toString() },
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
     })
 
     if (!res.ok) {

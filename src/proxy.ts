@@ -21,7 +21,8 @@ export async function proxy(request: NextRequest) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
     const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
       method: 'POST',
-      headers: { Cookie: `refreshToken=${refreshToken}` },
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
     })
 
     if (!res.ok) {

@@ -27,7 +27,7 @@ export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onConfirm()}
           autoFocus
-          className="flex-1"
+          className="flex-1 focus-visible:border-0 focus-visible:ring-offset-0 focus-visible:outline-none"
         />
         <Button disabled={!title.trim()} onClick={onConfirm} className="shrink-0 gap-1">
           확인

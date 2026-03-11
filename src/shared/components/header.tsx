@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { useAuthStore } from '@/featured/auth/store'
+import { logout } from '@/featured/auth/services/authService'
 import Image from 'next/image'
 import { Menu, Play, LayoutDashboard, LogOut, Settings } from 'lucide-react'
 
@@ -26,16 +27,20 @@ const navLinks = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const { isLoggedIn, user, logout } = useAuthStore()
+  const { isLoggedIn, user, logout: clearAuthStore } = useAuthStore()
   const router = useRouter()
 
-  const handleLogout = () => {
-    logout()
-    router.push('/')
-    setIsOpen(false)
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      clearAuthStore()
+      setIsOpen(false)
+      router.push('/signin')
+    }
   }
 
-  const initials = user?.name ? user.name.slice(0, 1) : 'U'
+  const initials = user?.nickname ? user.nickname.slice(0, 1) : 'U'
 
   return (
     <motion.header
@@ -91,7 +96,7 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-3 py-2">
-                    <p className="text-sm font-medium">{user?.name}</p>
+                    <p className="text-sm font-medium">{user?.nickname}</p>
                     <p className="text-muted-foreground truncate text-xs">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
@@ -157,7 +162,7 @@ export function Header() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{user?.name}</p>
+                        <p className="text-sm font-medium">{user?.nickname}</p>
                         <p className="text-muted-foreground text-xs">{user?.email}</p>
                       </div>
                     </div>

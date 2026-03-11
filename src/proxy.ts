@@ -2,63 +2,35 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const PUBLIC_PATHS = ['/', '/signin', '/terms', '/privacy']
 
+/**
+ * 보호 라우트 진입 게이트키퍼.
+ * "복구 가능한 로그인 상태인가?" 만 판단한다.
+ *
+ * - refreshToken 없음 → /signin 리다이렉트 (복구 불가)
+ * - refreshToken 있음 → 통과 (accessToken 만료 여부는 서버 계층에서 처리)
+ *
+ * 실제 accessToken 재발급은 serverApi(serverFetch)에서 수행한다.
+ * proxy에서 매 네비게이션마다 refresh를 호출하면 race condition 및
+ * 불필요한 네트워크 비용이 발생하므로 여기서는 하지 않는다.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  const refreshToken = request.cookies.get('refreshToken')?.value
+
+  // 로그인 상태에서 /signin 접근 시 대시보드로 이동
+  if (pathname === '/signin' && refreshToken) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
   const isPublic = PUBLIC_PATHS.some((path) => pathname === path)
   if (isPublic) return NextResponse.next()
 
-  const accessToken = request.cookies.get('accessToken')?.value
-  if (accessToken) return NextResponse.next()
-
-  // accessToken 없으면 refreshToken으로 재발급 시도
-  const refreshToken = request.cookies.get('refreshToken')?.value
   if (!refreshToken) {
     return NextResponse.redirect(new URL('/signin', request.url))
   }
 
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
-    const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    })
-
-    const data = await res.json()
-    if (!data.success || !data.data?.accessToken) {
-      const redirect = NextResponse.redirect(new URL('/signin', request.url))
-      redirect.cookies.delete('accessToken')
-      redirect.cookies.delete('refreshToken')
-      return redirect
-    }
-
-    const response = NextResponse.next()
-    const isProd = process.env.NODE_ENV === 'production'
-
-    response.cookies.set('accessToken', data.data.accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',
-      path: '/',
-    })
-
-    if (data.data.refreshToken) {
-      response.cookies.set('refreshToken', data.data.refreshToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: 'lax',
-        path: '/',
-      })
-    }
-
-    return response
-  } catch {
-    const redirect = NextResponse.redirect(new URL('/signin', request.url))
-    redirect.cookies.delete('accessToken')
-    redirect.cookies.delete('refreshToken')
-    return redirect
-  }
+  return NextResponse.next()
 }
 
 export const config = {

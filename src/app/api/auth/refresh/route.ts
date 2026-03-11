@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { parseSetCookieExpires } from '@/shared/lib/utils/cookie'
 
 /**
  * POST /api/auth/refresh
@@ -34,12 +35,14 @@ export async function POST() {
 
     const response = NextResponse.json({ success: true })
     const isProd = process.env.NODE_ENV === 'production'
+    const expiresMap = parseSetCookieExpires(res.headers.getSetCookie?.() ?? [])
 
     response.cookies.set('accessToken', data.data.accessToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: 'lax',
       path: '/',
+      expires: expiresMap.get('accessToken'),
     })
 
     if (data.data.refreshToken) {
@@ -48,6 +51,7 @@ export async function POST() {
         secure: isProd,
         sameSite: 'lax',
         path: '/',
+        expires: expiresMap.get('refreshToken'),
       })
     }
 

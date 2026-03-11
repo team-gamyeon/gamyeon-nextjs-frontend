@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { MOCK_RECORDS } from '@/featured/history/types'
 import {
   AreaChart,
@@ -36,6 +36,9 @@ interface Props {
 }
 
 export function ScoreTrendChart({ weekStart, weekEnd }: Props) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const chartData = useMemo(() => {
     return MOCK_RECORDS.filter((r) => r.status === 'completed' && r.score !== null)
       .map((r) => ({ ...r, dateObj: parseDate(r.date) }))
@@ -46,15 +49,16 @@ export function ScoreTrendChart({ weekStart, weekEnd }: Props) {
   }, [weekStart, weekEnd])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="relative min-h-0 flex-1">
       {chartData.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center gap-2">
+        <div className="flex h-full items-center justify-center gap-2">
           <div className="bg-muted/30 flex h-12 w-12 items-center justify-center rounded-full">
             <Inbox className="text-muted-foreground h-6 w-6" />
           </div>
           <p className="text-muted-foreground text-sm">진행된 면접 기록이 없습니다.</p>
         </div>
-      ) : (
+      ) : mounted ? (
+        <div className="absolute inset-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
             <defs>
@@ -100,7 +104,8 @@ export function ScoreTrendChart({ weekStart, weekEnd }: Props) {
             />
           </AreaChart>
         </ResponsiveContainer>
-      )}
+        </div>
+      ) : null}
     </div>
   )
 }

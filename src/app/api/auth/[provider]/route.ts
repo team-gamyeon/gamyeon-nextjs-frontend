@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { parseSetCookieExpires } from '@/shared/lib/utils/cookie'
 
 const SUPPORTED_PROVIDERS = ['google', 'kakao'] as const
 type Provider = (typeof SUPPORTED_PROVIDERS)[number]
@@ -37,6 +38,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     })
 
     const data = await res.json()
+    console.log(`[auth/${provider}] status: ${res.status}, body:`, JSON.stringify(data, null, 2))
+    console.log(`[auth/${provider}] Set-Cookie headers:`, res.headers.getSetCookie())
 
     if (!data.success) {
       data.message = '로그인 인증에 실패했습니다.'
@@ -46,17 +49,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (data.success && data.data) {
       const isProd = process.env.NODE_ENV === 'production'
+      const cookieExpiresMap = parseSetCookieExpires(res.headers.getSetCookie())
+
       response.cookies.set('accessToken', data.data.accessToken, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'lax',
         path: '/',
+        expires: cookieExpiresMap.get('accessToken'),
       })
       response.cookies.set('refreshToken', data.data.refreshToken, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'lax',
         path: '/',
+        expires: cookieExpiresMap.get('refreshToken'),
       })
     }
 

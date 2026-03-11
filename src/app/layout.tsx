@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 import { TooltipProvider } from '@/shared/ui/tooltip'
 import './globals.css'
 
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   )

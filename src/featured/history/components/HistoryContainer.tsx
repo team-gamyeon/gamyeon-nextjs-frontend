@@ -14,6 +14,7 @@ import {
   CompletedCardBack,
   CompletedCardFront,
 } from '@/featured/history/components/cards/CompletedCard'
+import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
 interface HistoryContainerProps {
   records: InterviewRecord[]
@@ -60,6 +61,7 @@ function FlipCard({ record }: FlipCardProps) {
           {record.status === 'completed' && <CompletedCardFront record={record} />}
           {record.status === 'pending' && <PendingCard />}
           {record.status === 'analysing' && <AnalysingCard />}
+          {record.status === 'failed' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (
           <Card

@@ -82,11 +82,11 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                     <Badge variant="outline" className="shrink-0 text-xs">
                       질문 {i + 1}
                     </Badge>
-                    {fb.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="shrink-0 text-xs font-normal">
-                        {tag}
-                      </Badge>
-                    ))}
+                    {/*{fb.tags.map((tag) => (*/}
+                    {/*  <Badge key={tag} variant="secondary" className="shrink-0 text-xs font-normal">*/}
+                    {/*    {tag}*/}
+                    {/*  </Badge>*/}
+                    {/*))}*/}
                   </div>
                   <p className="text-sm font-semibold">{fb.question}</p>
                   <p className="text-muted-foreground text-sm leading-relaxed">{fb.feedback}</p>

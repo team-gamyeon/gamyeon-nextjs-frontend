@@ -1,6 +1,6 @@
 export type SortBy = 'date' | 'score'
 
-export type InterviewStatus = 'completed' | 'pending' | 'analysing'
+export type InterviewStatus = 'completed' | 'pending' | 'analysing' | 'failed'
 
 export interface InterviewRecord {
   id: string
@@ -36,7 +36,7 @@ export const MOCK_RECORDS: InterviewRecord[] = [
     prevScore: null,
     questionCount: 5,
     duration: '10분 30초',
-    status: 'completed',
+    status: 'failed',
     strengths: ['성실한 태도', '기본기 탄탄'],
     improvements: ['답변 구조화 필요', '구체적 사례 부족'],
   },
@@ -72,7 +72,7 @@ export const MOCK_RECORDS: InterviewRecord[] = [
     prevScore: 71,
     questionCount: 5,
     duration: '13분 10초',
-    status: 'completed',
+    status: 'failed',
     strengths: ['명확한 결론 제시', '기술 키워드 활용'],
     improvements: ['꼬리 질문 대비 필요'],
   },

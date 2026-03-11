@@ -14,7 +14,7 @@ interface HistoryFiltersProps {
   onSortChange: (sort: SortBy) => void
 }
 
-export function HistoryFilters({
+export function HistoryFilterBar({
   search,
   sortBy,
   onSearchChange,

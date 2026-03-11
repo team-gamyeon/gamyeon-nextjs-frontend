@@ -1,27 +1,24 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
-import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
 import { Separator } from '@/shared/ui/separator'
 import Image from 'next/image'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
-import { useSigninForm } from '@/featured/auth/hooks/useSigninForm'
 
 export function SigninForm() {
-  const {
-    showPassword,
-    setShowPassword,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    handleSignin,
-    handleSocialSignin,
-  } = useSigninForm()
+  const router = useRouter()
+
+  // 임시 로그인 핸들러 (백엔드 연동 전 UI 테스트용)
+  const handleMockLogin = (provider: 'kakao' | 'google') => {
+    // 실제 개발 시 이 부분을 next-auth의 signIn 함수로 교체하면 됩니다.
+    console.log(`${provider} 로그인 시도`)
+
+    // 임시로 바로 대시보드로 이동시킵니다.
+    router.push('/dashboard')
+  }
 
   return (
     <div className="bg-muted/20 flex min-h-screen items-center justify-center px-4">
@@ -56,13 +53,13 @@ export function SigninForm() {
           </CardHeader>
           <Separator className="mx-6 w-auto!" />
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="flex flex-col gap-2.5">
+              {/* 카카오 로그인 버튼 */}
               <Button
                 type="button"
                 className="w-full cursor-pointer gap-2.5 bg-[#FEE500] py-6 font-medium text-[#3C1E1E] transition-colors hover:bg-[#F0D900] active:bg-[#E8CF00]"
-                style={{ touchAction: 'manipulation' }}
-                onClick={handleSocialSignin}
+                onClick={() => handleMockLogin('kakao')}
               >
                 <svg
                   className="h-5 w-5 shrink-0"
@@ -72,15 +69,15 @@ export function SigninForm() {
                 >
                   <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.617 5.076 4.077 6.54l-.977 3.642a.3.3 0 0 0 .44.327l4.217-2.79A12.2 12.2 0 0 0 12 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z" />
                 </svg>
-                카카오로 로그인
+                카카오로 시작하기
               </Button>
 
+              {/* 구글 로그인 버튼 */}
               <Button
                 type="button"
                 variant="outline"
                 className="active:bg-muted/50 w-full cursor-pointer gap-2.5 py-6 transition-colors"
-                style={{ touchAction: 'manipulation' }}
-                onClick={handleSocialSignin}
+                onClick={() => handleMockLogin('google')}
               >
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -100,83 +97,27 @@ export function SigninForm() {
                     fill="#EA4335"
                   />
                 </svg>
-                Google로 로그인
+                Google로 시작하기
               </Button>
             </div>
 
-            <p className="text-muted-foreground text-center text-xs">
+            <p className="text-muted-foreground mt-4 text-center text-xs">
               계속 진행하면{' '}
-              <Link href="/terms" className="text-primary cursor-pointer font-medium hover:underline">
+              <Link
+                href="/terms"
+                className="text-primary cursor-pointer font-medium hover:underline"
+              >
                 이용약관
               </Link>{' '}
               및{' '}
-              <Link href="/privacy" className="text-primary cursor-pointer font-medium hover:underline">
+              <Link
+                href="/privacy"
+                className="text-primary cursor-pointer font-medium hover:underline"
+              >
                 개인정보 처리 방침
               </Link>
               에 동의하는 것으로 간주됩니다.
             </p>
-
-            {/* <div className="relative">
-              <Separator />
-              <span className="bg-card text-muted-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-xs">
-                또는 이메일로 로그인
-              </span>
-            </div>
-
-            <form onSubmit={handleSignin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">이메일</Label>
-                <div className="relative">
-                  <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    className="pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">비밀번호</Label>
-                  <Link href="#" className="text-primary text-xs hover:underline">
-                    비밀번호 찾기
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="비밀번호를 입력하세요"
-                    className="pr-10 pl-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" size="lg">
-                로그인
-              </Button>
-            </form>
-
-            <p className="text-muted-foreground text-center text-sm">
-              아직 계정이 없으신가요?{' '}
-              <Link href="/signup" className="text-primary font-medium hover:underline">
-                회원가입
-              </Link>
-            </p> */}
           </CardContent>
         </Card>
       </motion.div>

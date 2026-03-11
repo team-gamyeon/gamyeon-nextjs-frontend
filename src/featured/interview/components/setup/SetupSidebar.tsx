@@ -15,11 +15,12 @@ interface SidebarStepProps {
   status: StepStatus
   onClick?: () => void
   freeNavigation?: boolean
+  locked?: boolean
 }
 
-function SidebarStep({ step, status, onClick, freeNavigation }: SidebarStepProps) {
+function SidebarStep({ step, status, onClick, freeNavigation, locked }: SidebarStepProps) {
   const Icon = step.icon
-  const clickable = (status === 'done' || freeNavigation) && !!onClick
+  const clickable = (status === 'done' || freeNavigation) && !!onClick && !locked
   return (
     <div
       onClick={clickable ? onClick : undefined}
@@ -77,9 +78,10 @@ interface SetupSidebarProps {
   doneCount: number
   onStepClick?: (step: number) => void
   freeNavigation?: boolean
+  lockedSteps?: Set<number>
 }
 
-export function SetupSidebar({ statuses, doneCount, onStepClick, freeNavigation }: SetupSidebarProps) {
+export function SetupSidebar({ statuses, doneCount, onStepClick, freeNavigation, lockedSteps }: SetupSidebarProps) {
   return (
     <aside className="border-border/60 bg-muted/30 flex w-64 shrink-0 flex-col border-r">
       <div className="border-border/50 border-b px-5 py-5">
@@ -101,6 +103,7 @@ export function SetupSidebar({ statuses, doneCount, onStepClick, freeNavigation 
             status={statuses[step.id - 1]}
             onClick={onStepClick ? () => onStepClick(step.id) : undefined}
             freeNavigation={freeNavigation}
+            locked={lockedSteps?.has(step.id)}
           />
         ))}
       </nav>

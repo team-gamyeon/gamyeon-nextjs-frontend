@@ -13,11 +13,13 @@ const fadeUp = {
   }),
 }
 
-export function QuickStartSection() {
+interface QuickStartSectionProps {
+  resumeInterviewId?: string
+}
+
+export function QuickStartSection({ resumeInterviewId }: QuickStartSectionProps = {}) {
   // TODO: 실제 유저 상태(진행 중인 면접 여부)에 따라 이 값을 동적으로 설정해야 합니다.
-  // true : 이어보기 활성화
-  // false : 이어보기 비활성화
-  const hasInProgressInterview = false
+  const hasInProgressInterview = !!resumeInterviewId
 
   return (
     <div>
@@ -80,7 +82,7 @@ export function QuickStartSection() {
             icon={RotateCcw}
             iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
             iconColorStyle="text-blue-600"
-            href="/interview/continue"
+            href={resumeInterviewId ? `/interview?resume=true&id=${resumeInterviewId}` : '/interview'}
             buttonText="이어서 면접보기"
             isDisabled={!hasInProgressInterview}
           />

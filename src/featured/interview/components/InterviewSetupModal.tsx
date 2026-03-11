@@ -22,12 +22,17 @@ import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
+  isResume?: boolean
 }
 
-export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
-  const [currentStep, setCurrentStep] = useState(1)
-  const [maxReachedStep, setMaxReachedStep] = useState(1)
+const RESUME_LOCKED_STEPS = new Set([1, 2])
+
+export function InterviewSetupModal({ session, isResume = false }: InterviewSetupModalProps) {
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(
+    () => (isResume ? new Set([1, 2]) : new Set()),
+  )
+  const [currentStep, setCurrentStep] = useState(() => (isResume ? 3 : 1))
+  const [maxReachedStep, setMaxReachedStep] = useState(() => (isResume ? 3 : 1))
   const [interviewId, setInterviewId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
   const [resume, setResume] = useState<File | null>(null)
@@ -90,6 +95,7 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
   }
 
   const navigateToStep = (step: number) => {
+    if (isResume && RESUME_LOCKED_STEPS.has(step)) return
     if (maxReachedStep >= 4 || completedSteps.has(step)) {
       setCurrentStep(step)
     }
@@ -212,6 +218,7 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
             doneCount={doneCount}
             onStepClick={navigateToStep}
             freeNavigation={maxReachedStep >= 4}
+            lockedSteps={isResume ? RESUME_LOCKED_STEPS : undefined}
           />
           <div className="flex flex-1 flex-col">
             <div className="flex-1 overflow-y-auto px-8 py-8">
@@ -232,7 +239,7 @@ export function InterviewSetupModal({ session }: InterviewSetupModalProps) {
                 취소
               </Button>
               <Button
-                disabled={!allDone || !camera.cameraStream || !title.trim() || !resume}
+                disabled={!allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))}
                 onClick={() => {
                   if (!camera.cameraStream) {
                     console.error('카메라 스트림이 아직 준비되지 않았습니다.')

@@ -60,7 +60,7 @@ function FlipCard({ record }: FlipCardProps) {
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {record.status === 'completed' && <CompletedCardFront record={record} />}
           {record.status === 'pending' && <PendingCard />}
-          {record.status === 'analysing' && <AnalysingCard />}
+          {record.status === 'analysing' && <AnalysingCard interviewId={record.id} />}
           {record.status === 'failed' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (

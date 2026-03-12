@@ -3,17 +3,35 @@ import { NetworkError, RequestConfig } from './types'
 import { toast } from 'sonner'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
+// 1. "지금 새 입장권(토큰)을 받아오고 있는 중이야?" (처음엔 아니니까 false)
 let isRefreshing = false
+
+//void는 영어로 '빈 공간, 아무것도 없음
+// "이 선반(배열)에는 **스위치(함수)**만 올려둘 수 있는데,
+//  그 스위치는 누를 때 반드시 **성공(true)했는지 실패(false)했는지 쪽지(success: boolean)**를 같이 넣어서 눌러야 하고,
+// 누른 다음에 아무것도 뱉어내지 않는(=> void) 스위치여야만 해!
+// 앞으로 여기에 resolve 같은 스위치를 담을 건데, 그 스위치는 성공 여부(boolean)를 알려주는 역할
 let pendingQueue: Array<(success: boolean) => void> = []
 
+// 2. pendingQueue: "진동벨 스위치(resolve)들을 모아두는 선반(배열)"
 function waitForRefresh(): Promise<boolean> {
+  // Promise는 자바스크립트의 비동기 처리 객체, 약속(Promise)**하는 객체(도구)
+
+  // 3. 진동벨(Promise)을 하나 만들어서 손님한테 줍니다.
   return new Promise((resolve) => {
-    pendingQueue.push(resolve)
+    // 4. Promise를 리턴하는데, resolve 함수 자체를 배열(Queue)에 밀어 넣습니다.
+    //  원래는 여기서 햄버거 다 만들고 resolve()를 바로 눌러야 하는데,
+    // 지금 누르지 않고 '진동벨 스위치(resolve)'를 선반(pendingQueue)에 쓱 밀어 넣어(push) 둡니다.
+    // resolve"너가 원하는 작업이 성공적으로 끝났을 때 이 스위치를 눌러!"라는 뜻
+    pendingQueue.push(resolve) //
   })
 }
 
 function resolveQueue(success: boolean) {
+  // 선반(pendingQueue)에 있는 스위치(resolve)들을 하나씩 꺼내서 success(true 또는 false) 쪽지를 넣고 눌러줍니다!
   pendingQueue.forEach((resolve) => resolve(success))
+
+  // 스위치를 다 눌렀으니 선반을 다시 비워줍니다.
   pendingQueue = []
 }
 

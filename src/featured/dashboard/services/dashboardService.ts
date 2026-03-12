@@ -4,7 +4,7 @@ import { serverApi } from '@/shared/lib/api'
 import { InterviewStat, Notice, NoticeDetail } from '../types'
 
 /**
- * 1. 일자별 면접 횟수 조회
+일자별 면접 횟수 조회
  */
 export async function getInterviewStats() {
   try {
@@ -16,7 +16,7 @@ export async function getInterviewStats() {
 }
 
 /**
- * 2. 전체 공지사항 목록 조회
+ 전체 공지사항 목록 조회
  */
 export async function getNotices() {
   try {
@@ -28,7 +28,7 @@ export async function getNotices() {
 }
 
 /**
- * 3. 공지사항 상세 내용 조회
+공지사항 상세 내용 조회
  */
 export async function getNoticeDetail(noticeId: number) {
   try {

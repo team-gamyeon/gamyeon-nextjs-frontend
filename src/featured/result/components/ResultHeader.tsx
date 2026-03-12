@@ -17,7 +17,7 @@ import { useAuthStore } from '@/featured/auth/store'
 export function ResultHeader() {
   const { user, logout } = useAuthStore()
   const router = useRouter()
-  const initials = user?.name ? user.name.slice(0, 1) : 'U'
+  const initials = user?.nickname ? user.nickname.slice(0, 1) : 'U'
 
   const handleLogout = () => {
     logout()
@@ -49,7 +49,7 @@ export function ResultHeader() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <div className="px-3 py-2">
-              <p className="text-sm font-medium">{user?.name ?? '사용자'}</p>
+              <p className="text-sm font-medium">{user?.nickname ?? '사용자'}</p>
               <p className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</p>
             </div>
             <DropdownMenuSeparator />

@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { ApiError, NetworkError, type RequestConfig } from './types'
+import { NetworkError, type RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
@@ -23,11 +23,13 @@ async function refreshOnce(): Promise<boolean> {
     method: 'POST',
     credentials: 'include',
   })
-  return res.ok
+  if (!res.ok) return false
+  const data = await res.json()
+  return data.success === true
 }
 
 /**
- * refresh를 최대 2번 시도.
+ * refresh 1회 시도.
  * 동시에 여러 요청이 401을 받아도 refresh는 1번만 실행됨.
  */
 async function attemptRefresh(): Promise<boolean> {
@@ -35,17 +37,9 @@ async function attemptRefresh(): Promise<boolean> {
 
   isRefreshing = true
   try {
-    // 1차 refresh
-    const first = await refreshOnce()
-    if (first) {
-      resolveQueue(true)
-      return true
-    }
-
-    // 2차 refresh (1차 실패 시)
-    const second = await refreshOnce()
-    resolveQueue(second)
-    return second
+    const success = await refreshOnce()
+    resolveQueue(success)
+    return success
   } catch {
     resolveQueue(false)
     return false
@@ -116,7 +110,7 @@ export async function clientFetch<T>(
   const refreshed = await attemptRefresh()
   if (!refreshed) {
     redirectToSignin()
-    throw new ApiError(401, '인증이 만료되었습니다. 다시 로그인해 주세요.', 'AUTH_EXPIRED')
+    return null
   }
 
   // ── refresh 성공 → 원래 요청 재시도 ──

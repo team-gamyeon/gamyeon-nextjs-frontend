@@ -1,30 +1,120 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { NetworkError } from './types'
-import type { ApiResult, RequestConfig } from './types'
+import type { RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
+import { parseSetCookieExpires } from '@/shared/lib/utils/cookie'
+
+/**
+ * accessToken 재발급을 시도한다.
+ * 성공 시 새 accessToken을 반환하고, 쿠키 저장을 시도한다.
+ *
+ * 쿠키 저장 가능 여부:
+ * - Server Action 컨텍스트 → 저장 성공 (이후 요청에도 유효)
+ * - RSC 컨텍스트 → 저장 불가 (throw를 catch해 무시). 새 토큰은 현재
+ *   요청의 retry에만 사용된다. 다음 네비게이션에서 proxy가 refreshToken
+ *   유효성을 재확인하고 serverFetch가 다시 refresh를 수행한다.
+ *   ※ 백엔드가 refreshToken을 단일 사용(rotation) 방식으로 운용하는 경우
+ *      RSC에서 새 refreshToken을 저장하지 못해 루프가 생길 수 있으므로,
+ *      그 경우 백엔드 측 grace period 또는 아키텍처 재검토가 필요하다.
+ *
+ * @returns 새 accessToken 문자열, 실패 시 null
+ */
+async function tryRefresh(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+): Promise<string | null> {
+  const refreshToken = cookieStore.get('refreshToken')?.value
+  console.log(`[tryRefresh] refreshToken 존재: ${!!refreshToken}`)
+  if (!refreshToken) return null
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
+  try {
+    const res = await fetch(`${apiUrl}/api/v1/auth/reissue`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+
+    const data = await res.json()
+    console.log(`[tryRefresh] status: ${res.status}, body:`, JSON.stringify(data, null, 2))
+    if (!data.success || !data.data?.accessToken) return null
+
+    const newAccessToken: string = data.data.accessToken
+    const isProd = process.env.NODE_ENV === 'production'
+    const expiresMap = parseSetCookieExpires(res.headers.getSetCookie?.() ?? [])
+
+    // RSC 컨텍스트에서는 throw되므로 try/catch로 감싼다.
+    try {
+      cookieStore.set('accessToken', newAccessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        path: '/',
+        expires: expiresMap.get('accessToken'),
+      })
+      if (data.data.refreshToken) {
+        cookieStore.set('refreshToken', data.data.refreshToken, {
+          httpOnly: true,
+          secure: isProd,
+          sameSite: 'lax',
+          path: '/',
+          expires: expiresMap.get('refreshToken'),
+        })
+      }
+    } catch {
+      // RSC 컨텍스트 — 쿠키 저장 불가, 현재 요청 retry에만 사용
+    }
+
+    return newAccessToken
+  } catch {
+    return null
+  }
+}
 
 /**
  * 서버 전용 내부 fetcher.
  * next/headers로 쿠키를 읽어 Cookie 헤더에 직접 포함.
- * 미들웨어(proxy)가 인증을 선처리하므로 401 refresh 로직 없음.
- * 절대 throw하지 않고 { data, error } 형태로 반환.
+ *
+ * 인증 흐름:
+ * 1. 원래 요청 수행
+ * 2. 401 수신 시 tryRefresh()로 accessToken 재발급 시도
+ * 3. 재발급 성공 → 새 토큰으로 retry
+ * 4. 재발급 실패 → /signin 리다이렉트
+ *
+ * ※ Server Action에서 try/catch로 serverApi를 감싸는 경우,
+ *   redirect()가 throw하는 NEXT_REDIRECT를 반드시 re-throw해야 한다.
+ *   예: catch (e) { if (isRedirectError(e)) throw e; ... }
+ *
+ * 에러 발생 시 throw — 호출 측에서 try/catch 사용.
  */
 async function serverFetch<T>(
   method: string,
   endpoint: string,
   body?: unknown,
   config?: RequestConfig,
-): Promise<ApiResult<T>> {
-  try {
-    const cookieStore = await cookies()
-    const url = buildUrl(endpoint, config?.params)
-    const jsonBody = body !== undefined ? JSON.stringify(body) : undefined
+): Promise<T> {
+  const cookieStore = await cookies()
+  const url = buildUrl(endpoint, config?.params)
+  const jsonBody = body !== undefined ? JSON.stringify(body) : undefined
 
-    const res = await fetch(url, {
+  const buildCookieHeader = (overrideAccessToken?: string): string => {
+    if (!overrideAccessToken) return cookieStore.toString()
+    const others = cookieStore
+      .getAll()
+      .filter((c) => c.name !== 'accessToken')
+      .map((c) => `${c.name}=${c.value}`)
+      .join('; ')
+    return others
+      ? `accessToken=${overrideAccessToken}; ${others}`
+      : `accessToken=${overrideAccessToken}`
+  }
+
+  const doFetch = (cookieHeader: string) =>
+    fetch(url, {
       method,
       headers: {
         ...(jsonBody !== undefined && { 'Content-Type': 'application/json' }),
-        Cookie: cookieStore.toString(),
+        Cookie: cookieHeader,
         ...config?.headers,
       },
       body: jsonBody,
@@ -32,23 +122,50 @@ async function serverFetch<T>(
       next: config?.next,
     })
 
-    return await parseApiResponse<T>(res)
+  let res: Response
+  try {
+    res = await doFetch(buildCookieHeader())
   } catch {
-    return { data: null, error: new NetworkError() }
+    throw new NetworkError()
   }
+
+  console.log(`[serverApi] ${method} ${url} → ${res.status}`)
+
+  if (res.status === 401) {
+    const newAccessToken = await tryRefresh(cookieStore)
+    if (!newAccessToken) redirect('/signin')
+
+    try {
+      res = await doFetch(buildCookieHeader(newAccessToken))
+    } catch {
+      throw new NetworkError()
+    }
+
+    console.log(`[serverApi] retry after refresh → ${res.status}`)
+  }
+
+  const { data, error } = await parseApiResponse<T>(res)
+  console.log(`[serverApi] response body:`, JSON.stringify({ data, error }, null, 2))
+  if (error) throw error
+  return data as T
 }
 
 /**
  * 서버 전용 API 인터페이스.
  * Server Action, service 레이어, RSC에서 사용.
  * 클라이언트 컴포넌트에서 import 금지 (next/headers는 서버 전용).
+ * 에러 발생 시 throw — 호출 측에서 try/catch 사용.
  *
  * @example
- * 'use server'
- * export async function getMe() {
- *   const { data, error } = await serverApi.get<User>('/me')
- *   if (error) return null
- *   return data
+ * // RSC
+ * const data = await serverApi.get<User>('/me')
+ *
+ * // Server Action (에러를 클라이언트에 직접 노출하면 안 되므로 try/catch 필수)
+ * try {
+ *   const data = await serverApi.post('/interviews', body)
+ *   return { success: true, data }
+ * } catch (error) {
+ *   return { success: false, message: error.message }
  * }
  */
 export const serverApi = {

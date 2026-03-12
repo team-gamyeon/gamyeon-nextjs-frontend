@@ -14,7 +14,7 @@ export function DashboardHeader() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="text-xl font-bold">안녕하세요, {user?.name ?? '사용자'}님 👋</h1>
+        <h1 className="text-xl font-bold">안녕하세요, {user?.nickname ?? '사용자'}님 👋</h1>
         <p className="text-muted-foreground mt-0.5 text-sm">오늘도 면접 실력을 키워볼까요?</p>
       </motion.div>
       <HeaderActions />

@@ -126,7 +126,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       await updateInterviewTitle(interviewId, title)
     } else {
       const result = await createInterview(title)
-      if (result.data) setInterviewId(result.data.intvId)
+      if (result.success) setInterviewId(result.data.intvId)
     }
     completeStep(1)
   }

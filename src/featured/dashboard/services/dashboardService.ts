@@ -9,10 +9,8 @@ import { InterviewStat, Notice, NoticeDetail } from '../types'
 export async function getInterviewStats() {
   try {
     const data = await serverApi.get<InterviewStat[]>('/api/v1/intvs/stats')
-    // 성공 시: success 깃발을 true로 들고, 데이터를 건네줌
     return { success: true as const, data }
   } catch (error) {
-    // 실패 시: 에러가 나도 앱이 안 터짐! success 깃발을 false로 들고 에러 메시지를 건네줌
     return { success: false as const, message: (error as Error).message }
   }
 }
@@ -24,6 +22,8 @@ export async function getNotices() {
   try {
     const data = await serverApi.get<Notice[]>('/api/v1/notices')
     return { success: true as const, data }
+    // true as const 이 깃발은 무조건 true야! 절대 변하지 않아!" 라고 강력 접착제로 붙여버리는 역할
+    // success가 true일 때만 마음 편하게 data를 꺼내서 화면에 쓰면 되겠구나
   } catch (error) {
     return { success: false as const, message: (error as Error).message }
   }

@@ -38,7 +38,7 @@ src/shared/lib/api/
   types.ts      — 타입 정의 (ApiError, NetworkError 등)
   _utils.ts     — 내부 헬퍼 (직접 사용 X)
   client.ts     — 내부 fetch 래퍼 (직접 사용 X)
-  api.ts        — clientApi 구현
+  clientApi.ts        — clientApi 구현
   serverApi.ts  — serverApi 구현
   index.ts      — 공개 export
 ```

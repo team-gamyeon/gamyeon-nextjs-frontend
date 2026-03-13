@@ -16,7 +16,7 @@ export function InterviewLayout() {
   return (
     <>
       <InterviewContainer session={session} interviewId={interviewId} />
-      <EndDialogModal session={session} />
+      <EndDialogModal session={session} interviewId={interviewId} />
       <InterviewSetupModal session={session} isResume={isResume} />
     </>
   )

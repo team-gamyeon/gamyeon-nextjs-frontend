@@ -1,16 +1,28 @@
 'use client'
 
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/shared/ui/button'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
+import { finishInterviewAction } from '@/featured/interview/actions/interview.action'
 
 interface FinishedOverlayProps {
   phase: Phase
+  intvId: number
 }
 
-export function FinishedOverlay({ phase }: FinishedOverlayProps) {
+export function FinishedOverlay({ phase, intvId }: FinishedOverlayProps) {
+  const router = useRouter()
+
+  async function handleGoToHistory() {
+    try {
+      await finishInterviewAction(intvId)
+    } finally {
+      router.push('/history')
+    }
+  }
+
   return (
     <AnimatePresence>
       {phase === 'finished' && (
@@ -31,11 +43,9 @@ export function FinishedOverlay({ phase }: FinishedOverlayProps) {
                 분석 완료까지 <strong>약 3~5분이 소요</strong>되며, 면접 기록에서 확인 가능합니다.
               </p>
             </div>
-            <Button size="lg" className="mt-2 gap-2 px-8" asChild>
-              <Link href="/history">
-                나의 면접 기록 보기
-                <ChevronRight className="h-4 w-4" />
-              </Link>
+            <Button size="lg" className="mt-2 gap-2 px-8" onClick={handleGoToHistory}>
+              나의 면접 기록 보기
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </motion.div>

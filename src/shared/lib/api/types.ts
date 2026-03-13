@@ -14,17 +14,15 @@ export class NetworkError extends Error {
 
 /** 서버 공통 응답 래퍼 */
 export interface ApiResponse<T> {
-  success: boolean
-  code: string
-  message: string
-  data: T | null
-  errors?: ApiFieldError[] | null
+  success: boolean 
+  code: string 
+  message: string 
+  data: T | null 
+  errors?: ApiFieldError[] | null 
 }
 
 export interface RequestConfig {
-  /** true이면 에러 toast를 띄우지 않음 */
   silent?: boolean
-  /** URL 쿼리 파라미터 */
   params?: Record<string, string | number | boolean>
   headers?: Record<string, string>
   cache?: RequestCache

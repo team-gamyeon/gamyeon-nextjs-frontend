@@ -5,12 +5,17 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/featured/auth/store'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
+// 1. "지금 새 입장권(토큰)을 받아오고 있는 중이야?" (처음엔 아니니까 false)
 let isRefreshing = false
 let pendingQueue: Array<(token: string | null) => void> = []
 
 function waitForRefresh(): Promise<string | null> {
   return new Promise((resolve) => {
-    pendingQueue.push(resolve)
+    // 4. Promise를 리턴하는데, resolve 함수 자체를 배열(Queue)에 밀어 넣습니다.
+    //  원래는 여기서 햄버거 다 만들고 resolve()를 바로 눌러야 하는데,
+    // 지금 누르지 않고 '진동벨 스위치(resolve)'를 선반(pendingQueue)에 쓱 밀어 넣어(push) 둡니다.
+    // resolve"너가 원하는 작업이 성공적으로 끝났을 때 이 스위치를 눌러!"라는 뜻
+    pendingQueue.push(resolve) //
   })
 }
 

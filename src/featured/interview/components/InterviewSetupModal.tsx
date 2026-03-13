@@ -125,20 +125,6 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     completeStep(4)
   }
 
-  const handleTitleConfirm = async () => {
-    try {
-      if (interviewId) {
-        await updateInterviewTitle(interviewId, title)
-      } else {
-        const result = await createInterview(title)
-        if (result.data) setInterviewId(result.data.intvId)
-      }
-      completeStep(1)
-    } catch {
-      // handleResponse가 이미 toast.error() 처리 — redirect도 자동 전파
-    }
-  }
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:

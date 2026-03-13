@@ -1,18 +1,19 @@
 'use server'
 
-import { serverApi } from '@/shared/lib/api'
 import type { ApiResponse } from '@/shared/lib/api'
 import type { CreateInterviewResponse } from '../types'
+import { createInterview } from '@/featured/interview/services/interview.service'
 
-export async function createInterview(
+export async function createInterviewAction(
   title: string,
 ): Promise<ApiResponse<CreateInterviewResponse>> {
-  return serverApi.post<CreateInterviewResponse>('/api/v1/intvs', { title })
+  return createInterview(title)
 }
 
-export async function updateInterviewTitle(
-  id: number,
-  title: string,
-): Promise<ApiResponse<CreateInterviewResponse>> {
-  return serverApi.patch<CreateInterviewResponse>(`/api/v1/intvs/${id}`, { title })
-}
+//
+// export async function updateInterviewTitle(
+//   id: number,
+//   title: string,
+// ): Promise<ApiResponse<CreateInterviewResponse>> {
+//   return serverApi.patch<CreateInterviewResponse>(`/api/v1/intvs/${id}`, { title })
+// }

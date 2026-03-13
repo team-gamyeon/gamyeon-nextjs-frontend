@@ -1,5 +1,6 @@
-import { ApiError } from './types'
-import type { ApiResponse, ApiResult, RequestConfig } from './types'
+import { NetworkError } from './types'
+import type { ApiResponse, RequestConfig } from './types'
+import { toast } from 'sonner'
 
 /** endpoint + params → 완성된 URL 문자열 */
 export function buildUrl(endpoint: string, params?: RequestConfig['params']): string {
@@ -16,12 +17,6 @@ export function buildUrl(endpoint: string, params?: RequestConfig['params']): st
   return `${url}?${searchParams.toString()}`
 }
 
-/**
- * 요청 body 직렬화.
- * - plain object / array → JSON.stringify (string 반환)
- * - FormData · Blob · ArrayBuffer 등 BodyInit → 그대로 반환 (Content-Type은 브라우저/런타임이 자동 설정)
- * - undefined → undefined (body 없음)
- */
 export function serializeBody(body: unknown): BodyInit | undefined {
   if (body === undefined) return undefined
   if (
@@ -51,22 +46,27 @@ export async function parseBody<T>(res: Response): Promise<T | null> {
   }
 }
 
-/**
- * 공통 응답 파싱 — parseBody 후 success 여부에 따라 ApiResult 반환.
- * toast/throw 없이 순수하게 { data, error }만 반환.
- * client.ts, serverApi.ts 양쪽에서 공유.
- */
-export async function parseApiResponse<T>(res: Response): Promise<ApiResult<T>> {
+export const handleResponse = async <T>(
+  res: Response,
+  config?: RequestConfig,
+): Promise<ApiResponse<T>> => {
   const body = await parseBody<ApiResponse<T>>(res)
 
-  if (body === null) return { data: null, error: null }
+  if (!body) throw new NetworkError()
 
   if (!body.success) {
-    return {
-      data: null,
-      error: new ApiError(res.status, body.message, body.code, body.errors),
+    if (!config?.silent) {
+      toast.error(body.message || '오류가 발생했습니다.')
     }
+    const error = {
+      success: false,
+      code: body.code,
+      message: body.message,
+      data: null,
+      errors: body.errors ?? null,
+    }
+    throw error
   }
 
-  return { data: body.data ?? null, error: null }
+  return body
 }

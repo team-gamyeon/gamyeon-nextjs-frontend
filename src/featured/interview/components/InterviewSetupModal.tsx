@@ -28,8 +28,8 @@ interface InterviewSetupModalProps {
 const RESUME_LOCKED_STEPS = new Set([1, 2])
 
 export function InterviewSetupModal({ session, isResume = false }: InterviewSetupModalProps) {
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(
-    () => (isResume ? new Set([1, 2]) : new Set()),
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(() =>
+    isResume ? new Set([1, 2]) : new Set(),
   )
   const [currentStep, setCurrentStep] = useState(() => (isResume ? 3 : 1))
   const [maxReachedStep, setMaxReachedStep] = useState(() => (isResume ? 3 : 1))
@@ -106,11 +106,10 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     if (completedSteps.has(1)) resetStep(1)
   }
 
-  const handleDocumentChange =
-    (setter: (file: File | null) => void) => (file: File | null) => {
-      setter(file)
-      if (completedSteps.has(2)) resetStep(2)
-    }
+  const handleDocumentChange = (setter: (file: File | null) => void) => (file: File | null) => {
+    setter(file)
+    if (completedSteps.has(2)) resetStep(2)
+  }
 
   const handleCameraConfirm = () => {
     camera.confirmCamera()
@@ -126,7 +125,10 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       await updateInterviewTitle(interviewId, title)
     } else {
       const result = await createInterview(title)
-      if (result.success) setInterviewId(result.data.intvId)
+      if (result.success) {
+        const data = result.data
+        if (data) setInterviewId(data.intvId)
+      }
     }
     completeStep(1)
   }
@@ -135,11 +137,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     switch (currentStep) {
       case 1:
         return (
-          <TitleStep
-            title={title}
-            onChange={handleTitleChange}
-            onConfirm={handleTitleConfirm}
-          />
+          <TitleStep title={title} onChange={handleTitleChange} onConfirm={handleTitleConfirm} />
         )
       case 2:
         return (
@@ -239,7 +237,9 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                 취소
               </Button>
               <Button
-                disabled={!allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))}
+                disabled={
+                  !allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))
+                }
                 onClick={() => {
                   if (!camera.cameraStream) {
                     console.error('카메라 스트림이 아직 준비되지 않았습니다.')

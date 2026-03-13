@@ -8,9 +8,10 @@ import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
 interface InterviewPageProps {
   session: ReturnType<typeof useInterview>
+  interviewId: number | null
 }
 
-export function InterviewContainer({ session }: InterviewPageProps) {
+export function InterviewContainer({ session, interviewId }: InterviewPageProps) {
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
       <ProcessBar

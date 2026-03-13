@@ -4,6 +4,10 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { getNoticesAction } from '../actions/dashboard.action'
+import type { Notice } from '@/featured/notice/types'
+import { NOTICE_CATEGORY_CONFIG } from '@/featured/notice/constants'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -14,38 +18,28 @@ const fadeUp = {
   }),
 }
 
-const noticeData = [
-  {
-    id: 1,
-    category: '업데이트',
-    title: '프론트엔드 직무 모의 면접 질문 세트가 추가되었습니다.',
-    date: '2026.03.08',
-    isNew: true,
-  },
-  {
-    id: 2,
-    category: '안내',
-    title: '보다 안정적인 서비스를 위한 서버 정기 점검 안내 (3/10)',
-    date: '2026.03.05',
-    isNew: false,
-  },
-  {
-    id: 3,
-    category: '이벤트',
-    title: '2026년 상반기 공채 대비 AI 면접 무제한 패스!',
-    date: '2026.03.01',
-    isNew: false,
-  },
-  {
-    id: 4,
-    category: '공지사항',
-    title: 'AI 면접관 음성 인식 속도 및 정확도 대폭 개선 안내',
-    date: '2026.02.26',
-    isNew: false,
-  },
-]
-
 export function NoticeSection() {
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchNotices() {
+      setIsLoading(true)
+
+      const result = await getNoticesAction()
+
+      if (result.success && result.data) {
+        setNotices(result.data)
+      } else {
+        console.error('공지사항 불러오기 실패:', result.message)
+        setNotices([])
+      }
+      setIsLoading(false)
+    }
+
+    fetchNotices()
+  }, [])
+
   return (
     <motion.div
       initial="hidden"
@@ -68,40 +62,56 @@ export function NoticeSection() {
 
       <Card className="border-border/50 flex h-full flex-col overflow-hidden py-4">
         <CardContent className="flex flex-1 flex-col p-0">
-          {noticeData.map((item) => (
-            <Link
-              key={item.id}
-              href={`/notices/${item.id}`}
-              className="flex flex-1 flex-col justify-center"
-            >
-              <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
-                <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                  <span
-                    className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${
-                      item.category === '업데이트'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
-                        : item.category === '안내'
-                          ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                          : item.category === '이벤트'
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
-                            : 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400'
-                    }`}
-                  >
-                    {item.category}
-                  </span>
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    {item.isNew && (
-                      <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
-                        N
+          {isLoading ? (
+            <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
+              공지사항을 불러오는 중입니다...
+            </div>
+          ) : notices.length > 0 ? (
+            notices.map((item) => {
+              const config = NOTICE_CATEGORY_CONFIG[item.category] || NOTICE_CATEGORY_CONFIG.NOTICE
+
+              // 작성일 기준 3일(72시간) 이내면 새 글로 취급하는 로직
+              const isRecent =
+                new Date(item.createdAt).getTime() > Date.now() - 3 * 24 * 60 * 60 * 1000
+
+              return (
+                <Link
+                  key={item.id}
+                  href={`/notices/${item.id}`}
+                  className="flex flex-1 flex-col justify-center"
+                >
+                  <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                      <span
+                        className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${config.color}`}
+                      >
+                        {config.label}
                       </span>
-                    )}
+
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <p className="truncate text-sm font-medium">{item.title}</p>
+
+                        {isRecent && (
+                          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+                            N
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="text-muted-foreground shrink-0 text-xs">
+                      {item.createdAt.split('T')[0]}
+                    </span>
                   </div>
-                </div>
-                <span className="text-muted-foreground shrink-0 text-xs">{item.date}</span>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              )
+            })
+          ) : (
+            // 데이터가 없거나 에러가 났을 때 공통으로 보여줄 UI
+            <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
+              새로운 공지사항이 없습니다.
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>

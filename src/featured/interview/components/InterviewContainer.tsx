@@ -1,9 +1,9 @@
-import { ProcessBar } from '@/featured/interview/components/interview/ProcessBar'
-import { QuestionBanner } from '@/featured/interview/components/interview/QuestionBanner'
-import { VideoArea } from '@/featured/interview/components/interview/VideoArea'
-import { TimerWidget } from '@/featured/interview/components/interview/TimerWidget'
-import { FinishedOverlay } from '@/featured/interview/components/interview/FinishedOverlay'
-import { ControlBar } from '@/featured/interview/components/interview/ControlBar'
+import { ProcessBar } from '@/featured/interview/components/screen/ProcessBar'
+import { QuestionBanner } from '@/featured/interview/components/screen/QuestionBanner'
+import { VideoArea } from '@/featured/interview/components/screen/VideoArea'
+import { TimerWidget } from '@/featured/interview/components/screen/TimerWidget'
+import { FinishedOverlay } from '@/featured/interview/components/screen/FinishedOverlay'
+import { ControlBar } from '@/featured/interview/components/screen/ControlBar'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
 interface InterviewPageProps {

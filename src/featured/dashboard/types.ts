@@ -10,3 +10,8 @@ export interface StatusCard {
   value: string
   colorClass: string
 }
+
+export interface InterviewStat {
+  date: string
+  count: number
+}

@@ -97,13 +97,12 @@ export function StatusSection() {
               <div className="mb-1 flex shrink-0 items-end gap-1 sm:gap-1.5">
                 <div className="w-6 shrink-0"></div>
                 <div className="text-muted-foreground grid w-full grid-cols-8 gap-1 text-center text-[9px] font-medium sm:gap-1.5 sm:text-[10px]">
-                  {['Week1', 'Week2', 'Week3', 'Week4', 'Week5', 'Week6', 'Week7', 'Week8'].map(
-                    (week, i) => (
-                      <div key={i} className="truncate">
-                        {week}
-                      </div>
-                    ),
-                  )}
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <div key={num}>
+                      <span className="2xl:hidden">W{num}</span>
+                      <span className="hidden 2xl:inline">Week{num}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -134,7 +133,7 @@ export function StatusSection() {
                               <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
                                 {formatDateKorean(item.dateObj)}: 면접 {item.count}회
                               </div>
-                              <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
+                              <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                             </div>
                           )}
                         </div>

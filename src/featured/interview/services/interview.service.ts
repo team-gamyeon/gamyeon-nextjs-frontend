@@ -1,7 +1,7 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
 import type { CreateInterviewResponse } from '../types'
 
-export async function createInterviewService(
+export async function createInterview(
   title: string,
 ): Promise<ApiResponse<CreateInterviewResponse>> {
   return await serverApi.post<CreateInterviewResponse>('/api/v1/intvs', {

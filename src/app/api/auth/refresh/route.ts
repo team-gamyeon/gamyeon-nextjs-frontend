@@ -33,7 +33,7 @@ export async function POST() {
       )
     }
 
-    const response = NextResponse.json({ success: true })
+    const response = NextResponse.json({ success: true, accessToken: data.data.accessToken })
     const isProd = process.env.NODE_ENV === 'production'
     const expiresMap = parseSetCookieExpires(res.headers.getSetCookie?.() ?? [])
 

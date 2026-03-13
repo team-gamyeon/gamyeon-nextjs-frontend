@@ -13,6 +13,7 @@ export interface AuthState {
   accessToken: string | null
   isLoggedIn: boolean
   signin: (user: User, accessToken: string) => void
+  setAccessToken: (accessToken: string) => void
   logout: () => void
 }
 

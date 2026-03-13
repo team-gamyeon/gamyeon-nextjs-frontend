@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { useAuthStore } from '@/featured/auth/store'
-import { logout } from '@/featured/auth/services/authService'
+import { logout } from '@/featured/auth/actions/auth.action'
 import { LayoutDashboard, LogOut, Settings } from 'lucide-react'
 
 export function UserProfileButton() {

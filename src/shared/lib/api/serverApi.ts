@@ -97,26 +97,17 @@ async function serverFetch<T>(
   const url = buildUrl(endpoint, config?.params)
   const serializedBody = serializeBody(body)
 
-  const buildCookieHeader = (overrideAccessToken?: string): string => {
-    if (!overrideAccessToken) return cookieStore.toString()
-    const others = cookieStore
-      .getAll()
-      .filter((c) => c.name !== 'accessToken')
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ')
-    return others
-      ? `accessToken=${overrideAccessToken}; ${others}`
-      : `accessToken=${overrideAccessToken}`
-  }
+  const getAccessToken = (overrideAccessToken?: string): string | undefined =>
+    overrideAccessToken ?? cookieStore.get('accessToken')?.value
 
-  const doFetch = (cookieHeader: string) =>
+  const doFetch = (accessToken?: string) =>
     fetch(url, {
       method,
       headers: {
         ...(typeof serializedBody === 'string' && {
           'Content-Type': 'application/json',
         }),
-        Cookie: cookieHeader,
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         ...config?.headers,
       },
       body: serializedBody as BodyInit,
@@ -126,7 +117,7 @@ async function serverFetch<T>(
 
   let res: Response
   try {
-    res = await doFetch(buildCookieHeader())
+    res = await doFetch(getAccessToken())
   } catch {
     throw new NetworkError()
   }
@@ -138,7 +129,7 @@ async function serverFetch<T>(
     if (!newAccessToken) redirect('/signin')
 
     try {
-      res = await doFetch(buildCookieHeader(newAccessToken))
+      res = await doFetch(getAccessToken(newAccessToken))
     } catch {
       throw new NetworkError()
     }

@@ -2,23 +2,14 @@ import { buildUrl, handleResponse, serializeBody } from './_utils'
 import { ApiResponse, NetworkError } from './types'
 import type { RequestConfig } from './types'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/featured/auth/store'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
 // 1. "지금 새 입장권(토큰)을 받아오고 있는 중이야?" (처음엔 아니니까 false)
 let isRefreshing = false
+let pendingQueue: Array<(token: string | null) => void> = []
 
-//void는 영어로 '빈 공간, 아무것도 없음
-// "이 선반(배열)에는 **스위치(함수)**만 올려둘 수 있는데,
-//  그 스위치는 누를 때 반드시 **성공(true)했는지 실패(false)했는지 쪽지(success: boolean)**를 같이 넣어서 눌러야 하고,
-// 누른 다음에 아무것도 뱉어내지 않는(=> void) 스위치여야만 해!
-// 앞으로 여기에 resolve 같은 스위치를 담을 건데, 그 스위치는 성공 여부(boolean)를 알려주는 역할
-let pendingQueue: Array<(success: boolean) => void> = []
-
-// 2. pendingQueue: "진동벨 스위치(resolve)들을 모아두는 선반(배열)"
-function waitForRefresh(): Promise<boolean> {
-  // Promise는 자바스크립트의 비동기 처리 객체, 약속(Promise)**하는 객체(도구)
-
-  // 3. 진동벨(Promise)을 하나 만들어서 손님한테 줍니다.
+function waitForRefresh(): Promise<string | null> {
   return new Promise((resolve) => {
     // 4. Promise를 리턴하는데, resolve 함수 자체를 배열(Queue)에 밀어 넣습니다.
     //  원래는 여기서 햄버거 다 만들고 resolve()를 바로 눌러야 하는데,
@@ -28,40 +19,37 @@ function waitForRefresh(): Promise<boolean> {
   })
 }
 
-function resolveQueue(success: boolean) {
-  // 선반(pendingQueue)에 있는 스위치(resolve)들을 하나씩 꺼내서 success(true 또는 false) 쪽지를 넣고 눌러줍니다!
-  pendingQueue.forEach((resolve) => resolve(success))
-
-  // 스위치를 다 눌렀으니 선반을 다시 비워줍니다.
+function resolveQueue(token: string | null) {
+  pendingQueue.forEach((resolve) => resolve(token))
   pendingQueue = []
 }
 
-/** refresh 엔드포인트 단건 호출 */
-async function refreshOnce(): Promise<boolean> {
-  const res = await fetch('/api/auth/refresh', {
-    method: 'POST',
-    credentials: 'include',
-  })
-  if (!res.ok) return false
+/** refresh 엔드포인트 단건 호출. 성공 시 새 accessToken 반환, 실패 시 null */
+async function refreshOnce(): Promise<string | null> {
+  const res = await fetch('/api/auth/refresh', { method: 'POST' })
+  if (!res.ok) return null
   const data = await res.json()
-  return data.success === true
+  if (!data.success || !data.accessToken) return null
+  return data.accessToken as string
 }
 
 /**
  * refresh 1회 시도.
  * 동시에 여러 요청이 401을 받아도 refresh는 1번만 실행됨.
+ * 성공 시 새 accessToken 반환 및 Zustand store 갱신, 실패 시 null.
  */
-async function attemptRefresh(): Promise<boolean> {
+async function attemptRefresh(): Promise<string | null> {
   if (isRefreshing) return waitForRefresh()
 
   isRefreshing = true
   try {
-    const success = await refreshOnce()
-    resolveQueue(success)
-    return success
+    const newToken = await refreshOnce()
+    if (newToken) useAuthStore.getState().setAccessToken(newToken)
+    resolveQueue(newToken)
+    return newToken
   } catch {
-    resolveQueue(false)
-    return false
+    resolveQueue(null)
+    return null
   } finally {
     isRefreshing = false
   }
@@ -76,13 +64,13 @@ function redirectToSignin() {
 // ─── 메인 fetcher ─────────────────────────────────────────────────────────────
 
 /**
- * 인증 쿠키를 자동으로 포함하는 클라이언트 전용 fetch 래퍼.
+ * Authorization: Bearer 토큰을 자동으로 포함하는 클라이언트 전용 fetch 래퍼.
  *
  * 401 처리 흐름:
  *   원래 요청 → 401
- *     → refresh 최대 2회 시도
- *       ├── 성공 → 토큰 갱신 → 원래 요청 재시도
- *       └── 모두 실패 → /signin redirect
+ *     → refresh 시도 (동시 요청은 1회로 병합)
+ *       ├── 성공 → 새 토큰으로 원래 요청 재시도
+ *       └── 실패 → /signin redirect
  *
  */
 export async function clientFetch<T>(
@@ -90,22 +78,25 @@ export async function clientFetch<T>(
   config?: RequestConfig & { method?: string; body?: BodyInit | null },
 ): Promise<ApiResponse<T>> {
   const url = buildUrl(endpoint, config?.params)
-  const init: RequestInit = {
+
+  const buildInit = (accessToken?: string | null): RequestInit => ({
     method: config?.method ?? 'GET',
-    credentials: 'include',
     headers: {
       ...(typeof config?.body === 'string' && { 'Content-Type': 'application/json' }),
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       ...config?.headers,
     },
     body: config?.body,
     cache: config?.cache,
     next: config?.next,
-  }
+  })
+
+  const currentToken = useAuthStore.getState().accessToken
 
   // ── 원래 요청 ──
   let res: Response
   try {
-    res = await fetch(url, init)
+    res = await fetch(url, buildInit(currentToken))
   } catch {
     const error = new NetworkError()
     if (!config?.silent) toast.error(error.message)
@@ -116,9 +107,9 @@ export async function clientFetch<T>(
     return await handleResponse<T>(res, config)
   }
 
-  // ── 401 → refresh 최대 2회 시도 ──
-  const refreshed = await attemptRefresh()
-  if (!refreshed) {
+  // ── 401 → refresh 시도 ──
+  const newToken = await attemptRefresh()
+  if (!newToken) {
     redirectToSignin()
     return {
       success: false,
@@ -129,10 +120,10 @@ export async function clientFetch<T>(
     }
   }
 
-  // ── refresh 성공 → 원래 요청 재시도 ──
+  // ── refresh 성공 → 새 토큰으로 재시도 ──
   let retryRes: Response
   try {
-    retryRes = await fetch(url, init)
+    retryRes = await fetch(url, buildInit(newToken))
   } catch {
     const error = new NetworkError()
     if (!config?.silent) toast.error(error.message)

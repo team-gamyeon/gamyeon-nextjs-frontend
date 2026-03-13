@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 import { NOTICE_CATEGORY } from '@/featured/notice/constants'
-import { formatDateDot } from '@/shared/lib/utils/date'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
 import Image from 'next/image'
 
 interface NoticeDetailProps {
@@ -67,10 +67,6 @@ function NoticeContent({ content }: { content: string }) {
   )
 }
 
-const checkIsRecent = (dateString: string) => {
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000 // 3일 치 시간
-  return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
-}
 
 export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailProps) {
   const shouldReduceMotion = useReducedMotion()

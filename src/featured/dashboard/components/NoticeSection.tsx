@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { getNoticesAction } from '@/featured/notice/actions/notice.action'
 import type { Notice } from '@/featured/notice/types'
 import { NOTICE_CATEGORY } from '@/featured/notice/constants'
-import { formatDateDot } from '@/shared/lib/utils/date'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -19,10 +19,6 @@ const fadeUp = {
   }),
 }
 
-const checkIsRecent = (dateString: string) => {
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
-  return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
-}
 
 type NoticeWithUI = Notice & { isRecent: boolean }
 

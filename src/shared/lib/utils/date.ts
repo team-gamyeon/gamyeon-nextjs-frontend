@@ -54,3 +54,13 @@ export const addDays = (dateObj: Date, n: number): Date => {
   d.setDate(d.getDate() + n)
   return d
 }
+
+/**
+ * 주어진 날짜 문자열이 현재로부터 3일 이내인지 확인합니다.
+ * @param dateString ISO 형식의 날짜 문자열
+ * @returns 3일 이내이면 true
+ */
+export const checkIsRecent = (dateString: string): boolean => {
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
+  return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
+}

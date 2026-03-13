@@ -6,17 +6,13 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/shared/ui/card'
 import type { Notice } from '@/featured/notice/types'
 import { NOTICE_CATEGORY } from '@/featured/notice/constants'
-import { formatDateDot } from '@/shared/lib/utils/date'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
 
 interface NoticeListProps {
   notices: Notice[]
   search: string
 }
 
-const checkIsRecent = (dateString: string) => {
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000 // 3일 치 시간
-  return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
-}
 
 export function NoticeList({ notices, search }: NoticeListProps) {
   const router = useRouter()

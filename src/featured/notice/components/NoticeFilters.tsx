@@ -13,8 +13,6 @@ interface NoticeFiltersProps {
   onCategoryChange: (value: FilterCategory) => void
 }
 
-// 2. 파일 안에 있던 const FILTER_CATEGORIES 배열은 깔끔하게 삭제했습니다. (상수로 뺐으니까요!)
-
 export function NoticeFilters({
   search,
   onSearchChange,
@@ -24,9 +22,7 @@ export function NoticeFilters({
   return (
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap gap-1.5">
-        {/* 3. 위에서 import 해온 FILTER_CATEGORIES 상수를 사용해서 그립니다. */}
         {FILTER_CATEGORIES.map((c) => {
-          // c가 'ALL'이면 '전체'라고 적고, 아니면 NOTICE_CATEGORY 사전에서 한글 라벨을 찾아옵니다.
           const label = c === 'ALL' ? '전체' : NOTICE_CATEGORY[c]?.label
 
           return (

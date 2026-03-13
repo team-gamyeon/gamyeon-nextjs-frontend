@@ -17,11 +17,9 @@ export function useActivityData() {
     async function fetchActivity() {
       const result = await getInterviewStatsAction()
 
-      // ✅ 1. 서버 데이터를 정리할 때, 날짜 형식을 "YYYY.MM.DD"로 통일합니다.
       const statMap: Record<string, number> = {}
       if (result.success && result.data) {
         result.data.forEach((stat) => {
-          // 서버에서 "2026-03-12" 형태로 올 수 있으니 "-"를 "."으로 바꿔서 저장해둡니다.
           const normalizedDate = stat.date.replaceAll('-', '.')
           statMap[normalizedDate] = stat.count
         })
@@ -31,16 +29,11 @@ export function useActivityData() {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      // ✅ 2. 이번 주 일요일 구하기 (복잡한 수학 계산 ➡️ 유틸 함수 사용)
-      const monday = getMondayOf(today) // 이번 주 월요일 구하기
-      const endDate = addDays(monday, 6) // 월요일에서 6일 더해서 일요일 만들기!
+      const monday = getMondayOf(today)
+      const endDate = addDays(monday, 6)
 
-      // 56칸(8주)을 하나씩 돌면서 채워 넣습니다.
       for (let i = 55; i >= 0; i--) {
-        // ✅ 3. 과거 날짜 구하기 (유틸 함수 사용)
         const currentDate = addDays(endDate, -i)
-
-        // ✅ 4. 날짜를 글자("YYYY.MM.DD")로 바꾸기 (복잡한 코드 ➡️ 유틸 함수 사용)
         const dateString = formatDateDot(currentDate)
 
         let count = 0

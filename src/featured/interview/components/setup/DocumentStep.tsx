@@ -9,12 +9,8 @@ interface DocumentStepProps {
   setPortfolio: (f: File | null) => void
   setSelfIntro: (f: File | null) => void
   onComplete: () => void
+  isUploading: boolean
 }
-
-const makeFileHandler =
-  (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setter(e.target.files?.[0] ?? null)
-  }
 
 export function DocumentStep({
   resume,
@@ -24,14 +20,28 @@ export function DocumentStep({
   setPortfolio,
   setSelfIntro,
   onComplete,
+  isUploading,
 }: DocumentStepProps) {
-  const hasAnyDoc = !!(resume || portfolio || selfIntro)
+  const canComplete = !!resume
+  const handleFileChange =
+    (setter: (f: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
 
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+      if (!isPdf) {
+        alert('PDF 파일만 업로드 가능합니다.')
+        e.target.value = ''
+        return
+      }
+
+      setter(file)
+    }
   const docs = [
-    { label: '(필수) 이력서', file: resume, setter: setResume },
-    { label: '(선택) 포트폴리오', file: portfolio, setter: setPortfolio },
-    { label: '(선택) 자기소개서', file: selfIntro, setter: setSelfIntro },
-  ] as { label: string; file: File | null; setter: (f: File | null) => void }[]
+    { label: '(필수) 이력서', type: 'RESUME', file: resume, setter: setResume },
+    { label: '(선택) 포트폴리오', type: 'PORTFOLIO', file: portfolio, setter: setPortfolio },
+    { label: '(선택) 자기소개서', type: 'COVER_LETTER', file: selfIntro, setter: setSelfIntro },
+  ]
 
   return (
     <div className="space-y-5">
@@ -67,8 +77,8 @@ export function DocumentStep({
                 <input
                   type="file"
                   className="hidden"
-                  accept=".pdf,.docx,.hwp,.txt"
-                  onChange={makeFileHandler(setter)}
+                  accept=".pdf"
+                  onChange={handleFileChange(setter)}
                 />
               </label>
             )}
@@ -76,9 +86,23 @@ export function DocumentStep({
         ))}
       </div>
       <div className="flex gap-2 pt-1">
-        <Button size="sm" disabled={!hasAnyDoc} className="gap-2" onClick={onComplete}>
-          완료
-          <ChevronRight className="h-3.5 w-3.5" />
+        <Button
+          size="sm"
+          disabled={!canComplete || isUploading}
+          className="gap-2"
+          onClick={onComplete}
+        >
+          {isUploading ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              업로드 중
+            </>
+          ) : (
+            <>
+              완료
+              <ChevronRight className="h-3.5 w-3.5" />
+            </>
+          )}
         </Button>
       </div>
     </div>

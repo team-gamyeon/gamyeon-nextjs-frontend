@@ -82,7 +82,7 @@ export function QuickStartSection({ resumeInterviewId }: QuickStartSectionProps 
             icon={RotateCcw}
             iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
             iconColorStyle="text-blue-600"
-            href={resumeInterviewId ? `/interview?resume=true&id=${resumeInterviewId}` : '/interview'}
+            href={resumeInterviewId ? `/interview?resume=true&id=${resumeInterviewId}` : '/screen'}
             buttonText="이어서 면접보기"
             isDisabled={!hasInProgressInterview}
           />

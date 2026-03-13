@@ -20,7 +20,7 @@ const navItems = [
   { icon: House, label: '랜딩 페이지', href: '/' },
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
   { icon: Megaphone, label: '공지사항', href: '/notices' },
-  { icon: Video, label: '면접 시작', href: '/interview' },
+  { icon: Video, label: '면접 시작', href: '/screen' },
   { icon: ClipboardList, label: '면접 기록', href: '/history' },
 ]
 

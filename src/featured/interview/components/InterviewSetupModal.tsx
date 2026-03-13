@@ -15,7 +15,10 @@ import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
 import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
-import { createInterviewAction } from '@/featured/interview/actions/interview.action'
+import {
+  createInterviewAction,
+  startInterviewAction,
+} from '@/featured/interview/actions/interview.action'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -230,10 +233,14 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                 disabled={
                   !allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))
                 }
-                onClick={() => {
+                onClick={async () => {
                   if (!camera.cameraStream) {
                     console.error('카메라 스트림이 아직 준비되지 않았습니다.')
                     return
+                  }
+
+                  if (interviewId) {
+                    await startInterviewAction(interviewId)
                   }
 
                   session.handleSetupComplete({

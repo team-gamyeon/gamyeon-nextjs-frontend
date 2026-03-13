@@ -134,7 +134,7 @@ export function StatusSection() {
                               <div className="rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-md">
                                 {formatDateKorean(item.dateObj)}: 면접 {item.count}회
                               </div>
-                              <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-[4px] border-transparent border-t-slate-800"></div>
+                              <div className="absolute top-full left-1/2 -mt-px -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                             </div>
                           )}
                         </div>

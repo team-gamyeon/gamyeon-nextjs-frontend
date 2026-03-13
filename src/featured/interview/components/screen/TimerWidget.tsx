@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { CircularTimer } from '@/featured/interview/components/interview/CircularTimer'
+import { CircularTimer } from '@/featured/interview/components/screen/CircularTimer'
 import type { Phase } from '@/featured/interview/types'
 import { TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 

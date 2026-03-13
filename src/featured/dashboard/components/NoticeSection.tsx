@@ -5,8 +5,14 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getNotices } from '../services/dashboardService'
-import type { Notice, NoticeCategory } from '../types'
+
+// ✅ 1. 웨이터(Action) 불러오기
+import { getNoticesAction } from '../actions/dashboard.action'
+
+// ✅ 2. 공지사항 공식 타입과 설정(색상/라벨) 불러오기
+// (주의: @/featured/notice/... 경로는 실제 프로젝트 폴더 구조에 맞게 수정해 주세요)
+import type { Notice } from '@/featured/notice/types'
+import { NOTICE_CATEGORY_CONFIG } from '@/featured/notice/constants'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -17,43 +23,25 @@ const fadeUp = {
   }),
 }
 
-const categoryConfig: Record<NoticeCategory, { label: string; color: string }> = {
-  NOTICE: { label: '공지', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  UPDATE: {
-    label: '업데이트',
-    color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  },
-  GUIDE: {
-    label: '안내',
-    color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-  },
-  EVENT: {
-    label: '이벤트',
-    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-  },
-  MAINTENANCE: {
-    label: '점검',
-    color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-  },
-}
-
 export function NoticeSection() {
   const [notices, setNotices] = useState<Notice[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isError, setIsError] = useState(false)
+
+  // 🗑️ isError 상태 제거
 
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
-      setIsError(false)
 
-      const result = await getNotices()
+      const result = await getNoticesAction()
 
-      if (result.success) {
+      // result.data가 null일 경우를 대비해 기본값 빈 배열([]) 설정
+      if (result.success && result.data) {
         setNotices(result.data)
       } else {
+        // 에러가 나거나 데이터가 없으면 빈 배열로 조용히 처리
         console.error('공지사항 불러오기 실패:', result.message)
-        setIsError(true)
+        setNotices([])
       }
       setIsLoading(false)
     }
@@ -87,13 +75,13 @@ export function NoticeSection() {
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
               공지사항을 불러오는 중입니다...
             </div>
-          ) : isError ? (
-            <div className="text-destructive flex flex-1 items-center justify-center text-sm">
-              공지사항을 불러오지 못했습니다.
-            </div>
           ) : notices.length > 0 ? (
             notices.map((item) => {
-              const config = categoryConfig[item.category] || categoryConfig.NOTICE
+              const config = NOTICE_CATEGORY_CONFIG[item.category] || NOTICE_CATEGORY_CONFIG.NOTICE
+
+              // 작성일 기준 3일(72시간) 이내면 새 글로 취급하는 로직
+              const isRecent =
+                new Date(item.createdAt).getTime() > Date.now() - 3 * 24 * 60 * 60 * 1000
 
               return (
                 <Link
@@ -111,6 +99,12 @@ export function NoticeSection() {
 
                       <div className="flex min-w-0 items-center gap-1.5">
                         <p className="truncate text-sm font-medium">{item.title}</p>
+
+                        {isRecent && (
+                          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+                            N
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -122,8 +116,9 @@ export function NoticeSection() {
               )
             })
           ) : (
+            // 데이터가 없거나 에러가 났을 때 공통으로 보여줄 UI
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-              등록된 공지사항이 없습니다.
+              새로운 공지사항이 없습니다.
             </div>
           )}
         </CardContent>

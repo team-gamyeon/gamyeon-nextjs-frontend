@@ -1,6 +1,7 @@
-import type { NoticeCategory } from './types'
+import type { NoticeCategory, FilterCategory } from './types'
 
-const NOTICE_CATEGORY_CONFIG: Record<NoticeCategory, { label: string; color: string }> = {
+// 카테고리 설정값 모음
+const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: string }> = {
   NOTICE: {
     label: '공지',
     color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
@@ -25,7 +26,16 @@ const NOTICE_CATEGORY_CONFIG: Record<NoticeCategory, { label: string; color: str
 
 // const NOTICE_PAGE_SIZE = 10;
 
-export {
-  NOTICE_CATEGORY_CONFIG,
-  // NOTICE_PAGE_SIZE,
-}
+// 화면에 그릴 필터 버튼 목록 (이것도 상수로 관리!)
+// ❌ export 제거!
+const FILTER_CATEGORIES: FilterCategory[] = [
+  'ALL',
+  'NOTICE',
+  'UPDATE',
+  'GUIDE',
+  'EVENT',
+  'MAINTENANCE',
+]
+
+// 여기서 한 번에 깔끔하게 내보냅니다.
+export { NOTICE_CATEGORY, FILTER_CATEGORIES }

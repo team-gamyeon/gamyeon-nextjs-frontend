@@ -1,7 +1,7 @@
 // 1. API 명세에 맞춘 카테고리
 export type NoticeCategory = 'NOTICE' | 'UPDATE' | 'GUIDE' | 'EVENT' | 'MAINTENANCE'
 
-//  필터용 카테고리
+// 필터용 카테고리
 export type FilterCategory = 'ALL' | NoticeCategory
 
 // 2. 공지사항 목록 타입
@@ -9,11 +9,11 @@ export interface Notice {
   id: number
   category: NoticeCategory
   title: string
-  createdAt: string // (기존 목업의 date 대신 API 명세인 createdAt 사용)
+  createdAt: string
 }
 
 // 3. 공지사항 상세 타입
-export interface NoticeDetail {
+export interface NoticeDetailResponse {
   id: number
   category: NoticeCategory
   title: string

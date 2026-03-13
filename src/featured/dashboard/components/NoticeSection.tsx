@@ -5,9 +5,9 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getNoticesAction } from '../actions/dashboard.action'
+import { getNoticesAction } from '@/featured/notice/actions/notice.action'
 import type { Notice } from '@/featured/notice/types'
-import { NOTICE_CATEGORY_CONFIG } from '@/featured/notice/constants'
+import { NOTICE_CATEGORY } from '@/featured/notice/constants'
 import { formatDateDot } from '@/shared/lib/utils/date'
 
 const fadeUp = {
@@ -24,7 +24,6 @@ const checkIsRecent = (dateString: string) => {
   return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
 }
 
-// 새 글(isRecent)'이라는 빨간색 N 스티커를 붙일지 말지 표시 
 type NoticeWithUI = Notice & { isRecent: boolean }
 
 export function NoticeSection() {
@@ -35,20 +34,28 @@ export function NoticeSection() {
     async function fetchNotices() {
       setIsLoading(true)
 
-      const result = await getNoticesAction()
+      // [수정 2] action에서 던진 에러(throw)를 잡기 위해 try...catch 블록을 추가합니다.
+      try {
+        const result = await getNoticesAction()
 
-      if (result.success && result.data) {
-        const processedNotices = result.data.map((item) => ({
-          ...item,
-          isRecent: checkIsRecent(item.createdAt),
-        }))
-        setNotices(processedNotices)
-      } else {
-        console.error('공지사항 불러오기 실패:', result.message)
+        if (result.success && result.data) {
+          const processedNotices = result.data.map((item) => ({
+            ...item,
+            isRecent: checkIsRecent(item.createdAt),
+          }))
+          setNotices(processedNotices)
+        } else {
+          console.error('공지사항 불러오기 실패:', result.message)
+          setNotices([])
+        }
+      } catch (error) {
+        // 서버가 터지는 등 치명적인 에러가 발생했을 때 화면이 깨지지 않도록 방어합니다.
+        console.error('공지사항 통신 에러 발생:', error)
         setNotices([])
+      } finally {
+        // 성공하든 실패하든 마지막에 로딩 상태를 끝냅니다.
+        setIsLoading(false)
       }
-
-      setIsLoading(false)
     }
 
     fetchNotices()
@@ -82,7 +89,7 @@ export function NoticeSection() {
             </div>
           ) : notices.length > 0 ? (
             notices.map((item) => {
-              const config = NOTICE_CATEGORY_CONFIG[item.category] || NOTICE_CATEGORY_CONFIG.NOTICE
+              const config = NOTICE_CATEGORY[item.category] || NOTICE_CATEGORY.NOTICE
 
               return (
                 <Link

@@ -14,11 +14,11 @@ export class NetworkError extends Error {
 
 /** 서버 공통 응답 래퍼 */
 export interface ApiResponse<T> {
-  success: boolean
-  code: string
-  message: string
-  data: T | null
-  errors?: ApiFieldError[] | null
+  success: boolean // 1️⃣ 성공 여부 (true / false)
+  code: string // 2️⃣ 상태 코드 (예: "CMMN-S000", "ERROR-001")
+  message: string // 3️⃣ 안내 메시지 (예: "성공", "불러오기 실패")
+  data: T | null // 4️⃣ 진짜 데이터 (들어있을 수도 있고, 비어있을 수도 있음!)
+  errors?: ApiFieldError[] | null // 5️⃣ (선택) 상세 에러 내역
 }
 
 export interface RequestConfig {

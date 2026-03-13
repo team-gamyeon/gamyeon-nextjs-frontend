@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-// ✅ 1. 웨이터(Action) 부르기!
 import { getInterviewStatsAction } from '../actions/dashboard.action'
+import { addDays, formatDateDot, getMondayOf } from '@/shared/lib/utils/date'
 
 export interface ActivityDay {
   dateObj: Date
@@ -14,47 +14,37 @@ export function useActivityData() {
   useEffect(() => {
     setMounted(true)
 
-    // ✅ 2. 비동기로 웨이터에게 데이터를 달라고 요청하는 함수
     async function fetchActivity() {
       const result = await getInterviewStatsAction()
 
-      // ✅ 3. 서버 데이터 정리하기 (날짜를 찾기 쉽게 사전처럼 만듭니다)
-      // 예: { "2026-03-12": 2, "2026-03-13": 5 }
+      // ✅ 1. 서버 데이터를 정리할 때, 날짜 형식을 "YYYY.MM.DD"로 통일합니다.
       const statMap: Record<string, number> = {}
       if (result.success && result.data) {
         result.data.forEach((stat) => {
-          statMap[stat.date] = stat.count
+          // 서버에서 "2026-03-12" 형태로 올 수 있으니 "-"를 "."으로 바꿔서 저장해둡니다.
+          const normalizedDate = stat.date.replaceAll('-', '.')
+          statMap[normalizedDate] = stat.count
         })
       }
 
-      // --- 여기서부터는 기존과 동일하게 56일치 빈 도시락통을 만드는 과정 ---
       const data: ActivityDay[] = []
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const currentDayOfWeek = today.getDay()
-      const mappedDay = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1
-      const daysToSunday = 6 - mappedDay
-
-      const endDate = new Date(today)
-      endDate.setDate(today.getDate() + daysToSunday)
+      // ✅ 2. 이번 주 일요일 구하기 (복잡한 수학 계산 ➡️ 유틸 함수 사용)
+      const monday = getMondayOf(today) // 이번 주 월요일 구하기
+      const endDate = addDays(monday, 6) // 월요일에서 6일 더해서 일요일 만들기!
 
       // 56칸(8주)을 하나씩 돌면서 채워 넣습니다.
       for (let i = 55; i >= 0; i--) {
-        const currentDate = new Date(endDate)
-        currentDate.setDate(endDate.getDate() - i)
-        currentDate.setHours(0, 0, 0, 0)
+        // ✅ 3. 과거 날짜 구하기 (유틸 함수 사용)
+        const currentDate = addDays(endDate, -i)
 
-        // Date 객체를 YYYY-MM-DD 형태의 문자열로 변환 (서버 날짜 형식과 비교하기 위해)
-        const year = currentDate.getFullYear()
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-        const day = String(currentDate.getDate()).padStart(2, '0')
-        const dateString = `${year}-${month}-${day}`
+        // ✅ 4. 날짜를 글자("YYYY.MM.DD")로 바꾸기 (복잡한 코드 ➡️ 유틸 함수 사용)
+        const dateString = formatDateDot(currentDate)
 
         let count = 0
         if (currentDate <= today) {
-          // ✅ 4. 랜덤(가짜) 숫자가 아니라, 위에서 만든 진짜 사전(statMap)에서 꺼내옵니다!
-          // 만약 사전(statMap)에 그 날짜가 있으면 그 숫자를 넣고, 없으면 0을 넣습니다.
           count = statMap[dateString] || 0
         }
 
@@ -63,16 +53,12 @@ export function useActivityData() {
           count: count,
         })
       }
-
-      // 완성된 56칸 도시락을 UI로 전달!
       setActivityData(data)
     }
 
-    // 위에서 만든 함수 실행
     fetchActivity()
   }, [])
 
-  // 횟수에 따라 에메랄드 색상 클래스를 반환하는 함수 (수정 안 함!)
   const getLevelColor = (count: number, dateObj: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)

@@ -5,7 +5,6 @@ import type { InterviewStat } from '../types'
 import { getInterviewStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
 import { Notice, NoticeDetail } from '@/featured/notice/types'
 
-// 📌 에러 시 반환하는 객체의 타입을 미리 정의해두면 깔끔합니다.
 type ActionError = { success: false; message: string }
 
 /** * 일자별 면접 횟수 조회 Action */

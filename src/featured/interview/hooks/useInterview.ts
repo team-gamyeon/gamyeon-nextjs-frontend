@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { QUESTIONS, TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
 import type { Phase } from '@/featured/interview/types'
+import { useVideoRecorder } from '@/featured/interview/hooks/useVideoRecorder'
 
 export function useInterview() {
   const router = useRouter()
+  const { stopRecording, startRecording } = useVideoRecorder()
 
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [phase, setPhase] = useState<Phase>('ready')
@@ -73,8 +75,10 @@ export function useInterview() {
     router.push('/dashboard')
   }
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     const questionIndex = currentQuestionRef.current
+
+    const video = await stopRecording()
 
     if (questionIndex < QUESTIONS.length - 1) {
       setPhase('transition')

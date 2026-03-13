@@ -1,5 +1,6 @@
-import { buildUrl, parseApiResponse, serializeBody } from './_utils'
-import { NetworkError, RequestConfig } from './types'
+import { buildUrl, handleResponse, serializeBody } from './_utils'
+import { ApiResponse, NetworkError } from './types'
+import type { RequestConfig } from './types'
 import { toast } from 'sonner'
 
 // ─── 401 refresh 동시 요청 방지 ────────────────────────────────────────────────
@@ -65,20 +66,16 @@ function redirectToSignin() {
  *       ├── 성공 → 토큰 갱신 → 원래 요청 재시도
  *       └── 모두 실패 → /signin redirect
  *
- * @throws {ApiError}     서버가 success: false를 반환한 경우
- * @throws {NetworkError} 네트워크 자체가 실패한 경우
  */
 export async function clientFetch<T>(
   endpoint: string,
   config?: RequestConfig & { method?: string; body?: BodyInit | null },
-): Promise<T | null> {
+): Promise<ApiResponse<T>> {
   const url = buildUrl(endpoint, config?.params)
   const init: RequestInit = {
     method: config?.method ?? 'GET',
     credentials: 'include',
     headers: {
-      // string(JSON)일 때만 Content-Type 지정
-      // FormData·Blob 등은 런타임이 자동으로 설정하도록 생략
       ...(typeof config?.body === 'string' && { 'Content-Type': 'application/json' }),
       ...config?.headers,
     },
@@ -98,19 +95,20 @@ export async function clientFetch<T>(
   }
 
   if (res.status !== 401) {
-    const { data, error } = await parseApiResponse<T>(res)
-    if (error) {
-      if (!config?.silent) toast.error(error.message)
-      throw error
-    }
-    return data
+    return await handleResponse<T>(res, config)
   }
 
   // ── 401 → refresh 최대 2회 시도 ──
   const refreshed = await attemptRefresh()
   if (!refreshed) {
     redirectToSignin()
-    return null
+    return {
+      success: false,
+      code: 'AUTH_EXPIRED',
+      message: '인증 만료',
+      data: null as T,
+      errors: null,
+    }
   }
 
   // ── refresh 성공 → 원래 요청 재시도 ──
@@ -122,32 +120,24 @@ export async function clientFetch<T>(
     if (!config?.silent) toast.error(error.message)
     throw error
   }
-
-  const { data, error } = await parseApiResponse<T>(retryRes)
-  if (error) {
-    if (!config?.silent) toast.error(error.message)
-    throw error
-  }
-  return data
+  return await handleResponse<T>(retryRes, config)
 }
 
-/** body 없는 메서드용 (GET, DELETE) */
-function requestWithoutBody<T>(method: string, endpoint: string, config?: RequestConfig) {
+function requestWithoutBody<T>(
+  method: string,
+  endpoint: string,
+  config?: RequestConfig,
+): Promise<ApiResponse<T>> {
   return clientFetch<T>(endpoint, { ...config, method })
 }
 
-/** body 있는 메서드용 (POST, PUT, PATCH) */
 function requestWithBody<T>(
   method: string,
   endpoint: string,
   body?: unknown,
   config?: RequestConfig,
-) {
-  return clientFetch<T>(endpoint, {
-    ...config,
-    method,
-    body: serializeBody(body),
-  })
+): Promise<ApiResponse<T>> {
+  return clientFetch<T>(endpoint, { ...config, method, body: serializeBody(body) })
 }
 
 /**

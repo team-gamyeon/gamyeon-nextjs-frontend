@@ -17,7 +17,6 @@ const fadeUp = {
   }),
 }
 
-// 📌 카테고리별 한국어 라벨 및 색상 맵핑 객체
 const categoryConfig: Record<NoticeCategory, { label: string; color: string }> = {
   NOTICE: { label: '공지', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
   UPDATE: {
@@ -40,13 +39,12 @@ const categoryConfig: Record<NoticeCategory, { label: string; color: string }> =
 
 export function NoticeSection() {
   const [notices, setNotices] = useState<Notice[]>([])
-  // 📌 로딩 및 에러 상태 추가
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
 
   useEffect(() => {
     async function fetchNotices() {
-      setIsLoading(true) // 페치 시작 전 로딩 켜기
+      setIsLoading(true)
       setIsError(false)
 
       const result = await getNotices()
@@ -55,9 +53,9 @@ export function NoticeSection() {
         setNotices(result.data)
       } else {
         console.error('공지사항 불러오기 실패:', result.message)
-        setIsError(true) // 실패 시 에러 상태 켜기
+        setIsError(true)
       }
-      setIsLoading(false) // 페치 완료 후 로딩 끄기
+      setIsLoading(false)
     }
 
     fetchNotices()
@@ -85,7 +83,6 @@ export function NoticeSection() {
 
       <Card className="border-border/50 flex h-full flex-col overflow-hidden py-4">
         <CardContent className="flex flex-1 flex-col p-0">
-          {/* 📌 상태에 따른 조건부 렌더링 */}
           {isLoading ? (
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
               공지사항을 불러오는 중입니다...
@@ -96,7 +93,6 @@ export function NoticeSection() {
             </div>
           ) : notices.length > 0 ? (
             notices.map((item) => {
-              // 카테고리 설정 가져오기 (fallback 처리 포함)
               const config = categoryConfig[item.category] || categoryConfig.NOTICE
 
               return (
@@ -107,7 +103,6 @@ export function NoticeSection() {
                 >
                   <div className="hover:bg-muted/40 flex h-full w-full items-center justify-between gap-4 px-5 transition-colors">
                     <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                      {/* 📌 동적 카테고리 뱃지 적용 */}
                       <span
                         className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${config.color}`}
                       >

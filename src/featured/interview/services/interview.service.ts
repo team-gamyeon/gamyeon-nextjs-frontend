@@ -1,5 +1,12 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
-import type { CreateInterviewResponse } from '../types'
+import {
+  CompleteFileUploadResponse,
+  CreateInterviewResponse,
+  FileInfo,
+  IssuePresignedUrlRequest,
+  IssuePresignedUrlResponse,
+  UpdateInterviewTitleResponse,
+} from '../types'
 
 export async function createInterview(
   title: string,
@@ -9,6 +16,39 @@ export async function createInterview(
   })
 }
 
+export async function updateInterviewTitle(
+  id: number,
+  title: string,
+): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
+  const intvId = id
+  return await serverApi.patch(`/api/v1/intvs/${intvId}`, {
+    title,
+  })
+}
+
+export async function issuePresignedUrl(
+  resBody: IssuePresignedUrlRequest,
+  id: number,
+): Promise<ApiResponse<IssuePresignedUrlResponse>> {
+  const { fileType, originalFileName, fileSizeBytes, contentType } = resBody
+  const intvId = id
+  return await serverApi.post(`/api/v1/preparations/${intvId}/files/presigned-url`, {
+    fileType: fileType,
+    originalFileName: originalFileName,
+    fileSizeBytes: fileSizeBytes,
+    contentType: contentType,
+  })
+}
+
+export async function completeFileUpload(
+  files: FileInfo[],
+  id: number,
+): Promise<ApiResponse<CompleteFileUploadResponse>> {
+  const intvId = id
+  return await serverApi.post(`/api/v1/preparation/${intvId}/files`, {
+    files: files,
+  })
+}
 // 면접 시작
 export async function startInterview(intvId: number): Promise<ApiResponse<null>> {
   return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/start`)

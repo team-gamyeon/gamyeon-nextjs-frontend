@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test'
  * 면접 타이틀 입력 흐름 테스트
  * 1. 로그인 페이지 접속
  * 2. Google 로그인 클릭 → 대시보드 이동
- * 3. 면접 시작("지금 시작") 클릭 → /interview 이동
+ * 3. 면접 시작("지금 시작") 클릭 → /screen 이동
  * 4. 타이틀 입력 → 확인 클릭
  * 5. createInterview 서버 액션 응답 확인 (POST /api/v1/intvs)
  */
@@ -18,10 +18,10 @@ test('면접 타이틀 입력 후 서버 응답 확인', async ({ page }) => {
   await page.waitForURL('**/dashboard')
   console.log('[1] 대시보드 이동 완료')
 
-  // ── 3. 면접 시작 카드 → /interview ──────────────────────────────
+  // ── 3. 면접 시작 카드 → /screen ──────────────────────────────
   await page.getByRole('link', { name: '지금 시작' }).click()
   await page.waitForURL('**/interview')
-  console.log('[2] /interview 이동 완료')
+  console.log('[2] /screen 이동 완료')
 
   // 셋업 모달이 열릴 때까지 대기
   const dialog = page.getByRole('dialog')
@@ -39,9 +39,7 @@ test('면접 타이틀 입력 후 서버 응답 확인', async ({ page }) => {
   // 실제 백엔드 API (POST /api/v1/intvs) 요청도 함께 감지
   const [serverActionResponse] = await Promise.all([
     page.waitForResponse(
-      (res) =>
-        res.request().method() === 'POST' &&
-        res.url().includes('/interview'),
+      (res) => res.request().method() === 'POST' && res.url().includes('/screen'),
       { timeout: 15_000 },
     ),
     dialog.getByRole('button', { name: '확인' }).click(),
@@ -116,5 +114,7 @@ test('createInterview API 응답 구조 직접 확인', async ({ request }) => {
   console.log('=========================================\n')
 
   // 응답 상태 코드 기록 (서버가 실제로 어떻게 응답하는지 확인)
-  console.log(`응답 상태: ${status} (${status < 300 ? '성공' : status < 500 ? '클라이언트 에러' : '서버 에러'})`)
+  console.log(
+    `응답 상태: ${status} (${status < 300 ? '성공' : status < 500 ? '클라이언트 에러' : '서버 에러'})`,
+  )
 })

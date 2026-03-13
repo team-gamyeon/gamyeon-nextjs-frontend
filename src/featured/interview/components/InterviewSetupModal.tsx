@@ -16,9 +16,13 @@ import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import {
+  completeFileUploadAction,
   createInterviewAction,
+  issuePresignedUrlAction,
   startInterviewAction,
+  updateInterviewTitleAction,
 } from '@/featured/interview/actions/interview.action'
+import uploadFileToS3 from '@/shared/lib/utils/uploadFileToS3'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -38,6 +42,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const [resume, setResume] = useState<File | null>(null)
   const [portfolio, setPortfolio] = useState<File | null>(null)
   const [selfIntro, setSelfIntro] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const camera = useCameraModalHandler()
   const micPerm = useMicPermission()
@@ -77,6 +82,72 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const doneCount = completedSteps.size
   const allDone = doneCount === 4
 
+  const handleDocumentConfirm = async () => {
+    if (!interviewId || !resume) return
+
+    try {
+      setIsUploading(true)
+      const uploadTargets = [
+        { file: resume, type: 'RESUME' },
+        { file: portfolio, type: 'PORTFOLIO' },
+        { file: selfIntro, type: 'COVER_LETTER' },
+      ].filter((target) => target.file !== null) // 선택 제출 안 한 건 제외
+      const uploadedFiles: Array<{
+        fileType: string
+        originalFileName: string
+        fileKey: string
+        fileUrl: string
+      }> = []
+
+      for (const target of uploadTargets) {
+        if (!target.file) continue
+
+        const urlRes = await issuePresignedUrlAction(
+          {
+            fileType: target.type,
+            originalFileName: target.file.name,
+            fileSizeBytes: target.file.size,
+            contentType: 'application/pdf',
+          },
+          interviewId,
+        )
+
+        if (!urlRes.success || !urlRes.data) {
+          throw new Error(`${target.type} presigned URL 발급 실패`)
+        }
+
+        const { presignedUrl, fileType, originalFileName, fileKey, fileUrl } = urlRes.data
+        const s3Res = await uploadFileToS3(target.file, presignedUrl)
+
+        if (!s3Res.success) {
+          throw new Error(`${target.type} S3 업로드 실패`)
+        }
+
+        uploadedFiles.push({
+          fileType,
+          originalFileName,
+          fileKey,
+          fileUrl,
+        })
+      }
+
+      if (uploadedFiles.length === 0) {
+        console.log('업로드할 파일이 없습니다.')
+      }
+
+      const finalRes = await completeFileUploadAction({ files: uploadedFiles }, interviewId)
+      if (!finalRes.success) {
+        console.log(finalRes.message || '파일 업로드 완료 처리 실패')
+      }
+
+      completeStep(2)
+    } catch (error) {
+      console.error('문서 업로드 중 오류:', error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const completeStep = (step: number) => {
     const newCompleted = new Set([...completedSteps, step])
     setCompletedSteps(newCompleted)
@@ -94,9 +165,23 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     })
   }
 
+  const syncInterviewTitle = async () => {
+    if (!interviewId) return
+    const nextTitle = title.trim()
+    if (!nextTitle) return
+
+    const result = await updateInterviewTitleAction(interviewId, nextTitle)
+    if (!result.success) {
+      console.error('면접 제목 수정 실패:', result.message)
+    }
+  }
+
   const navigateToStep = (step: number) => {
     if (isResume && RESUME_LOCKED_STEPS.has(step)) return
     if (maxReachedStep >= 4 || completedSteps.has(step)) {
+      if (step === 1) {
+        void syncInterviewTitle()
+      }
       setCurrentStep(step)
     }
   }
@@ -141,7 +226,8 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
             setResume={handleDocumentChange(setResume)}
             setPortfolio={handleDocumentChange(setPortfolio)}
             setSelfIntro={handleDocumentChange(setSelfIntro)}
-            onComplete={() => completeStep(2)}
+            onComplete={handleDocumentConfirm}
+            isUploading={isUploading}
           />
         )
       case 3:

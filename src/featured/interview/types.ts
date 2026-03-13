@@ -66,6 +66,43 @@ export interface CreateInterviewResponse {
   status: string
 }
 
+export interface UpdateInterviewTitleResponse {
+  intvId: number
+  title: string
+  status: string
+}
+export type InterviewFileType = 'RESUME' | 'PORTFOLIO' | 'SELF_INTRO'
+export interface IssuePresignedUrlRequest {
+  fileType: string
+  originalFileName: string
+  contentType: string
+  fileSizeBytes: number
+}
+export interface FileInfo {
+  fileType: string
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+}
+export interface IssuePresignedUrlResponse {
+  preparationId: number
+  fileType: InterviewFileType
+  originalFileName: string
+  fileKey: string
+  presignedUrl: string
+  fileUrl: string
+  expiresInSeconds: number
+}
+export type PreparationStatusType = 'READY'
+export interface CompleteFileUploadResponse {
+  preparationId: number
+  fileId: number
+  fileType: InterviewFileType
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+  preparationStatus: PreparationStatusType
+}
 export interface InterviewBatchPayload {
   meta: {
     interviewId: string

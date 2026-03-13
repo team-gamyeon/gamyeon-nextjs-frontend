@@ -1,13 +1,23 @@
 'use server'
 
 import type { ApiResponse } from '@/shared/lib/api'
-import type { CreateInterviewResponse } from '../types'
 import {
+  CompleteFileUploadResponse,
+  CreateInterviewResponse,
+  FileInfo,
+  IssuePresignedUrlRequest,
+  IssuePresignedUrlResponse,
+  UpdateInterviewTitleResponse,
+} from '../types'
+import {
+  completeFileUpload,
   createInterview,
-  startInterview,
+  finishInterview,
+  issuePresignedUrl,
   pauseInterview,
   resumeInterview,
-  finishInterview,
+  startInterview,
+  updateInterviewTitle,
 } from '@/featured/interview/services/interview.service'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -18,6 +28,34 @@ export async function createInterviewAction(
   return createInterview(title)
 }
 
+export async function updateInterviewTitleAction(
+  id: number,
+  title: string,
+): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
+  return updateInterviewTitle(id, title)
+}
+
+export async function issuePresignedUrlAction(
+  resBody: IssuePresignedUrlRequest,
+  id: number,
+): Promise<ApiResponse<IssuePresignedUrlResponse>> {
+  return issuePresignedUrl(resBody, id)
+}
+
+export async function completeFileUploadAction(
+  { files }: { files: FileInfo[] },
+  id: number,
+): Promise<ApiResponse<CompleteFileUploadResponse>> {
+  if (!files || files.length === 0) {
+    return {
+      success: false,
+      message: '업로드된 파일 정보가 없습니다.',
+      code: '',
+      data: null,
+    }
+  }
+  return completeFileUpload(files, id)
+}
 // 면접 시작
 export async function startInterviewAction(intvId: number): Promise<ApiResponse<null>> {
   try {
@@ -58,10 +96,3 @@ export async function finishInterviewAction(intvId: number): Promise<ApiResponse
   }
 }
 
-//
-// export async function updateInterviewTitle(
-//   id: number,
-//   title: string,
-// ): Promise<ApiResponse<CreateInterviewResponse>> {
-//   return serverApi.patch<CreateInterviewResponse>(`/api/v1/intvs/${id}`, { title })
-// }

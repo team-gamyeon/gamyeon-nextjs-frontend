@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -11,12 +12,33 @@ import {
   DialogFooter,
 } from '@/shared/ui/dialog'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
+import { pauseInterviewAction } from '@/featured/interview/actions/interview.action'
 
 interface EndDialogModalProps {
   session: ReturnType<typeof useInterview>
+  interviewId: number | null
 }
 
-export function EndDialogModal({ session }: EndDialogModalProps) {
+export function EndDialogModal({ session, interviewId }: EndDialogModalProps) {
+  const router = useRouter()
+  const [isPending, setIsPending] = useState(false)
+
+  const handlePause = async () => {
+    if (interviewId === null) {
+      router.push('/history')
+      return
+    }
+
+    setIsPending(true)
+    try {
+      await pauseInterviewAction(interviewId)
+    } finally {
+      // 무조건 router를 움직여야해서 catch 사용하지 않고 바로 finally로
+      setIsPending(false)
+      router.push('/history')
+    }
+  }
+
   return (
     <Dialog open={session.showEndDialog} onOpenChange={session.setShowEndDialog}>
       <DialogContent className="border-white/10 bg-slate-900 text-white">
@@ -35,11 +57,12 @@ export function EndDialogModal({ session }: EndDialogModalProps) {
             variant="ghost"
             className="text-white/70 hover:bg-white/10 hover:text-white"
             onClick={() => session.setShowEndDialog(false)}
+            disabled={isPending}
           >
             계속하기
           </Button>
-          <Button variant="destructive" asChild>
-            <Link href="/history">면접 중단</Link>
+          <Button variant="destructive" onClick={handlePause} disabled={isPending}>
+            면접 중단
           </Button>
         </DialogFooter>
       </DialogContent>

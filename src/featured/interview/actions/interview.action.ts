@@ -5,6 +5,7 @@ import type { CreateInterviewResponse } from '../types'
 import {
   createInterview,
   startInterview,
+  pauseInterview,
 } from '@/featured/interview/services/interview.service'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -19,6 +20,17 @@ export async function startInterviewAction(
 ): Promise<ApiResponse<null>> {
   try {
     return await startInterview(intvId)
+  } catch (error) {
+    if (isRedirectError(error)) throw error
+    throw error
+  }
+}
+
+export async function pauseInterviewAction(
+  intvId: number,
+): Promise<ApiResponse<null>> {
+  try {
+    return await pauseInterview(intvId)
   } catch (error) {
     if (isRedirectError(error)) throw error
     throw error

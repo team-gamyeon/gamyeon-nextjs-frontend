@@ -5,12 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-
-// ✅ 1. 웨이터(Action) 불러오기
 import { getNoticesAction } from '../actions/dashboard.action'
-
-// ✅ 2. 공지사항 공식 타입과 설정(색상/라벨) 불러오기
-// (주의: @/featured/notice/... 경로는 실제 프로젝트 폴더 구조에 맞게 수정해 주세요)
 import type { Notice } from '@/featured/notice/types'
 import { NOTICE_CATEGORY_CONFIG } from '@/featured/notice/constants'
 
@@ -27,19 +22,15 @@ export function NoticeSection() {
   const [notices, setNotices] = useState<Notice[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // 🗑️ isError 상태 제거
-
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
 
       const result = await getNoticesAction()
 
-      // result.data가 null일 경우를 대비해 기본값 빈 배열([]) 설정
       if (result.success && result.data) {
         setNotices(result.data)
       } else {
-        // 에러가 나거나 데이터가 없으면 빈 배열로 조용히 처리
         console.error('공지사항 불러오기 실패:', result.message)
         setNotices([])
       }

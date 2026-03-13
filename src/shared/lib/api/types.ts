@@ -21,22 +21,6 @@ export interface ApiResponse<T> {
   errors?: ApiFieldError[] | null
 }
 
-export type ApiResult<T> =
-  | {
-      success: true
-      message: string
-      code: string
-      data: T | null
-      errors: null
-    }
-  | {
-      success: false
-      message: string
-      code: string
-      data: null
-      errors: ApiFieldError[] | null
-    }
-
 export interface RequestConfig {
   /** true이면 에러 toast를 띄우지 않음 */
   silent?: boolean

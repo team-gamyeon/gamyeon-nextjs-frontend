@@ -1,26 +1,23 @@
 'use server'
 
-import { ApiResponse, ApiResult, serverApi } from '@/shared/lib/api'
+import { ApiResponse, serverApi } from '@/shared/lib/api'
 import type { CreateInterviewResponse } from '../types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
-export async function createInterview(title: string): Promise<ApiResult<CreateInterviewResponse>> {
+export async function createInterview(
+  title: string,
+): Promise<ApiResponse<CreateInterviewResponse>> {
   try {
-    const res = await serverApi.post<ApiResponse<CreateInterviewResponse>>('/api/v1/intvs', {
+    return await serverApi.post<CreateInterviewResponse>('/api/v1/intvs', {
       title,
     })
-    return {
-      success: true,
-      data: res.data,
-      message: res.message,
-      code: res.code,
-      errors: null,
-    }
   } catch (error: any) {
+    if (isRedirectError(error)) throw error
     return {
       success: false,
       data: null,
       message: error.message || '오류발생',
-      code: error.code,
+      code: error.code || '알 수 없는 에러',
       errors: error.errors || null,
     }
   }

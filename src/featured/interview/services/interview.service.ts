@@ -9,16 +9,24 @@ export async function createInterview(
   })
 }
 
-export async function startInterview(
-  intvId: number,
-): Promise<ApiResponse<null>> {
+// 면접 시작
+export async function startInterview(intvId: number): Promise<ApiResponse<null>> {
   return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/start`)
 }
 
-export async function pauseInterview(
-  intvId: number,
-): Promise<ApiResponse<null>> {
+// 면저 중단
+export async function pauseInterview(intvId: number): Promise<ApiResponse<null>> {
   return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/pause`)
+}
+
+// 면접 재개
+export async function resumeInterview(intvId: number): Promise<ApiResponse<null>> {
+  return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/resume`)
+}
+
+// 면접 완료
+export async function finishInterview(intvId: number): Promise<ApiResponse<null>> {
+  return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/finish`)
 }
 
 // export async function updateInterviewTitle(id: number, title: string) {

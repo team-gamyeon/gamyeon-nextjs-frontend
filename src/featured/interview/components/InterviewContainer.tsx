@@ -41,7 +41,7 @@ export function InterviewContainer({ session, interviewId }: InterviewPageProps)
           timeLeft={session.timeLeft}
           phase={session.phase}
         />
-        <FinishedOverlay phase={session.phase} />
+        <FinishedOverlay phase={session.phase} intvId={interviewId!} />
       </div>
       <ControlBar
         micOn={session.micOn}

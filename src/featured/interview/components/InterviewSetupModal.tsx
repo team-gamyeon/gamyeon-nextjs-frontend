@@ -15,7 +15,7 @@ import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
 import {
   createInterview,
   updateInterviewTitle,
-} from '@/featured/interview/services/interviewService'
+} from '@/featured/interview/actions/interview.action'
 import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'

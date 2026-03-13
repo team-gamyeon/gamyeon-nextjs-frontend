@@ -21,12 +21,18 @@ const fadeUp = {
 export function NoticeSection() {
   const [notices, setNotices] = useState<Notice[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [now, setNow] = useState<number>(0)
 
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
 
+      // 웨이터가 주방(서버)에 다녀옵니다. (여기서 약간의 시간이 걸림)
       const result = await getNoticesAction()
+
+      // [수정된 부분] 데이터가 도착한 직후에 시계를 보고 메모(now)합니다!
+      // 이렇게 서버 통신(비동기) 이후에 상태를 바꾸면, 리액트가 숨을 고를 수 있어서 에러가 안 납니다.
+      setNow(Date.now())
 
       if (result.success && result.data) {
         setNotices(result.data)
@@ -38,7 +44,7 @@ export function NoticeSection() {
     }
 
     fetchNotices()
-  }, [])
+  }, []) // 맨 위에 있던 setNow(Date.now())는 삭제했습니다!
 
   return (
     <motion.div
@@ -70,9 +76,9 @@ export function NoticeSection() {
             notices.map((item) => {
               const config = NOTICE_CATEGORY_CONFIG[item.category] || NOTICE_CATEGORY_CONFIG.NOTICE
 
-              // 작성일 기준 3일(72시간) 이내면 새 글로 취급하는 로직
+              // 여기서 메모해둔 now 값을 씁니다.
               const isRecent =
-                new Date(item.createdAt).getTime() > Date.now() - 3 * 24 * 60 * 60 * 1000
+                now > 0 && new Date(item.createdAt).getTime() > now - 3 * 24 * 60 * 60 * 1000
 
               return (
                 <Link
@@ -107,7 +113,6 @@ export function NoticeSection() {
               )
             })
           ) : (
-            // 데이터가 없거나 에러가 났을 때 공통으로 보여줄 UI
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
               새로운 공지사항이 없습니다.
             </div>

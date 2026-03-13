@@ -15,7 +15,7 @@ import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
 import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
-import { createInterviewAction } from '@/featured/interview/actions/interview.action'
+import { createInterview } from '@/featured/interview/actions/interview.action'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -105,7 +105,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
   const handleTitleConfirm = async () => {
     if (!title.trim()) return
-    const result = await createInterviewAction(title)
+    const result = await createInterview(title)
     if (result.success) {
       if (result.data) {
         setInterviewId(result.data.intvId)
@@ -123,20 +123,6 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
   const handleMicConfirm = () => {
     completeStep(4)
-  }
-
-  const handleTitleConfirm = async () => {
-    try {
-      if (interviewId) {
-        await updateInterviewTitle(interviewId, title)
-      } else {
-        const result = await createInterview(title)
-        if (result.data) setInterviewId(result.data.intvId)
-      }
-      completeStep(1)
-    } catch {
-      // handleResponse가 이미 toast.error() 처리 — redirect도 자동 전파
-    }
   }
 
   const renderStep = () => {

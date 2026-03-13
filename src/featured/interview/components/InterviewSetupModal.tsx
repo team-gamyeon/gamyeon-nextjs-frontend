@@ -112,7 +112,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       }
       completeStep(1)
     } else {
-      alert(result.message)
+      console.log(result.message)
     }
   }
 

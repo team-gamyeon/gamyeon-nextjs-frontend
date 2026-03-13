@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { NetworkError } from './types'
+import { ApiResponse, NetworkError } from './types'
 import type { RequestConfig } from './types'
-import { buildUrl, parseApiResponse } from './_utils'
+import { buildUrl, handleResponse, serializeBody } from './_utils'
 import { parseSetCookieExpires } from '@/shared/lib/utils/cookie'
 
 /**
@@ -92,10 +92,10 @@ async function serverFetch<T>(
   endpoint: string,
   body?: unknown,
   config?: RequestConfig,
-): Promise<T> {
+): Promise<ApiResponse<T>> {
   const cookieStore = await cookies()
   const url = buildUrl(endpoint, config?.params)
-  const jsonBody = body !== undefined ? JSON.stringify(body) : undefined
+  const serializedBody = serializeBody(body)
 
   const buildCookieHeader = (overrideAccessToken?: string): string => {
     if (!overrideAccessToken) return cookieStore.toString()
@@ -113,11 +113,13 @@ async function serverFetch<T>(
     fetch(url, {
       method,
       headers: {
-        ...(jsonBody !== undefined && { 'Content-Type': 'application/json' }),
+        ...(typeof serializedBody === 'string' && {
+          'Content-Type': 'application/json',
+        }),
         Cookie: cookieHeader,
         ...config?.headers,
       },
-      body: jsonBody,
+      body: serializedBody as BodyInit,
       cache: config?.cache,
       next: config?.next,
     })
@@ -144,10 +146,7 @@ async function serverFetch<T>(
     console.log(`[serverApi] retry after refresh → ${res.status}`)
   }
 
-  const { data, error } = await parseApiResponse<T>(res)
-  console.log(`[serverApi] response body:`, JSON.stringify({ data, error }, null, 2))
-  if (error) throw error
-  return data as T
+  return await handleResponse<T>(res, config)
 }
 
 /**

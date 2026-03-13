@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/shared/ui/card'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 import { NOTICE_CATEGORY } from '@/featured/notice/constants'
 import { formatDateDot } from '@/shared/lib/utils/date'
+import Image from 'next/image'
 
 interface NoticeDetailProps {
   notice: NoticeDetailResponse
@@ -138,7 +139,7 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
             <div className="mt-8 flex flex-col gap-4">
               {notice.imageUrls.map((url, index) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   key={index}
                   src={url}
                   alt={`공지사항 첨부 이미지 ${index + 1}`}

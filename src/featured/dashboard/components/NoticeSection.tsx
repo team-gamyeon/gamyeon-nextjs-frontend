@@ -33,8 +33,6 @@ export function NoticeSection() {
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
-
-      // [수정 2] action에서 던진 에러(throw)를 잡기 위해 try...catch 블록을 추가합니다.
       try {
         const result = await getNoticesAction()
 
@@ -49,11 +47,9 @@ export function NoticeSection() {
           setNotices([])
         }
       } catch (error) {
-        // 서버가 터지는 등 치명적인 에러가 발생했을 때 화면이 깨지지 않도록 방어합니다.
         console.error('공지사항 통신 에러 발생:', error)
         setNotices([])
       } finally {
-        // 성공하든 실패하든 마지막에 로딩 상태를 끝냅니다.
         setIsLoading(false)
       }
     }

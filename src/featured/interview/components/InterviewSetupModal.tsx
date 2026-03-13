@@ -12,13 +12,10 @@ import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModal
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
 import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
-import {
-  createInterview,
-  updateInterviewTitle,
-} from '@/featured/interview/services/interviewService'
 import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
+import { createInterviewAction } from '@/featured/interview/actions/interview.action'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -101,14 +98,22 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     }
   }
 
-  const handleTitleChange = (value: string) => {
-    setTitle(value)
-    if (completedSteps.has(1)) resetStep(1)
-  }
-
   const handleDocumentChange = (setter: (file: File | null) => void) => (file: File | null) => {
     setter(file)
     if (completedSteps.has(2)) resetStep(2)
+  }
+
+  const handleTitleConfirm = async () => {
+    if (!title.trim()) return
+    const result = await createInterviewAction(title)
+    if (result.success) {
+      if (result.data) {
+        setInterviewId(result.data.intvId)
+      }
+      completeStep(1)
+    } else {
+      console.log(result.message)
+    }
   }
 
   const handleCameraConfirm = () => {
@@ -120,25 +125,10 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     completeStep(4)
   }
 
-  const handleTitleConfirm = async () => {
-    if (interviewId) {
-      await updateInterviewTitle(interviewId, title)
-    } else {
-      const result = await createInterview(title)
-      if (result.success) {
-        const data = result.data
-        if (data) setInterviewId(data.intvId)
-      }
-    }
-    completeStep(1)
-  }
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return (
-          <TitleStep title={title} onChange={handleTitleChange} onConfirm={handleTitleConfirm} />
-        )
+        return <TitleStep title={title} onChange={setTitle} onConfirm={handleTitleConfirm} />
       case 2:
         return (
           <DocumentStep

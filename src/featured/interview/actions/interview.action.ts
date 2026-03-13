@@ -16,7 +16,7 @@ export async function createInterviewAction(
 
 export async function startInterviewAction(
   intvId: number,
-): Promise<ApiResponse<void>> {
+): Promise<ApiResponse<null>> {
   try {
     return await startInterview(intvId)
   } catch (error) {

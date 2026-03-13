@@ -11,8 +11,8 @@ export async function createInterview(
 
 export async function startInterview(
   intvId: number,
-): Promise<ApiResponse<void>> {
-  return await serverApi.patch<void>(`/api/v1/intvs/${intvId}/start`)
+): Promise<ApiResponse<null>> {
+  return await serverApi.patch<null>(`/api/v1/intvs/${intvId}/start`)
 }
 
 // export async function updateInterviewTitle(id: number, title: string) {

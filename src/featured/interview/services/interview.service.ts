@@ -1,16 +1,17 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
 import {
-  completeFileUploadResponse,
-  createInterviewResponse,
-  issuePresignedUrlRequest,
-  issuePresignedUrlResponse,
-  updateInterviewTitleResponse,
+  CompleteFileUploadResponse,
+  CreateInterviewResponse,
+  FileInfo,
+  IssuePresignedUrlRequest,
+  IssuePresignedUrlResponse,
+  UpdateInterviewTitleResponse,
 } from '../types'
 
 export async function createInterview(
   title: string,
-): Promise<ApiResponse<createInterviewResponse>> {
-  return await serverApi.post<createInterviewResponse>('/api/v1/intvs', {
+): Promise<ApiResponse<CreateInterviewResponse>> {
+  return await serverApi.post<CreateInterviewResponse>('/api/v1/intvs', {
     title,
   })
 }
@@ -18,7 +19,7 @@ export async function createInterview(
 export async function updateInterviewTitle(
   id: number,
   title: string,
-): Promise<ApiResponse<updateInterviewTitleResponse>> {
+): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
   const intvId = id
   return await serverApi.patch(`/api/v1/intvs/${intvId}`, {
     title,
@@ -26,9 +27,9 @@ export async function updateInterviewTitle(
 }
 
 export async function issuePresignedUrl(
-  resBody: issuePresignedUrlRequest,
+  resBody: IssuePresignedUrlRequest,
   id: number,
-): Promise<ApiResponse<issuePresignedUrlResponse>> {
+): Promise<ApiResponse<IssuePresignedUrlResponse>> {
   const { fileType, originalFileName, fileSizeBytes, contentType } = resBody
   const intvId = id
   return await serverApi.post(`/api/v1/preparations/${intvId}/files/presigned-url`, {
@@ -40,9 +41,9 @@ export async function issuePresignedUrl(
 }
 
 export async function completeFileUpload(
-  files: any[],
+  files: FileInfo[],
   id: number,
-): Promise<ApiResponse<completeFileUploadResponse>> {
+): Promise<ApiResponse<CompleteFileUploadResponse>> {
   const intvId = id
   return await serverApi.post(`/api/v1/preparation/${intvId}/files`, {
     files: files,

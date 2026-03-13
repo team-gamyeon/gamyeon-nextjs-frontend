@@ -19,12 +19,10 @@ import {
   completeFileUploadAction,
   createInterviewAction,
   issuePresignedUrlAction,
+  startInterviewAction,
   updateInterviewTitleAction,
 } from '@/featured/interview/actions/interview.action'
 import uploadFileToS3 from '@/shared/lib/utils/uploadFileToS3'
-  createInterviewAction,
-  startInterviewAction,
-} from '@/featured/interview/actions/interview.action'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>

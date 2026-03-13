@@ -2,54 +2,50 @@
 
 import type { ApiResponse } from '@/shared/lib/api'
 import {
-  completeFileUploadResponse,
-  createInterviewResponse,
+  CompleteFileUploadResponse,
+  CreateInterviewResponse,
   FileInfo,
-  issuePresignedUrlRequest,
-  issuePresignedUrlResponse,
-  updateInterviewTitleResponse,
+  IssuePresignedUrlRequest,
+  IssuePresignedUrlResponse,
+  UpdateInterviewTitleResponse,
 } from '../types'
 import {
   completeFileUpload,
   createInterview,
+  finishInterview,
   issuePresignedUrl,
-  updateInterviewTitle,
-} from '@/featured/interview/services/interview.service'
-import type { CreateInterviewResponse } from '../types'
-import {
-  createInterview,
-  startInterview,
   pauseInterview,
   resumeInterview,
-  finishInterview,
+  startInterview,
+  updateInterviewTitle,
 } from '@/featured/interview/services/interview.service'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 // 면접 생성
 export async function createInterviewAction(
   title: string,
-): Promise<ApiResponse<createInterviewResponse>> {
+): Promise<ApiResponse<CreateInterviewResponse>> {
   return createInterview(title)
 }
 
 export async function updateInterviewTitleAction(
   id: number,
   title: string,
-): Promise<ApiResponse<updateInterviewTitleResponse>> {
+): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
   return updateInterviewTitle(id, title)
 }
 
 export async function issuePresignedUrlAction(
-  resBody: issuePresignedUrlRequest,
+  resBody: IssuePresignedUrlRequest,
   id: number,
-): Promise<ApiResponse<issuePresignedUrlResponse>> {
+): Promise<ApiResponse<IssuePresignedUrlResponse>> {
   return issuePresignedUrl(resBody, id)
 }
 
 export async function completeFileUploadAction(
   { files }: { files: FileInfo[] },
   id: number,
-): Promise<ApiResponse<completeFileUploadResponse>> {
+): Promise<ApiResponse<CompleteFileUploadResponse>> {
   if (!files || files.length === 0) {
     return {
       success: false,
@@ -100,10 +96,3 @@ export async function finishInterviewAction(intvId: number): Promise<ApiResponse
   }
 }
 
-//
-// export async function updateInterviewTitle(
-//   id: number,
-//   title: string,
-// ): Promise<ApiResponse<CreateInterviewResponse>> {
-//   return serverApi.patch<CreateInterviewResponse>(`/api/v1/intvs/${id}`, { title })
-// }

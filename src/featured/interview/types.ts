@@ -60,19 +60,19 @@ export interface GazeEvent {
   direction: FocusState
 }
 
-export interface createInterviewResponse {
+export interface CreateInterviewResponse {
   intvId: number
   title: string
   status: string
 }
 
-export interface updateInterviewTitleResponse {
+export interface UpdateInterviewTitleResponse {
   intvId: number
   title: string
   status: string
 }
 export type InterviewFileType = 'RESUME' | 'PORTFOLIO' | 'SELF_INTRO'
-export interface issuePresignedUrlRequest {
+export interface IssuePresignedUrlRequest {
   fileType: string
   originalFileName: string
   contentType: string
@@ -84,7 +84,7 @@ export interface FileInfo {
   fileKey: string
   fileUrl: string
 }
-export interface issuePresignedUrlResponse {
+export interface IssuePresignedUrlResponse {
   preparationId: number
   fileType: InterviewFileType
   originalFileName: string
@@ -93,15 +93,15 @@ export interface issuePresignedUrlResponse {
   fileUrl: string
   expiresInSeconds: number
 }
-export type preparationStatusType = 'READY'
-export interface completeFileUploadResponse {
+export type PreparationStatusType = 'READY'
+export interface CompleteFileUploadResponse {
   preparationId: number
   fileId: number
   fileType: InterviewFileType
   originalFileName: string
   fileKey: string
   fileUrl: string
-  preparationStatus: preparationStatusType
+  preparationStatus: PreparationStatusType
 }
 export interface InterviewBatchPayload {
   meta: {

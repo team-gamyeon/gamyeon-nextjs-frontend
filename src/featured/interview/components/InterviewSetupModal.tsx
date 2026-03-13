@@ -15,7 +15,10 @@ import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
 import { type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
-import { createInterview } from '@/featured/interview/actions/interview.action'
+import {
+  createInterviewAction,
+  startInterviewAction,
+} from '@/featured/interview/actions/interview.action'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -105,7 +108,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
   const handleTitleConfirm = async () => {
     if (!title.trim()) return
-    const result = await createInterview(title)
+    const result = await createInterviewAction(title)
     if (result.success) {
       if (result.data) {
         setInterviewId(result.data.intvId)
@@ -230,10 +233,14 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                 disabled={
                   !allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))
                 }
-                onClick={() => {
+                onClick={async () => {
                   if (!camera.cameraStream) {
                     console.error('카메라 스트림이 아직 준비되지 않았습니다.')
                     return
+                  }
+
+                  if (interviewId) {
+                    await startInterviewAction(interviewId)
                   }
 
                   session.handleSetupComplete({

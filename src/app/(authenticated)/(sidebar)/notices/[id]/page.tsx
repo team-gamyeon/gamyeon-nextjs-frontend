@@ -15,7 +15,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
   const detailResult = await getNoticeDetailAction(noticeId)
 
   if (!detailResult.success || !detailResult.data) {
-    notFound()
+    return notFound()
   }
 
   const notice = detailResult.data

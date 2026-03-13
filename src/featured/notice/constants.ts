@@ -26,8 +26,7 @@ const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: string }> 
 
 // const NOTICE_PAGE_SIZE = 10;
 
-// 화면에 그릴 필터 버튼 목록 (이것도 상수로 관리!)
-// ❌ export 제거!
+// 카테고리 필터
 const FILTER_CATEGORIES: FilterCategory[] = [
   'ALL',
   'NOTICE',
@@ -37,5 +36,4 @@ const FILTER_CATEGORIES: FilterCategory[] = [
   'MAINTENANCE',
 ]
 
-// 여기서 한 번에 깔끔하게 내보냅니다.
 export { NOTICE_CATEGORY, FILTER_CATEGORIES }

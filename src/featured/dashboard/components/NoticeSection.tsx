@@ -19,7 +19,6 @@ const fadeUp = {
   }),
 }
 
-
 type NoticeWithUI = Notice & { isRecent: boolean }
 
 export function NoticeSection() {
@@ -29,27 +28,25 @@ export function NoticeSection() {
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
+
       try {
         const result = await getNoticesAction()
 
+        // 통신이 성공하고 데이터가 무사히 도착했다면?
         if (result.success && result.data) {
-          const processedNotices = result.data.map((item) => ({
-            ...item,
-            isRecent: checkIsRecent(item.createdAt),
-          }))
+          // 🚀 피드백 반영: 100개의 데이터 중 앞에서부터 5개만 싹둑 자릅니다!
+          const processedNotices = result.data
+            .slice(0, 4) // 0번째부터 4번째 전(4번째)까지 총 4개만 남김
+            .map((item) => ({
+              ...item,
+              isRecent: checkIsRecent(item.createdAt), // 잘라낸 5개에만 '새 글' 딱지를 붙임
+            }))
+
           setNotices(processedNotices)
         } else {
           console.error('공지사항 불러오기 실패:', result.message)
           setNotices([])
         }
-
-//         ⬇️ Suggested change
-// -          const processedNotices = result.data.map((item) => ({
-// +const processedNotices = result.data.slice(0, 5).map((item) => ({
-// +  ...item,
-// +  isRecent: checkIsRecent(item.createdAt),
-// +}))
-// 이런 느낌으로 대시보드에서 보여지는 갯수 만큼 정해놓는게 좋을것 같아요
       } catch (error) {
         console.error('공지사항 통신 에러 발생:', error)
         setNotices([])

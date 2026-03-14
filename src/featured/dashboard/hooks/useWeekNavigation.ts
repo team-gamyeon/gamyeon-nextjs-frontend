@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react'
-import { MOCK_RECORDS } from '@/featured/history/types'
-import { parseDateDot, getMondayOf, addDays } from '@/shared/lib/utils/date'
+import { InterviewReportItem } from '@/featured/history/types'
+import { getMondayOf, addDays } from '@/shared/lib/utils/date'
 
-export function useWeekNavigation() {
+export function useWeekNavigation(records: InterviewReportItem[]) {
   const sessions = useMemo(() => {
-    return MOCK_RECORDS.filter((r) => r.status === 'completed' && r.score !== null)
-      .map((r) => ({ ...r, dateObj: parseDateDot(r.date) }))
+    return (records || [])
+      .filter((r) => r.intvStatus === 'FINISHED' && r.report?.totalScore !== null)
+      .map((r) => ({ ...r, dateObj: new Date(r.updatedAt) }))
       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
-  }, [])
+  }, [records])
 
+  // 가장 최근 데이터의 월요일을 기준으로 잡음
   const baseMonday = useMemo(
     () =>
       sessions.length > 0

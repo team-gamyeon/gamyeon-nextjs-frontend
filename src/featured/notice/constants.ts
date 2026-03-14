@@ -18,6 +18,7 @@ const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: string }> 
     label: '이벤트',
     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   },
+  // MAINTENANCE는 정의는 유지하되(데이터 렌더링용), 필터 목록에서는 제외합니다.
   MAINTENANCE: {
     label: '점검',
     color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
@@ -33,7 +34,7 @@ const FILTER_CATEGORIES: FilterCategory[] = [
   'UPDATE',
   'GUIDE',
   'EVENT',
-  'MAINTENANCE',
+  // 'MAINTENANCE',
 ]
 
 export { NOTICE_CATEGORY, FILTER_CATEGORIES }

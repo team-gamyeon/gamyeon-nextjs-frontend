@@ -8,7 +8,7 @@ export function NoticeHeader() {
       <div>
         <h1 className="text-xl font-bold">공지사항</h1>
         <p className="text-muted-foreground mt-0.5 text-sm">
-          서비스 업데이트, 점검 안내, 이벤트 등 최신 소식을 확인하세요.
+          가상 면접 AI 서비스의 새로운 소식과 유용한 정보를 확인해 보세요.
         </p>
       </div>
       <HeaderActions />

@@ -13,7 +13,6 @@ interface NoticeListProps {
   search: string
 }
 
-
 export function NoticeList({ notices, search }: NoticeListProps) {
   const router = useRouter()
   const shouldReduceMotion = useReducedMotion()
@@ -59,7 +58,6 @@ export function NoticeList({ notices, search }: NoticeListProps) {
                 whileTap={
                   shouldReduceMotion ? {} : { opacity: 0.6, transition: { duration: 0.05 } }
                 }
-                // 클릭하면 그 공지사항의 상세 페이지로 이동!
                 onClick={() => router.push(`/notices/${notice.id}`)}
                 className="border-border/40 hover:bg-muted/40 flex cursor-pointer items-center justify-between gap-4 border-b px-6 py-4 transition-colors last:border-b-0"
               >

@@ -19,7 +19,6 @@ const fadeUp = {
   }),
 }
 
-
 type NoticeWithUI = Notice & { isRecent: boolean }
 
 export function NoticeSection() {
@@ -29,14 +28,16 @@ export function NoticeSection() {
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
+
       try {
         const result = await getNoticesAction()
 
         if (result.success && result.data) {
-          const processedNotices = result.data.map((item) => ({
+          const processedNotices = result.data.slice(0, 4).map((item) => ({
             ...item,
             isRecent: checkIsRecent(item.createdAt),
           }))
+
           setNotices(processedNotices)
         } else {
           console.error('공지사항 불러오기 실패:', result.message)

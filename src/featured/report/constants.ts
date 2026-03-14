@@ -55,10 +55,8 @@ const INTV_STATUS_LABEL: Record<string, string> = {
   [INTV_STATUS.IN_PROGRESS]: '진행 중',
 }
 
-// 1. 타입을 'null'이 가능하게 수정합니다.
-export type ReportCardType = 'completedCard' | 'analysingCard' | 'failedCard' | 'pendingCard' | null // 👈 UI가 없을 때는 null을 주겠어!
+export type ReportCardType = 'completedCard' | 'analysingCard' | 'failedCard' | 'pendingCard' | null 
 
-// 2. 함수 수정
 export function getReportCardType(
   intvStatus: string,
   reportStatus?: string | null,

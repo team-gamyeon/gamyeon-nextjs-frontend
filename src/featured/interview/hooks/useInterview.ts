@@ -75,11 +75,18 @@ export function useInterview() {
     router.push('/dashboard')
   }
 
+  const beginAnswering = useCallback(() => {
+    const stream = cameraStreamRef.current
+    if (stream) {
+      startRecording(stream)
+    }
+    setPhase('answering')
+    setTimeLeft(TOTAL_ANSWER_TIME)
+  }, [startRecording])
+
   const handleNext = useCallback(async () => {
     const questionIndex = currentQuestionRef.current
-
-    const video = await stopRecording()
-
+    await stopRecording()
     if (questionIndex < QUESTIONS.length - 1) {
       setPhase('transition')
       setTimeout(() => {
@@ -93,7 +100,7 @@ export function useInterview() {
     }
 
     setPhase('finished')
-  }, [])
+  }, [stopRecording])
 
   useEffect(() => {
     if (phase !== 'thinking' && phase !== 'answering') return
@@ -102,7 +109,7 @@ export function useInterview() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (phaseRef.current === 'thinking') {
-            setPhase('answering')
+            beginAnswering()
             return TOTAL_ANSWER_TIME
           }
 
@@ -115,7 +122,7 @@ export function useInterview() {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [phase, handleNext])
+  }, [phase, handleNext, beginAnswering])
 
   useEffect(() => {
     const handlePageExit = () => {
@@ -142,8 +149,7 @@ export function useInterview() {
   }
 
   const startAnswering = () => {
-    setPhase('answering')
-    setTimeLeft(TOTAL_ANSWER_TIME)
+    beginAnswering()
   }
 
   return {

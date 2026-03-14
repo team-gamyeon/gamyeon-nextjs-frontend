@@ -1,6 +1,6 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
 import type { InterviewStat } from '../types'
-import type { Notice, NoticeDetail } from '@/featured/notice/types'
+import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
 /**
  * 일자별 면접 횟수 조회
@@ -18,6 +18,8 @@ export async function getNotices(): Promise<ApiResponse<Notice[]>> {
 }
 
 //공지사항 상세 내용 조회
-export async function getNoticeDetail(noticeId: number): Promise<ApiResponse<NoticeDetail>> {
-  return await serverApi.get<NoticeDetail>(`/api/v1/notices/${noticeId}`)
+export async function getNoticeDetail(
+  noticeId: number,
+): Promise<ApiResponse<NoticeDetailResponse>> {
+  return await serverApi.get<NoticeDetailResponse>(`/api/v1/notices/${noticeId}`)
 }

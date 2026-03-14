@@ -4,10 +4,10 @@ import { Button } from '@/shared/ui/button'
 interface DocumentStepProps {
   resume: File | null
   portfolio: File | null
-  selfIntro: File | null
+  coverLetter: File | null
   setResume: (f: File | null) => void
   setPortfolio: (f: File | null) => void
-  setSelfIntro: (f: File | null) => void
+  setCoverLetter: (f: File | null) => void
   onComplete: () => void
   isUploading: boolean
 }
@@ -15,10 +15,10 @@ interface DocumentStepProps {
 export function DocumentStep({
   resume,
   portfolio,
-  selfIntro,
+  coverLetter,
   setResume,
   setPortfolio,
-  setSelfIntro,
+  setCoverLetter,
   onComplete,
   isUploading,
 }: DocumentStepProps) {
@@ -40,7 +40,7 @@ export function DocumentStep({
   const docs = [
     { label: '(필수) 이력서', type: 'RESUME', file: resume, setter: setResume },
     { label: '(선택) 포트폴리오', type: 'PORTFOLIO', file: portfolio, setter: setPortfolio },
-    { label: '(선택) 자기소개서', type: 'COVER_LETTER', file: selfIntro, setter: setSelfIntro },
+    { label: '(선택) 자기소개서', type: 'COVER_LETTER', file: coverLetter, setter: setCoverLetter },
   ]
 
   return (

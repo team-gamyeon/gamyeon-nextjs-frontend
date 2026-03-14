@@ -13,6 +13,7 @@ import {
   completeFileUpload,
   createInterview,
   finishInterview,
+  generateInterviewQuestion,
   issuePresignedUrl,
   pauseInterview,
   resumeInterview,
@@ -21,30 +22,33 @@ import {
 } from '@/featured/interview/services/interview.service'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
-// 면접 생성
+// 면접 생성(제목 추가)
 export async function createInterviewAction(
   title: string,
 ): Promise<ApiResponse<CreateInterviewResponse>> {
   return createInterview(title)
 }
 
+// 면접 제목 수정
 export async function updateInterviewTitleAction(
-  id: number,
+  intvId: number,
   title: string,
 ): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
-  return updateInterviewTitle(id, title)
+  return updateInterviewTitle(intvId, title)
 }
 
+// 면접 문서 업로드 presignedUrl 발급
 export async function issuePresignedUrlAction(
+  intvId: number,
   resBody: IssuePresignedUrlRequest,
-  id: number,
 ): Promise<ApiResponse<IssuePresignedUrlResponse>> {
-  return issuePresignedUrl(resBody, id)
+  return issuePresignedUrl(intvId, resBody)
 }
 
+// 면접 문서 업로드 완료
 export async function completeFileUploadAction(
+  intvId: number,
   { files }: { files: FileInfo[] },
-  id: number,
 ): Promise<ApiResponse<CompleteFileUploadResponse>> {
   if (!files || files.length === 0) {
     return {
@@ -54,8 +58,14 @@ export async function completeFileUploadAction(
       data: null,
     }
   }
-  return completeFileUpload(files, id)
+  return completeFileUpload(intvId, files)
 }
+
+// 면접 질문 생성
+export async function generateInterviewQuestionAction(intvId: number) {
+  return generateInterviewQuestion(intvId)
+}
+
 // 면접 시작
 export async function startInterviewAction(intvId: number): Promise<ApiResponse<null>> {
   try {
@@ -95,4 +105,3 @@ export async function finishInterviewAction(intvId: number): Promise<ApiResponse
     throw error
   }
 }
-

@@ -1,8 +1,8 @@
 export type Phase = 'ready' | 'thinking' | 'answering' | 'transition' | 'finished'
-
 export type StepStatus = 'pending' | 'active' | 'done'
 export type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
 export type RecordingStatus = 'idle' | 'recording' | 'recorded'
+export type InterviewFileType = 'RESUME' | 'PORTFOLIO' | 'COVER_LETTER'
 
 export interface InterviewSetupConfig {
   title: string
@@ -60,49 +60,6 @@ export interface GazeEvent {
   direction: FocusState
 }
 
-export interface CreateInterviewResponse {
-  intvId: number
-  title: string
-  status: string
-}
-
-export interface UpdateInterviewTitleResponse {
-  intvId: number
-  title: string
-  status: string
-}
-export type InterviewFileType = 'RESUME' | 'PORTFOLIO' | 'SELF_INTRO'
-export interface IssuePresignedUrlRequest {
-  fileType: string
-  originalFileName: string
-  contentType: string
-  fileSizeBytes: number
-}
-export interface FileInfo {
-  fileType: string
-  originalFileName: string
-  fileKey: string
-  fileUrl: string
-}
-export interface IssuePresignedUrlResponse {
-  preparationId: number
-  fileType: InterviewFileType
-  originalFileName: string
-  fileKey: string
-  presignedUrl: string
-  fileUrl: string
-  expiresInSeconds: number
-}
-export type PreparationStatusType = 'READY'
-export interface CompleteFileUploadResponse {
-  preparationId: number
-  fileId: number
-  fileType: InterviewFileType
-  originalFileName: string
-  fileKey: string
-  fileUrl: string
-  preparationStatus: PreparationStatusType
-}
 export interface InterviewBatchPayload {
   meta: {
     interviewId: string
@@ -117,4 +74,56 @@ export interface InterviewBatchPayload {
   }
   raw_data: RawGazeData[]
   events: GazeEvent[]
+}
+
+export interface CreateInterviewResponse {
+  intvId: number
+  title: string
+  status: string
+}
+
+export interface UpdateInterviewTitleResponse {
+  intvId: number
+  title: string
+  status: string
+}
+
+export interface IssuePresignedUrlRequest {
+  fileType: InterviewFileType
+  originalFileName: string
+  contentType: string
+  fileSizeBytes: number
+}
+
+export interface FileInfo {
+  fileType: string
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+}
+
+export interface IssuePresignedUrlResponse {
+  preparationId: number
+  fileType: InterviewFileType
+  originalFileName: string
+  fileKey: string
+  presignedUrl: string
+  fileUrl: string
+  expiresInSeconds: number
+}
+
+export type PreparationStatusType = 'READY'
+
+export interface UploadedFileInfo {
+  fileId: number
+  fileType: InterviewFileType
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+}
+
+export interface CompleteFileUploadResponse {
+  preparationId: number
+  preparationStatus: PreparationStatusType
+  files: UploadedFileInfo[]
 }

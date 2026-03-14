@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card } from '@/shared/ui/card'
 import { FileText, Inbox } from 'lucide-react'
-import { InterviewRecord } from '@/featured/history/types'
+import { InterviewReportItem } from '@/featured/history/types'
+import { getReportCardType } from '@/featured/history/constants'
 import { PendingCard } from '@/featured/history/components/cards/PedingCard'
 import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
 import { CardContainer } from '@/featured/history/components/cards/CardContainer'
@@ -17,25 +18,30 @@ import {
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
 interface HistoryContainerProps {
-  records: InterviewRecord[]
+  records: InterviewReportItem[]
   search: string
   currentPage: number
   itemsPerPage: number
 }
 
 interface FlipCardProps {
-  record: InterviewRecord
+  record: InterviewReportItem
 }
 
 function FlipCard({ record }: FlipCardProps) {
   const router = useRouter()
-  const [isFlipped, setIsFlipped] = useState(false)
+  // isFlipped 상태 자체를 아예 없애버림 마우스 호버 하나로 다 통제 가능.
+  // const [isFlipped, setIsFlipped] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const isCompleted = record.status === 'completed'
+
+  // 상태 감별사 함수로 무슨 카드 보여줄지 결정
+  const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
+  const isCompleted = cardType === 'completedCard'
 
   const handleClick = () => {
+    // 분석 완료 카드만 상세 페이지로 이동 가능
     if (isCompleted) {
-      router.push(`/result/${record.id}`)
+      router.push(`/report/${record.interviewId}`)
     }
   }
 
@@ -45,23 +51,24 @@ function FlipCard({ record }: FlipCardProps) {
       onMouseEnter={() => {
         if (isCompleted) {
           setIsHovered(true)
-          setIsFlipped(true)
+          // setIsFlipped(true)
         }
       }}
       onMouseLeave={() => {
         if (isCompleted) {
           setIsHovered(false)
-          setIsFlipped(false)
+          // setIsFlipped(false)
         }
       }}
       className={`h-full w-full ${isCompleted ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      <CardContainer isFlipped={isFlipped} isHovered={isHovered}>
+      {/* <CardContainer isFlipped={isFlipped} isHovered={isHovered}> */}
+      <CardContainer isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
-          {record.status === 'completed' && <CompletedCardFront record={record} />}
-          {record.status === 'pending' && <PendingCard />}
-          {record.status === 'analysing' && <AnalysingCard interviewId={record.id} />}
-          {record.status === 'failed' && <FailedCard record={record} />}
+          {cardType === 'completedCard' && <CompletedCardFront record={record} />}
+          {cardType === 'pendingCard' && <PendingCard />}
+          {cardType === 'analysingCard' && <AnalysingCard interviewId={record.interviewId} />}
+          {cardType === 'failedCard' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (
           <Card
@@ -137,7 +144,7 @@ export function HistoryContainer({
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
       {pageRecords.map((record, i) => (
         <motion.div
-          key={record.id}
+          key={record.interviewId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.4 }}

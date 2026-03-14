@@ -23,7 +23,7 @@ export function NoticeList({ notices, search }: NoticeListProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
-        className="py-20 text-center"
+        className="flex min-h-100 flex-col items-center justify-center text-center"
       >
         <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
           <Bell className="text-muted-foreground h-7 w-7" />

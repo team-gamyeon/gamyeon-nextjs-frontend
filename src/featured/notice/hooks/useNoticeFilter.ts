@@ -1,15 +1,12 @@
-'use client'
-
 import { useRef, useState } from 'react'
-import type { FilterCategory } from '@/featured/notice/types'
-import { MOCK_NOTICES } from '@/featured/notice/types'
+import type { FilterCategory, Notice } from '@/featured/notice/types'
 import { debounce } from '@/shared/lib/utils/debounce'
 
-export function useNoticeFilter() {
+export function useNoticeFilter(initialNotices: Notice[]) {
   const [search, setSearch] = useState('')
+  // 성능 최적화
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [category, setCategory] = useState<FilterCategory>('전체')
-
+  const [category, setCategory] = useState<FilterCategory>('ALL')
   const debouncedSetSearch = useRef(debounce(setDebouncedSearch, 300)).current
 
   function handleSearchChange(value: string) {
@@ -21,8 +18,8 @@ export function useNoticeFilter() {
     }
   }
 
-  const notices = MOCK_NOTICES.filter((n) => {
-    const matchesCategory = category === '전체' || n.category === category
+  const notices = initialNotices.filter((n) => {
+    const matchesCategory = category === 'ALL' || n.category === category
     const matchesSearch = n.title.includes(debouncedSearch)
     return matchesCategory && matchesSearch
   })

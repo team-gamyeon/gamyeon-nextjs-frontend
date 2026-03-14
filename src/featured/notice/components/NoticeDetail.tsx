@@ -5,12 +5,13 @@ import { ArrowLeft, Calendar, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
-
-import type { Notice } from '@/featured/notice/types'
-import { CATEGORY_COLORS } from '@/featured/notice/types'
+import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
+import { NOTICE_CATEGORY } from '@/featured/notice/constants'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
+import Image from 'next/image'
 
 interface NoticeDetailProps {
-  notice: Notice
+  notice: NoticeDetailResponse
   prevNotice: Notice | null
   nextNotice: Notice | null
 }
@@ -66,8 +67,11 @@ function NoticeContent({ content }: { content: string }) {
   )
 }
 
+
 export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailProps) {
   const shouldReduceMotion = useReducedMotion()
+  const config = NOTICE_CATEGORY[notice.category] || NOTICE_CATEGORY.NOTICE
+  const isRecent = checkIsRecent(notice.createdAt)
 
   return (
     <motion.div
@@ -103,11 +107,11 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
         <div className="border-border/50 border-b px-8 py-6">
           <div className="mb-3 flex items-center gap-2">
             <span
-              className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${CATEGORY_COLORS[notice.category]}`}
+              className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${config.color}`}
             >
-              {notice.category}
+              {config.label}
             </span>
-            {notice.isNew ? (
+            {isRecent ? (
               <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
                 N
               </span>
@@ -118,15 +122,32 @@ export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailPro
 
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Calendar className="h-3 w-3" />
-            <span>{notice.date}</span>
+            <span>{formatDateDot(new Date(notice.createdAt))}</span>
           </div>
         </div>
 
-        {/* 본문 */}
+        {/* 본문 내용 + 첨부 이미지 */}
         <CardContent className="px-8 py-7">
+          {/* 글씨 본문 */}
           <NoticeContent content={notice.content} />
+
+          {notice.imageUrls && notice.imageUrls.length > 0 && (
+            <div className="mt-8 flex flex-col gap-4">
+              {notice.imageUrls.map((url, index) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <Image
+                  key={index}
+                  src={url}
+                  alt={`공지사항 첨부 이미지 ${index + 1}`}
+                  className="w-full max-w-2xl rounded-lg border"
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/*  이전글/다음글(prevNotice, nextNotice) 추가? */}
     </motion.div>
   )
 }

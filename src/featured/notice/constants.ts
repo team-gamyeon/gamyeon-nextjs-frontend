@@ -1,6 +1,7 @@
-import type { NoticeCategory } from './types'
+import type { NoticeCategory, FilterCategory } from './types'
 
-const NOTICE_CATEGORY_CONFIG: Record<NoticeCategory, { label: string; color: string }> = {
+// 카테고리 설정값 모음
+const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: string }> = {
   NOTICE: {
     label: '공지',
     color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
@@ -25,7 +26,14 @@ const NOTICE_CATEGORY_CONFIG: Record<NoticeCategory, { label: string; color: str
 
 // const NOTICE_PAGE_SIZE = 10;
 
-export {
-  NOTICE_CATEGORY_CONFIG,
-  // NOTICE_PAGE_SIZE,
-}
+// 카테고리 필터
+const FILTER_CATEGORIES: FilterCategory[] = [
+  'ALL',
+  'NOTICE',
+  'UPDATE',
+  'GUIDE',
+  'EVENT',
+  'MAINTENANCE',
+]
+
+export { NOTICE_CATEGORY, FILTER_CATEGORIES }

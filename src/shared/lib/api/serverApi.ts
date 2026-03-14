@@ -87,6 +87,11 @@ async function tryRefresh(
  *
  * 에러 발생 시 throw — 호출 측에서 try/catch 사용.
  */
+
+
+// 현재 프로젝트의 serverApi.ts 코드를 자세히 보면, serverFetch 함수가 결과를 반환할 때 이미 Promise<ApiResponse<T>> 형태로 감싸서 주고 있습니다.
+// 즉, serverApi.get을 호출할 때는 실제 핵심 데이터(Notice[])만 제네릭(<>)으로 넘겨주면, serverApi 내부에서 알아서 ApiResponse 껍데기를 씌워서 반환해 줍니다.
+
 async function serverFetch<T>(
   method: string,
   endpoint: string,
@@ -174,3 +179,4 @@ export const serverApi = {
   delete: <T>(endpoint: string, config?: RequestConfig) =>
     serverFetch<T>('DELETE', endpoint, undefined, config),
 }
+

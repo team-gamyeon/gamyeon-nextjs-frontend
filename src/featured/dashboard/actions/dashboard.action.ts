@@ -2,7 +2,7 @@
 
 import type { ApiResponse } from '@/shared/lib/api'
 import type { InterviewStat } from '../types'
-import type { Notice, NoticeDetail } from '@/featured/notice/types'
+import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
 import { getInterviewStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
 
@@ -44,7 +44,9 @@ export async function getNoticesAction(): Promise<ApiResponse<Notice[]>> {
 }
 
 /** * 공지사항 상세 내용 조회 Action */
-export async function getNoticeDetailAction(noticeId: number): Promise<ApiResponse<NoticeDetail>> {
+export async function getNoticeDetailAction(
+  noticeId: number,
+): Promise<ApiResponse<NoticeDetailResponse>> {
   try {
     return await getNoticeDetail(noticeId)
   } catch (error) {

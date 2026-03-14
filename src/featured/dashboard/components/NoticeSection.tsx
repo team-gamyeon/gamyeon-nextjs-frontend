@@ -5,9 +5,10 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getNoticesAction } from '../actions/dashboard.action'
+import { getNoticesAction } from '@/featured/notice/actions/notice.action'
 import type { Notice } from '@/featured/notice/types'
-import { NOTICE_CATEGORY_CONFIG } from '@/featured/notice/constants'
+import { NOTICE_CATEGORY } from '@/featured/notice/constants'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -18,23 +19,35 @@ const fadeUp = {
   }),
 }
 
+
+type NoticeWithUI = Notice & { isRecent: boolean }
+
 export function NoticeSection() {
-  const [notices, setNotices] = useState<Notice[]>([])
+  const [notices, setNotices] = useState<NoticeWithUI[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchNotices() {
       setIsLoading(true)
+      try {
+        const result = await getNoticesAction()
 
-      const result = await getNoticesAction()
-
-      if (result.success && result.data) {
-        setNotices(result.data)
-      } else {
-        console.error('공지사항 불러오기 실패:', result.message)
+        if (result.success && result.data) {
+          const processedNotices = result.data.map((item) => ({
+            ...item,
+            isRecent: checkIsRecent(item.createdAt),
+          }))
+          setNotices(processedNotices)
+        } else {
+          console.error('공지사항 불러오기 실패:', result.message)
+          setNotices([])
+        }
+      } catch (error) {
+        console.error('공지사항 통신 에러 발생:', error)
         setNotices([])
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     fetchNotices()
@@ -68,11 +81,7 @@ export function NoticeSection() {
             </div>
           ) : notices.length > 0 ? (
             notices.map((item) => {
-              const config = NOTICE_CATEGORY_CONFIG[item.category] || NOTICE_CATEGORY_CONFIG.NOTICE
-
-              // 작성일 기준 3일(72시간) 이내면 새 글로 취급하는 로직
-              const isRecent =
-                new Date(item.createdAt).getTime() > Date.now() - 3 * 24 * 60 * 60 * 1000
+              const config = NOTICE_CATEGORY[item.category] || NOTICE_CATEGORY.NOTICE
 
               return (
                 <Link
@@ -91,7 +100,7 @@ export function NoticeSection() {
                       <div className="flex min-w-0 items-center gap-1.5">
                         <p className="truncate text-sm font-medium">{item.title}</p>
 
-                        {isRecent && (
+                        {item.isRecent && (
                           <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
                             N
                           </span>
@@ -100,14 +109,13 @@ export function NoticeSection() {
                     </div>
 
                     <span className="text-muted-foreground shrink-0 text-xs">
-                      {item.createdAt.split('T')[0]}
+                      {formatDateDot(new Date(item.createdAt))}
                     </span>
                   </div>
                 </Link>
               )
             })
           ) : (
-            // 데이터가 없거나 에러가 났을 때 공통으로 보여줄 UI
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
               새로운 공지사항이 없습니다.
             </div>

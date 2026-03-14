@@ -5,12 +5,14 @@ import { Bell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/shared/ui/card'
 import type { Notice } from '@/featured/notice/types'
-import { CATEGORY_COLORS } from '@/featured/notice/types'
+import { NOTICE_CATEGORY } from '@/featured/notice/constants'
+import { formatDateDot, checkIsRecent } from '@/shared/lib/utils/date'
 
 interface NoticeListProps {
   notices: Notice[]
   search: string
 }
+
 
 export function NoticeList({ notices, search }: NoticeListProps) {
   const router = useRouter()
@@ -41,37 +43,47 @@ export function NoticeList({ notices, search }: NoticeListProps) {
     <Card className="border-border/50 overflow-hidden py-4">
       <CardContent className="p-0">
         <AnimatePresence initial={false}>
-          {notices.map((notice, i) => (
-            <motion.div
-              key={notice.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={
-                shouldReduceMotion ? { duration: 0 } : { delay: i * 0.02, duration: 0.15 }
-              }
-              whileTap={shouldReduceMotion ? {} : { opacity: 0.6, transition: { duration: 0.05 } }}
-              onClick={() => router.push(`/notices/${notice.id}`)}
-              className="border-border/40 hover:bg-muted/40 flex cursor-pointer items-center justify-between gap-4 border-b px-6 py-4 transition-colors last:border-b-0"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <span
-                  className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${CATEGORY_COLORS[notice.category]}`}
-                >
-                  {notice.category}
-                </span>
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <p className="truncate text-sm font-medium">{notice.title}</p>
-                  {notice.isNew ? (
-                    <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
-                      N
-                    </span>
-                  ) : null}
+          {notices.map((notice, i) => {
+            const config = NOTICE_CATEGORY[notice.category] || NOTICE_CATEGORY.NOTICE
+            const isRecent = checkIsRecent(notice.createdAt)
+
+            return (
+              <motion.div
+                key={notice.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={
+                  shouldReduceMotion ? { duration: 0 } : { delay: i * 0.02, duration: 0.15 }
+                }
+                whileTap={
+                  shouldReduceMotion ? {} : { opacity: 0.6, transition: { duration: 0.05 } }
+                }
+                // 클릭하면 그 공지사항의 상세 페이지로 이동!
+                onClick={() => router.push(`/notices/${notice.id}`)}
+                className="border-border/40 hover:bg-muted/40 flex cursor-pointer items-center justify-between gap-4 border-b px-6 py-4 transition-colors last:border-b-0"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <span
+                    className={`flex h-5 w-14 shrink-0 items-center justify-center rounded text-[10px] font-medium ${config.color}`}
+                  >
+                    {config.label}
+                  </span>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <p className="truncate text-sm font-medium">{notice.title}</p>
+                    {isRecent ? (
+                      <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+                        N
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-              <span className="text-muted-foreground shrink-0 text-xs">{notice.date}</span>
-            </motion.div>
-          ))}
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {formatDateDot(new Date(notice.createdAt))}
+                </span>
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
       </CardContent>
     </Card>

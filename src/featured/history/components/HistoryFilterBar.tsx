@@ -30,7 +30,7 @@ export function HistoryFilterBar({
       <div className="relative flex-1">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
-          placeholder="직무로 검색..."
+          placeholder="면접 제목으로 검색..."
           className="pl-10"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}

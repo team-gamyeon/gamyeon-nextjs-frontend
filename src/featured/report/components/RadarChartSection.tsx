@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { Info } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
-import { RadarChart } from '@/featured/result/components/RaderChart'
-import type { RadarDataPoint } from '@/featured/result/types'
+import { RadarChart } from '@/featured/report/components/RaderChart'
+import type { RadarDataPoint } from '@/featured/report/types'
 
 const CHART_SIZE = 360
 const CONTAINER_HEIGHT = 360

@@ -5,7 +5,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { ChevronDown, MessageCircleCheck, Lightbulb } from 'lucide-react'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
-import type { FeedbackItem } from '@/featured/result/types'
+import type { FeedbackItem } from '@/featured/report/types'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },

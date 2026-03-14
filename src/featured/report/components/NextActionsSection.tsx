@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Lightbulb } from 'lucide-react'
-import type { NextAction } from '@/featured/result/types'
+import type { NextAction } from '@/featured/report/types'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },

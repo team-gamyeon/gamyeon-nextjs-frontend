@@ -9,7 +9,7 @@ import {
   PolarRadiusAxis,
   Tooltip,
 } from 'recharts'
-import type { RadarDataPoint } from '@/featured/result/types'
+import type { RadarDataPoint } from '@/featured/report/types'
 
 const OUTER_RADIUS = 150
 const LABEL_RADIUS = 180
@@ -20,7 +20,6 @@ interface RadarChartProps {
   data: RadarDataPoint[]
   size?: number
 }
-
 
 const CustomTooltip = ({
   active,
@@ -51,7 +50,13 @@ export function RadarChart({ data, size = 320 }: RadarChartProps) {
       const svg = containerRef.current?.querySelector('svg')
       if (!svg) return
       const rect = svg.getBoundingClientRect()
-      svg.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: rect.left + cx, clientY: rect.top + cy }))
+      svg.dispatchEvent(
+        new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: rect.left + cx,
+          clientY: rect.top + cy,
+        }),
+      )
       svg.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
     }, 0)
     return () => clearTimeout(timer)
@@ -150,7 +155,7 @@ export function RadarChart({ data, size = 320 }: RadarChartProps) {
         return (
           <span
             key={index}
-            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-default text-[11px] text-current opacity-60 transition-all duration-150 select-none hover:font-semibold hover:opacity-90 whitespace-nowrap"
+            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-default text-[11px] whitespace-nowrap text-current opacity-60 transition-all duration-150 select-none hover:font-semibold hover:opacity-90"
             style={{ left: x, top: y }}
             onMouseEnter={() => triggerTooltip(index)}
             onMouseLeave={hideTooltip}

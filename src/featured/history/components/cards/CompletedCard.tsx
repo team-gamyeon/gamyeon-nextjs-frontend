@@ -1,8 +1,11 @@
+'use client'
+
 import { AlertCircle, Calendar, Clock, TrendingUp } from 'lucide-react'
-import { InterviewRecord } from '@/featured/history/types'
+import { InterviewReportItem } from '@/featured/history/types'
+import { formatDateDot } from '@/shared/lib/utils/date'
 
 interface CompletedCardProps {
-  record: InterviewRecord
+  record: InterviewReportItem
 }
 
 function CompletedCardFront({ record }: CompletedCardProps) {
@@ -13,7 +16,7 @@ function CompletedCardFront({ record }: CompletedCardProps) {
         <div className="mt-2 @[180px]:mt-3 @[220px]:mt-5 @[280px]:mt-8">
           <div className="mb-1 flex items-end gap-1 @[180px]:gap-1.5 @[220px]:mb-2 @[220px]:gap-2">
             <span className="text-2xl font-bold @[180px]:text-3xl @[220px]:text-4xl @[280px]:text-5xl">
-              {record.score}
+              {record.report?.totalScore}
             </span>
             <span className="mb-0.5 text-base opacity-90 @[180px]:mb-1 @[180px]:text-lg @[220px]:text-xl @[280px]:mb-2 @[280px]:text-2xl">
               점
@@ -27,20 +30,21 @@ function CompletedCardFront({ record }: CompletedCardProps) {
         <div className="space-y-1.5 @[180px]:space-y-2 @[220px]:space-y-3 @[280px]:space-y-4">
           <div>
             <h3 className="mb-0.5 line-clamp-2 min-h-[2.5em] text-[11px] leading-tight font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
-              {record.position}
+              {record.intvTitle}
             </h3>
             <p className="text-[9px] text-gray-500 @[180px]:text-[10px] @[220px]:text-xs">
-              {record.questionCount}개 질문
+              {record.report?.answeredCount}개 질문
             </p>
           </div>
           <div className="space-y-1 py-1 @[180px]:space-y-1.5 @[220px]:space-y-2 @[220px]:py-1.5 @[280px]:py-2">
             <div className="flex items-center gap-1 text-[10px] text-gray-600 @[180px]:gap-1.5 @[180px]:text-[11px] @[220px]:gap-2 @[220px]:text-xs @[280px]:text-sm">
               <Calendar className="h-2.5 w-2.5 shrink-0 text-blue-500 @[180px]:h-3 @[180px]:w-3 @[220px]:h-3.5 @[220px]:w-3.5 @[280px]:h-4 @[280px]:w-4" />
-              <span>{record.date}</span>
+              <span>{formatDateDot(new Date(record.updatedAt))}</span>
             </div>
             <div className="flex items-center gap-1 text-[10px] text-gray-600 @[180px]:gap-1.5 @[180px]:text-[11px] @[220px]:gap-2 @[220px]:text-xs @[280px]:text-sm">
               <Clock className="h-2.5 w-2.5 shrink-0 text-blue-500 @[180px]:h-3 @[180px]:w-3 @[220px]:h-3.5 @[220px]:w-3.5 @[280px]:h-4 @[280px]:w-4" />
-              <span>{record.duration}</span>
+              {/*  record.duration -> 밀리초 계산 로직 필요 (임시로 durationMs 표시) */}
+              <span>{Math.floor((record.durationMs ?? 0) / 60000)}분</span>
             </div>
           </div>
         </div>
@@ -50,6 +54,9 @@ function CompletedCardFront({ record }: CompletedCardProps) {
 }
 
 function CompletedCardBack({ record }: CompletedCardProps) {
+  const strengths = record.report?.strengths ?? []
+  const weaknesses = record.report?.weaknesses ?? []
+
   return (
     <div className="flex h-full flex-col p-2 @[180px]:p-3 @[220px]:p-4 @[280px]:p-6">
       <div className="flex flex-1 flex-col gap-1.5 @[180px]:gap-2 @[220px]:gap-2.5 @[280px]:gap-4">
@@ -64,8 +71,8 @@ function CompletedCardBack({ record }: CompletedCardProps) {
             </p>
           </div>
           <ul className="space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
-            {record.strengths.length > 0 ? (
-              record.strengths.map((strength, idx) => (
+            {strengths.length > 0 ? (
+              strengths.map((strength: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-1 @[180px]:gap-1.5">
                   <span className="mt-1 h-0.5 w-0.5 shrink-0 rounded-full bg-green-600 @[180px]:h-1 @[180px]:w-1" />
                   <span className="text-[9px] text-green-800 @[180px]:text-[10px] @[220px]:text-xs">
@@ -81,7 +88,6 @@ function CompletedCardBack({ record }: CompletedCardProps) {
           </ul>
         </div>
 
-        {/* 개선점 */}
         <div className="flex flex-1 flex-col rounded-md bg-orange-50 p-2 @[180px]:p-3 @[220px]:rounded-lg @[220px]:p-3.5 @[280px]:p-5">
           <div className="mb-1 flex items-center gap-1 @[180px]:gap-1.5 @[220px]:mb-1.5 @[220px]:gap-2">
             <div className="rounded-full bg-orange-500 p-0.5 @[220px]:p-1">
@@ -92,18 +98,18 @@ function CompletedCardBack({ record }: CompletedCardProps) {
             </p>
           </div>
           <ul className="space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
-            {record.improvements.length > 0 ? (
-              record.improvements.map((improvement, idx) => (
+            {weaknesses.length > 0 ? (
+              weaknesses.map((weakness: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-1 @[180px]:gap-1.5">
                   <span className="mt-1 h-0.5 w-0.5 shrink-0 rounded-full bg-orange-600 @[180px]:h-1 @[180px]:w-1" />
                   <span className="text-[9px] text-orange-800 @[180px]:text-[10px] @[220px]:text-xs">
-                    {improvement}
+                    {weakness}
                   </span>
                 </li>
               ))
             ) : (
               <li className="text-[9px] text-orange-700/70 @[180px]:text-[10px] @[220px]:text-xs">
-                개선점이 발견되지 않았습니다
+                개선할 점이 발견되지 않았습니다
               </li>
             )}
           </ul>

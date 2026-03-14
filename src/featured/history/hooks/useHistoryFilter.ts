@@ -1,20 +1,35 @@
-import { useState } from 'react'
-import type { SortBy, InterviewRecord } from '@/featured/history/types'
-import { MOCK_RECORDS } from '@/featured/history/types'
+import { useState, useMemo } from 'react'
+import type { SortBy, InterviewReportItem } from '../types'
 
-export function useHistoryFilter() {
+export function useHistoryFilter(records: InterviewReportItem[] = []) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortBy>('date')
 
-  const filtered = MOCK_RECORDS.filter((r) => r.position.includes(search)).sort((a, b) => {
-    if (sortBy === 'score') {
-      if (a.score === null) return 1
-      if (b.score === null) return -1
+  // 실무 최적화: 검색어나 정렬 기준, 원본 데이터가 바뀔 때만 재계산 (useMemo)
+  const filtered = useMemo(() => {
+    return records
+      .filter((record) => {
+        // 검색어가 없으면 모두 보여줌
+        if (!search) return true
 
-      return b.score - a.score
-    }
-    return b.date.localeCompare(a.date)
-  })
+        // 1. 기존 position -> intvTitle (대소문자 구분 없이 검색되도록 toLowerCase 추가)
+        return record.intvTitle.toLowerCase().includes(search.toLowerCase())
+      })
+      .sort((a, b) => {
+        // 2. 기존 score -> report.totalScore
+        if (sortBy === 'score') {
+          // 점수가 null이면 맨 밑으로 보내기 위해 -1 처리
+          const scoreA = a.report?.totalScore ?? -1
+          const scoreB = b.report?.totalScore ?? -1
+
+          return scoreB - scoreA // 내림차순 (높은 점수 우선)
+        }
+
+        // 3. 기존 date -> updatedAt (최신순 정렬)
+        // ISO 문자열("2026-03-10T09:00...")을 타임스탬프 숫자로 변환해서 비교
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      })
+  }, [records, search, sortBy])
 
   return {
     search,

@@ -67,7 +67,6 @@ function NoticeContent({ content }: { content: string }) {
   )
 }
 
-
 export function NoticeDetail({ notice, prevNotice, nextNotice }: NoticeDetailProps) {
   const shouldReduceMotion = useReducedMotion()
   const config = NOTICE_CATEGORY[notice.category] || NOTICE_CATEGORY.NOTICE

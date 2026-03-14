@@ -34,12 +34,12 @@ export function NoticeSection() {
 
         // 통신이 성공하고 데이터가 무사히 도착했다면?
         if (result.success && result.data) {
-          // 🚀 피드백 반영: 100개의 데이터 중 앞에서부터 4개만 싹둑 자릅니다!
+          // 피드백 반영: 100개의 데이터 중 앞에서부터 4개만 싹둑 자릅니다!
           const processedNotices = result.data
             .slice(0, 4) // 0번째부터 4번째 전(4번째)까지 총 4개만 남김
             .map((item) => ({
               ...item,
-              isRecent: checkIsRecent(item.createdAt), // 잘라낸 5개에만 '새 글' 딱지를 붙임
+              isRecent: checkIsRecent(item.createdAt), // 잘라낸 4개에만 '새 글' 딱지를 붙임
             }))
 
           setNotices(processedNotices)

@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { NoticeHeader } from '@/featured/notice/components/NoticeHeader'
 import { NoticeDetail } from '@/featured/notice/components/NoticeDetail'
-
 import { getNoticeDetailAction, getNoticesAction } from '@/featured/notice/actions/notice.action'
 
 interface NoticeDetailPageProps {
@@ -15,7 +14,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
   const detailResult = await getNoticeDetailAction(noticeId)
 
   if (!detailResult.success || !detailResult.data) {
-    return notFound()
+    return notFound() //return notFound() 로 return 추가
   }
 
   const notice = detailResult.data

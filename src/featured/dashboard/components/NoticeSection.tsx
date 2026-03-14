@@ -42,6 +42,14 @@ export function NoticeSection() {
           console.error('공지사항 불러오기 실패:', result.message)
           setNotices([])
         }
+
+//         ⬇️ Suggested change
+// -          const processedNotices = result.data.map((item) => ({
+// +const processedNotices = result.data.slice(0, 5).map((item) => ({
+// +  ...item,
+// +  isRecent: checkIsRecent(item.createdAt),
+// +}))
+// 이런 느낌으로 대시보드에서 보여지는 갯수 만큼 정해놓는게 좋을것 같아요
       } catch (error) {
         console.error('공지사항 통신 에러 발생:', error)
         setNotices([])

@@ -77,6 +77,7 @@ export function useInterview() {
 
   const beginAnswering = useCallback(() => {
     const stream = cameraStreamRef.current
+    if (phaseRef.current !== 'thinking') return
     if (stream) {
       startRecording(stream)
     }

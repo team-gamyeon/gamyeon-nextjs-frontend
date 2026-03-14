@@ -2,7 +2,7 @@
 
 import { AlertCircle, Calendar, Clock, TrendingUp } from 'lucide-react'
 import { InterviewReportItem } from '@/featured/history/types'
-import { formatDateDot } from '@/shared/lib/utils/date'
+import { formatDateDot, formatDuration } from '@/shared/lib/utils/date'
 
 interface CompletedCardProps {
   record: InterviewReportItem
@@ -43,8 +43,7 @@ function CompletedCardFront({ record }: CompletedCardProps) {
             </div>
             <div className="flex items-center gap-1 text-[10px] text-gray-600 @[180px]:gap-1.5 @[180px]:text-[11px] @[220px]:gap-2 @[220px]:text-xs @[280px]:text-sm">
               <Clock className="h-2.5 w-2.5 shrink-0 text-blue-500 @[180px]:h-3 @[180px]:w-3 @[220px]:h-3.5 @[220px]:w-3.5 @[280px]:h-4 @[280px]:w-4" />
-              {/*  record.duration -> 밀리초 계산 로직 필요 (임시로 durationMs 표시) */}
-              <span>{Math.floor((record.durationMs ?? 0) / 60000)}분</span>
+              <span>{formatDuration(record.durationMs)}</span>
             </div>
           </div>
         </div>

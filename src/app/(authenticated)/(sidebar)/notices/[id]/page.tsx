@@ -14,7 +14,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
   const detailResult = await getNoticeDetailAction(noticeId)
 
   if (!detailResult.success || !detailResult.data) {
-    return notFound() //return notFound() 로 return 추가
+    return notFound() 
   }
 
   const notice = detailResult.data

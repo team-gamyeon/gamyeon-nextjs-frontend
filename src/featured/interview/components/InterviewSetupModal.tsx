@@ -12,12 +12,13 @@ import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModal
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
 import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
-import { type StepStatus } from '@/featured/interview/types'
+import { type InterviewFileType, type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import {
   completeFileUploadAction,
   createInterviewAction,
+  generateInterviewQuestionAction,
   issuePresignedUrlAction,
   startInterviewAction,
   updateInterviewTitleAction,
@@ -41,7 +42,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const [title, setTitle] = useState('')
   const [resume, setResume] = useState<File | null>(null)
   const [portfolio, setPortfolio] = useState<File | null>(null)
-  const [selfIntro, setSelfIntro] = useState<File | null>(null)
+  const [coverLetter, setCoverLetter] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
   const camera = useCameraModalHandler()
@@ -87,13 +88,13 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
     try {
       setIsUploading(true)
-      const uploadTargets = [
+      const uploadTargets: Array<{ file: File | null; type: InterviewFileType }> = [
         { file: resume, type: 'RESUME' },
         { file: portfolio, type: 'PORTFOLIO' },
-        { file: selfIntro, type: 'COVER_LETTER' },
-      ].filter((target) => target.file !== null) // 선택 제출 안 한 건 제외
+        { file: coverLetter, type: 'COVER_LETTER' },
+      ]
       const uploadedFiles: Array<{
-        fileType: string
+        fileType: InterviewFileType
         originalFileName: string
         fileKey: string
         fileUrl: string
@@ -102,15 +103,12 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       for (const target of uploadTargets) {
         if (!target.file) continue
 
-        const urlRes = await issuePresignedUrlAction(
-          {
-            fileType: target.type,
-            originalFileName: target.file.name,
-            fileSizeBytes: target.file.size,
-            contentType: 'application/pdf',
-          },
-          interviewId,
-        )
+        const urlRes = await issuePresignedUrlAction(interviewId, {
+          fileType: target.type,
+          originalFileName: target.file.name,
+          fileSizeBytes: target.file.size,
+          contentType: 'application/pdf',
+        })
 
         if (!urlRes.success || !urlRes.data) {
           throw new Error(`${target.type} presigned URL 발급 실패`)
@@ -132,15 +130,16 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       }
 
       if (uploadedFiles.length === 0) {
-        console.log('업로드할 파일이 없습니다.')
+        throw new Error('업로드할 파일이 없습니다.')
       }
 
-      const finalRes = await completeFileUploadAction({ files: uploadedFiles }, interviewId)
+      const finalRes = await completeFileUploadAction(interviewId, { files: uploadedFiles })
       if (!finalRes.success) {
-        console.log(finalRes.message || '파일 업로드 완료 처리 실패')
+        throw new Error(finalRes.message || '파일 업로드 완료 처리 실패')
       }
 
       completeStep(2)
+      generateInterviewQuestionAction(interviewId).catch((err) => console.error(err))
     } catch (error) {
       console.error('문서 업로드 중 오류:', error)
     } finally {
@@ -222,10 +221,10 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
           <DocumentStep
             resume={resume}
             portfolio={portfolio}
-            selfIntro={selfIntro}
+            coverLetter={coverLetter}
             setResume={handleDocumentChange(setResume)}
             setPortfolio={handleDocumentChange(setPortfolio)}
-            setSelfIntro={handleDocumentChange(setSelfIntro)}
+            setCoverLetter={handleDocumentChange(setCoverLetter)}
             onComplete={handleDocumentConfirm}
             isUploading={isUploading}
           />

@@ -13,7 +13,6 @@ interface NoticeListProps {
   search: string
 }
 
-
 export function NoticeList({ notices, search }: NoticeListProps) {
   const router = useRouter()
   const shouldReduceMotion = useReducedMotion()

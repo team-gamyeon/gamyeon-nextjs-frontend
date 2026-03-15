@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Info } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
-import { RadarChart } from '@/featured/report/components/RaderChart'
+import { RadarChart } from '@/featured/report/components/RadarChart'
 import type { CompetencyScores, RadarDataPoint } from '@/featured/report/types'
 import { COMPETENCY_MAP } from '../constants'
 

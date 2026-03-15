@@ -10,10 +10,10 @@ import { getReportDetail, deleteReport } from '../service/report.service'
  * 리포트 상세 데이터 조회 Action
  */
 export async function getReportDetailAction(
-  intvId: number,
+  interviewId: number,
 ): Promise<ApiResponse<ReportDetailData>> {
   try {
-    return await getReportDetail(intvId)
+    return await getReportDetail(interviewId)
   } catch (error) {
     if (isRedirectError(error)) throw error
     throw error
@@ -23,9 +23,9 @@ export async function getReportDetailAction(
 /**
  * 리포트 삭제 Action
  */
-export async function deleteReportAction(intvId: number): Promise<ApiResponse<null>> {
+export async function deleteReportAction(interviewId: number): Promise<ApiResponse<null>> {
   try {
-    const response = await deleteReport(intvId)
+    const response = await deleteReport(interviewId)
 
     // API 응답 성공 여부 확인 (명세서의 "success": true 기준)
     if (response.success) {

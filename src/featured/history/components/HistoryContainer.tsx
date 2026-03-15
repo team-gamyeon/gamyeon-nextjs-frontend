@@ -20,7 +20,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 // 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
 // const MOCK_RECORDS: InterviewReportItem[] = [
 //   {
-//     intvId: 1,
+//     interviewId: 1,
 //     intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 3600000,
@@ -35,7 +35,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     intvId: 2,
+//     interviewId: 2,
 //     intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 2400000,
@@ -50,7 +50,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     intvId: 3,
+//     interviewId: 3,
 //     intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 1800000,
@@ -65,7 +65,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     intvId: 4,
+//     interviewId: 4,
 //     intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
 //     intvStatus: 'PAUSED',
 //     durationMs: null,
@@ -74,7 +74,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //   },
 //   {
 //     // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
-//     intvId: 5,
+//     interviewId: 5,
 //     intvTitle: 'READY 상태 테스트',
 //     intvStatus: 'READY',
 //     durationMs: null,
@@ -109,7 +109,7 @@ function FlipCard({ record }: FlipCardProps) {
   const handleClick = () => {
     // 분석 완료 카드만 상세 페이지로 이동 가능
     if (isCompleted) {
-      router.push(`/report/${record.intvId}`)
+      router.push(`/report/${record.interviewId}`)
     }
   }
 
@@ -135,7 +135,7 @@ function FlipCard({ record }: FlipCardProps) {
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {cardType === 'completedCard' && <CompletedCardFront record={record} />}
           {cardType === 'pendingCard' && <PendingCard />}
-          {cardType === 'analysingCard' && <AnalysingCard intvId={record.intvId} />}
+          {cardType === 'analysingCard' && <AnalysingCard interviewId={record.interviewId} />}
           {cardType === 'failedCard' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (
@@ -222,7 +222,7 @@ export function HistoryContainer({
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
       {pageRecords.map((record, i) => (
         <motion.div
-          key={record.intvId}
+          key={record.interviewId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.4 }}

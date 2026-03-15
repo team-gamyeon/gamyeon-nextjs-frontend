@@ -11,7 +11,7 @@ export interface ReportSummary {
 }
 
 export interface InterviewReportItem {
-  intvId: number
+  interviewId: number
   intvTitle: string
   intvStatus: 'FINISHED' | 'PAUSED' | 'IN_PROGRESS' | (string & {})
   durationMs: number | null 

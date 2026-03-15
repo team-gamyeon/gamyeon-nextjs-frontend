@@ -37,7 +37,7 @@ export interface DetailReportBody {
 }
 
 export interface ReportDetailData {
-  intvId: number
+  interviewId: number
   interviewStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
   // 삭제된 상태를 프론트에서 처리해야 할 경우를 대비해 'DELETED' 추가 (리포트 삭제 시 필요)
   reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | 'DELETED'

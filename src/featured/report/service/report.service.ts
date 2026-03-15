@@ -3,17 +3,23 @@ import { ReportDetailData } from '../types'
 
 /**
  * 특정 모의면접의 상세 리포트 데이터를 조회합니다.
- * GET /api/v1/report/detail/{interview_id}
+ * GET /api/v1/report/detail/{intvId}
  */
-export async function getReportDetail(interviewId: number): Promise<ApiResponse<ReportDetailData>> {
-  return await serverApi.get<ReportDetailData>(`/api/v1/report/detail/${interviewId}`)
+export async function getReportDetail(
+  intvId: number,
+): Promise<ApiResponse<ReportDetailData>>, {
+  return await serverApi.get<ReportDetailData>(`/api/v1/report/detail/${intvId}`)
 }
 
-// @ 리포트 삭제 api 임의 코드 (확정되면 수정할 것)
 /**
  * 특정 리포트를 삭제합니다.
- * DELETE /api/v1/report/delete/{interview_id}
+ * DELETE /api/v1/report/delete/{intvId}
+ * * @param intvId - 삭제할 면접 세션 ID (Path Parameter)
+ * @returns 성공 시 data 필드는 null로 반환됩니다.
  */
-export async function deleteReport(interviewId: number): Promise<ApiResponse<null>> {
-  return await serverApi.delete<null>(`/api/v1/report/delete/${interviewId}`)
+export async function deleteReport(
+  intvId: number,
+): Promise<ApiResponse<null>> {
+  // 명세서의 /api/v1/report/delete/{interviewId} 반영
+  return await serverApi.delete<null>(`/api/v1/report/delete/${intvId}`)
 }

@@ -17,7 +17,7 @@ interface ScoreSummaryCardProps {
   totalQuestionCount: number
 }
 
-// 💡 3. 점수 등급에 따른 차트 색상 매핑 (getScoreChartColor 함수 대체)
+// 점수 등급에 따른 차트 색상 매핑 (getScoreChartColor 함수 대체)
 const CHART_COLORS: Record<ScoreGrade, string> = {
   미흡: '#ef4444', // red-500
   보통: '#eab308', // yellow-500

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { ResultHeader } from '@/featured/result/components/ResultHeader'
+import { ReportHeader } from '@/featured/result/components/ReportHeader'
 import { ScoreSummaryCard } from '@/featured/result/components/ScoreSummaryCard'
 import { RadarChartSection } from '@/featured/result/components/RadarChartSection'
 import { StrengthsImprovementsSection } from '@/featured/result/components/StrengthsImprovementsSection'
@@ -22,7 +22,7 @@ const OVERALL_SCORE = Math.round(
 export default function ResultPage() {
   return (
     <div className="bg-muted/20 min-h-screen">
-      <ResultHeader />
+      <ReportHeader />
 
       <main className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="relative mb-8 flex items-center justify-center">

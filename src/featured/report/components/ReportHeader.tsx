@@ -14,7 +14,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { useAuthStore } from '@/featured/auth/store'
 
-export function ResultHeader() {
+export function ReportHeader() {
   const { user, logout } = useAuthStore()
   const router = useRouter()
   const initials = user?.nickname ? user.nickname.slice(0, 1) : 'U'

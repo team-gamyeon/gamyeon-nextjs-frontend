@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
 import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
-import type { AiConfidenceLevel, ScoreGrade } from '@/featured/report/types'
+import type { AiConfidenceLevel } from '@/featured/report/types'
 import { SCORE_GRADE_CONFIG, AI_CONFIDENCE_STYLE, getScoreGrade } from '@/featured/report/constants'
 import { formatDuration } from '@/shared/lib/utils/date'
 

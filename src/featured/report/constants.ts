@@ -7,6 +7,15 @@ const SCORE_THRESHOLD = {
   FAIR: 26,
 } as const
 
+/** * 점수에 따른 등급 반환 (25점 단위 구간)
+ */
+function getScoreGrade(score: number): ScoreGrade {
+  if (score >= SCORE_THRESHOLD.EXCELLENT) return '좋음'
+  if (score >= SCORE_THRESHOLD.GOOD) return '양호'
+  if (score >= SCORE_THRESHOLD.FAIR) return '보통'
+  return '미흡'
+}
+
 /**
  * 등급별 통합 관리 (피드백, 스타일, 차트 색상)
  */
@@ -43,15 +52,6 @@ const AI_CONFIDENCE_STYLE: Record<AiConfidenceLevel, string> = {
   보통: 'bg-yellow-500/10 text-yellow-600',
   낮음: 'bg-orange-500/10 text-orange-600',
   '생성 불가': 'bg-muted text-muted-foreground',
-}
-
-/** * 점수에 따른 등급 반환 (25점 단위 구간)
- */
-function getScoreGrade(score: number): ScoreGrade {
-  if (score >= SCORE_THRESHOLD.EXCELLENT) return '좋음'
-  if (score >= SCORE_THRESHOLD.GOOD) return '양호'
-  if (score >= SCORE_THRESHOLD.FAIR) return '보통'
-  return '미흡'
 }
 
 /**

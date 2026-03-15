@@ -11,8 +11,3 @@ export async function getReportList(userId?: number): Promise<ApiResponse<Interv
   const config = userId ? { params: { userId } } : undefined
   return await serverApi.get<InterviewReportItem[]>('/api/v1/report/list', config)
 }
-
-// @ 뭐가 맞는건지 모르겠음 (서현님 답장오면 수정예정)
-// export async function getReportList(): Promise<ApiResponse<InterviewReportItem[]>> {
-//   return await serverApi.get<InterviewReportItem[]>('/api/v1/report/list')
-// }

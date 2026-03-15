@@ -7,27 +7,33 @@ const SCORE_THRESHOLD = {
   FAIR: 26,
 } as const
 
-// 점수 구간별 피드백 및 스타일 통합 관리 (0-25: 미흡, 26-50: 보통, 51-75: 양호, 76-100: 좋음)
-const SCORE_FEEDBACK_MAP: Record<ScoreGrade, ScoreRangeFeedback> = {
+/**
+ * 등급별 통합 관리 (피드백, 스타일, 차트 색상)
+ */
+const SCORE_GRADE_CONFIG: Record<ScoreGrade, ScoreRangeFeedback & { chartColor: string }> = {
   미흡: {
     grade: '미흡',
     comment: '미흡합니다. 좀 더 연습이 필요해요.',
     style: 'bg-red-500/10 text-red-600',
+    chartColor: '#ef4444', // red-500
   },
   보통: {
     grade: '보통',
     comment: '부족하지만 가능성이 보입니다.',
     style: 'bg-yellow-500/10 text-yellow-600',
+    chartColor: '#eab308', // yellow-500
   },
   양호: {
     grade: '양호',
     comment: '괜찮은 수준입니다! 조금만 더 보완해볼까요?',
     style: 'bg-green-500/10 text-green-500',
+    chartColor: '#22c55e', // green-500
   },
   좋음: {
     grade: '좋음',
     comment: '아주 훌륭한 답변입니다!',
     style: 'bg-blue-500/10 text-blue-500',
+    chartColor: '#3b82f6', // blue-500
   },
 }
 
@@ -83,7 +89,7 @@ const COMPETENCY_MAP: Record<keyof CompetencyScores, { label: string; descriptio
 
 export {
   SCORE_THRESHOLD,
-  SCORE_FEEDBACK_MAP,
+  SCORE_GRADE_CONFIG,
   AI_CONFIDENCE_STYLE,
   REPORT_API_CODE,
   COMPETENCY_MAP,

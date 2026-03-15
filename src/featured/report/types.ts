@@ -15,12 +15,14 @@ export interface QuestionFeedbackDetail {
   improvement: string
 }
 
+// videoUrl 명세 다시 확인해야함 (임의로 넣어둠)
 export interface QuestionSummary {
   index: number
   question: string
   answerSummary: string
   feedbackBadges: string[]
   feedback: QuestionFeedbackDetail
+  videoUrl?: string | null
 }
 
 export interface DetailReportBody {

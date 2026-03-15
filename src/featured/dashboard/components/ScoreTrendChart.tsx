@@ -11,18 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Inbox } from 'lucide-react'
-import { InterviewReportItem } from '@/featured/history/types'
-
-interface ChartDataItem {
-  name: string
-  score: number
-  position: string
-}
-
-interface CustomTooltipProps {
-  active?: boolean
-  payload?: Array<{ payload: ChartDataItem }>
-}
+import { ChartDataItem, CustomTooltipProps, ScoreTrendChartProps } from '../types'
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
@@ -35,13 +24,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   )
 }
 
-interface Props {
-  weekStart: Date
-  weekEnd: Date
-  records: InterviewReportItem[]
-}
-
-export function ScoreTrendChart({ weekStart, weekEnd, records }: Props) {
+export function ScoreTrendChart({ weekStart, weekEnd, records }: ScoreTrendChartProps) {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -128,7 +111,7 @@ export function ScoreTrendChart({ weekStart, weekEnd, records }: Props) {
                 fill="url(#scoreGradient)"
                 dot={{ fill: 'white', stroke: '#0ea5e9', strokeWidth: 2, r: 4 }}
                 activeDot={{ fill: '#0ea5e9', stroke: 'white', strokeWidth: 2, r: 5 }}
-                isAnimationActive={true} // isClient가 true일 때만 렌더링되므로 안심하고 활성화
+                isAnimationActive={true}
               />
             </AreaChart>
           </ResponsiveContainer>

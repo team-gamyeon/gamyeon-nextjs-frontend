@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -12,15 +13,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
+import { deleteReportAction } from '@/featured/report/actions/report.action'
 
-export function DeleteReportButton() {
+interface DeleteReportButtonProps {
+  interviewId: number
+}
+
+export function DeleteReportButton({ interviewId }: DeleteReportButtonProps) {
   const [open, setOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
 
-  const handleDelete = () => {
-    // TODO: 실제 삭제 API 연동
-    setOpen(false)
-    router.push('/history')
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true)
+
+      const res = await deleteReportAction(interviewId)
+
+      if (res.success) {
+        toast.success('리포트가 성공적으로 삭제되었습니다.')
+
+        setOpen(false)
+        router.push('/history')
+      } else {
+        toast.error('삭제에 실패했습니다. 다시 시도해 주세요.')
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('서버 오류가 발생했습니다.')
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -43,11 +66,16 @@ export function DeleteReportButton() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={isDeleting}>
               취소
             </Button>
-            <Button variant="destructive" className="cursor-pointer" onClick={handleDelete}>
-              삭제
+            <Button
+              variant="destructive"
+              className="cursor-pointer"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? '삭제 중...' : '삭제'}
             </Button>
           </DialogFooter>
         </DialogContent>

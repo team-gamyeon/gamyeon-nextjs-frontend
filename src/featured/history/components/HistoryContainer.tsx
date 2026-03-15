@@ -18,70 +18,70 @@ import {
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
 // 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
-const MOCK_RECORDS: InterviewReportItem[] = [
-  {
-    interviewId: 1,
-    intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
-    intvStatus: 'FINISHED',
-    durationMs: 3600000,
-    updatedAt: '2026-03-15T10:00:00Z',
-    report: {
-      reportId: 101,
-      reportStatus: 'SUCCEED',
-      totalScore: 85,
-      answeredCount: 5,
-      strengths: ['React', 'TypeScript'],
-      weaknesses: ['CS 지식'],
-    },
-  },
-  {
-    interviewId: 2,
-    intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
-    intvStatus: 'FINISHED',
-    durationMs: 2400000,
-    updatedAt: '2026-03-15T11:00:00Z',
-    report: {
-      reportId: 102,
-      reportStatus: 'IN_PROGRESS',
-      totalScore: null,
-      answeredCount: 4,
-      strengths: null,
-      weaknesses: null,
-    },
-  },
-  {
-    interviewId: 3,
-    intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
-    intvStatus: 'FINISHED',
-    durationMs: 1800000,
-    updatedAt: '2026-03-15T12:00:00Z',
-    report: {
-      reportId: 103,
-      reportStatus: 'FAILED',
-      totalScore: null,
-      answeredCount: 2,
-      strengths: null,
-      weaknesses: null,
-    },
-  },
-  {
-    interviewId: 4,
-    intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
-    intvStatus: 'PAUSED',
-    durationMs: null,
-    updatedAt: '2026-03-15T13:00:00Z',
-    report: null,
-  },
-  {
-    // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
-    interviewId: 5,
-    intvTitle: 'READY 상태 테스트',
-    intvStatus: 'READY',
-    durationMs: null,
-    updatedAt: '2026-03-15T13:00:00Z',
-    report: null,
-  },
-]
+// const MOCK_RECORDS: InterviewReportItem[] = [
+//   {
+//     interviewId: 1,
+//     intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 3600000,
+//     updatedAt: '2026-03-15T10:00:00Z',
+//     report: {
+//       reportId: 101,
+//       reportStatus: 'SUCCEED',
+//       totalScore: 85,
+//       answeredCount: 5,
+//       strengths: ['React', 'TypeScript'],
+//       weaknesses: ['CS 지식'],
+//     },
+//   },
+//   {
+//     interviewId: 2,
+//     intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 2400000,
+//     updatedAt: '2026-03-15T11:00:00Z',
+//     report: {
+//       reportId: 102,
+//       reportStatus: 'IN_PROGRESS',
+//       totalScore: null,
+//       answeredCount: 4,
+//       strengths: null,
+//       weaknesses: null,
+//     },
+//   },
+//   {
+//     interviewId: 3,
+//     intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 1800000,
+//     updatedAt: '2026-03-15T12:00:00Z',
+//     report: {
+//       reportId: 103,
+//       reportStatus: 'FAILED',
+//       totalScore: null,
+//       answeredCount: 2,
+//       strengths: null,
+//       weaknesses: null,
+//     },
+//   },
+//   {
+//     interviewId: 4,
+//     intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
+//     intvStatus: 'PAUSED',
+//     durationMs: null,
+//     updatedAt: '2026-03-15T13:00:00Z',
+//     report: null,
+//   },
+//   {
+//     // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
+//     interviewId: 5,
+//     intvTitle: 'READY 상태 테스트',
+//     intvStatus: 'READY',
+//     durationMs: null,
+//     updatedAt: '2026-03-15T13:00:00Z',
+//     report: null,
+//   },
+// ]
 
 interface HistoryContainerProps {
   records: InterviewReportItem[]
@@ -157,16 +157,20 @@ export function HistoryContainer({
   currentPage,
   itemsPerPage,
 }: HistoryContainerProps) {
+  // 면접 데이터 없게 들어오는지 test
+  console.log('실제 API에서 넘어온 면접 데이터:', records)
+
   const start = (currentPage - 1) * itemsPerPage
 
   // 잠시 테스트를 위해 records 대신 MOCK_RECORDS를 사용하도록 변경
+  // const pageRecords = MOCK_RECORDS.slice(start, start + itemsPerPage)
   // 테스트가 끝나면 다시 records로
-  const pageRecords = MOCK_RECORDS.slice(start, start + itemsPerPage)
-  // const pageRecords = records.slice(start, start + itemsPerPage)
+  const pageRecords = records.slice(start, start + itemsPerPage)
 
-  // ❌ 수정 전: if (records.length === 0) {
-  // ✅ 수정 후: 목데이터를 기준으로 빈 화면인지 체크하도록 변경
-  if (pageRecords.length === 0) {
+  // ❌ 수정 전:
+  if (records.length === 0) {
+    // ✅ 수정 후: 목데이터를 기준으로 빈 화면인지 체크하도록 변경
+    // if (pageRecords.length === 0) {
     if (search) {
       return (
         <motion.div

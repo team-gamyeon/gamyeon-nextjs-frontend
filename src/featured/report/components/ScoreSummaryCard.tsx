@@ -6,7 +6,7 @@ import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
 import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
 import type { AiConfidenceLevel } from '@/featured/report/types'
-import { SCORE_GRADE_CONFIG, AI_CONFIDENCE_STYLE, getScoreGrade } from '@/featured/report/constants'
+import { getScoreConfig, AI_CONFIDENCE_STYLE } from '@/featured/report/constants'
 import { formatDuration } from '@/shared/lib/utils/date'
 
 interface ScoreSummaryCardProps {
@@ -25,8 +25,7 @@ export function ScoreSummaryCard({
   totalQuestionCount,
 }: ScoreSummaryCardProps) {
   // 점수 기반으로 모든 설정을 한 번에 가져오기
-  const grade = getScoreGrade(overallScore)
-  const config = SCORE_GRADE_CONFIG[grade]
+  const config = getScoreConfig(overallScore)
 
   return (
     <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-0 py-6 shadow-lg">

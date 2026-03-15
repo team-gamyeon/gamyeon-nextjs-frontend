@@ -10,20 +10,18 @@ export default async function DashboardPage() {
   const response = await getReportListAction()
 
   // API가 성공하면 데이터를, 아니면 빈 배열을 기본으로 합니다.
-  const records = response.success && response.data ? response.data : []
+  const history = response.success && response.data ? response.data : []
 
   return (
     <>
       <DashboardHeader />
       <div className="space-y-6 px-8 py-4">
         <QuickStartSection />
-
-        {/* 원본 백엔드 데이터를 그대로 넘깁니다 */}
-        <StatusSection records={records} />
+        <StatusSection history={history} />
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* 원본 백엔드 데이터를 그대로 넘깁니다 */}
-          <RecentHistorySection records={records} />
+          {/* history 에러 수정해야함 */}
+          <RecentHistorySection history={history} />
           <NoticeSection />
         </div>
       </div>

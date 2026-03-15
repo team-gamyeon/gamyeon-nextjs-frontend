@@ -17,17 +17,17 @@ import {
 } from '@/featured/history/components/cards/CompletedCard'
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
-// 테스트용 임시 목데이터 (UI 확인용)
+// 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
 const MOCK_RECORDS: InterviewReportItem[] = [
   {
     interviewId: 1,
-    intvTitle: '프론트엔드 개발자 면접 (분석 완료 테스트)',
+    intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
     intvStatus: 'FINISHED',
     durationMs: 3600000,
     updatedAt: '2026-03-15T10:00:00Z',
     report: {
       reportId: 101,
-      reportStatus: 'SUCCEED', // -> completedCard 렌더링
+      reportStatus: 'SUCCEED',
       totalScore: 85,
       answeredCount: 5,
       strengths: ['React', 'TypeScript'],
@@ -36,13 +36,13 @@ const MOCK_RECORDS: InterviewReportItem[] = [
   },
   {
     interviewId: 2,
-    intvTitle: 'UI/UX 디자이너 면접 (분석 중 테스트)',
+    intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
     intvStatus: 'FINISHED',
     durationMs: 2400000,
     updatedAt: '2026-03-15T11:00:00Z',
     report: {
       reportId: 102,
-      reportStatus: 'IN_PROGRESS', // -> analysingCard 렌더링
+      reportStatus: 'IN_PROGRESS',
       totalScore: null,
       answeredCount: 4,
       strengths: null,
@@ -51,13 +51,13 @@ const MOCK_RECORDS: InterviewReportItem[] = [
   },
   {
     interviewId: 3,
-    intvTitle: '백엔드 개발자 면접 (분석 실패 테스트)',
+    intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
     intvStatus: 'FINISHED',
     durationMs: 1800000,
     updatedAt: '2026-03-15T12:00:00Z',
     report: {
       reportId: 103,
-      reportStatus: 'FAILED', // -> failedCard 렌더링
+      reportStatus: 'FAILED',
       totalScore: null,
       answeredCount: 2,
       strengths: null,
@@ -66,8 +66,8 @@ const MOCK_RECORDS: InterviewReportItem[] = [
   },
   {
     interviewId: 4,
-    intvTitle: '프로젝트 매니저 면접 (일시 정지 테스트)',
-    intvStatus: 'PAUSED', // -> pendingCard 렌더링
+    intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
+    intvStatus: 'PAUSED',
     durationMs: null,
     updatedAt: '2026-03-15T13:00:00Z',
     report: null,
@@ -93,6 +93,8 @@ function FlipCard({ record }: FlipCardProps) {
 
   // 상태 감별사 함수로 무슨 카드 보여줄지 결정
   const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
+  // 🌟 추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
+  if (!cardType) return null
   const isCompleted = cardType === 'completedCard'
 
   const handleClick = () => {
@@ -147,13 +149,15 @@ export function HistoryContainer({
   itemsPerPage,
 }: HistoryContainerProps) {
   const start = (currentPage - 1) * itemsPerPage
-  
+
   // 잠시 테스트를 위해 records 대신 MOCK_RECORDS를 사용하도록 변경
-  // 테스트가 끝나면 다시 records로 
+  // 테스트가 끝나면 다시 records로
   const pageRecords = MOCK_RECORDS.slice(start, start + itemsPerPage)
   // const pageRecords = records.slice(start, start + itemsPerPage)
 
-  if (records.length === 0) {
+  // ❌ 수정 전: if (records.length === 0) {
+  // ✅ 수정 후: 목데이터를 기준으로 빈 화면인지 체크하도록 변경
+  if (pageRecords.length === 0) {
     if (search) {
       return (
         <motion.div

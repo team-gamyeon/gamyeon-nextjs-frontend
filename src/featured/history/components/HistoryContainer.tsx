@@ -17,6 +17,63 @@ import {
 } from '@/featured/history/components/cards/CompletedCard'
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
+// 테스트용 임시 목데이터 (UI 확인용)
+const MOCK_RECORDS: InterviewReportItem[] = [
+  {
+    interviewId: 1,
+    intvTitle: '프론트엔드 개발자 면접 (분석 완료 테스트)',
+    intvStatus: 'FINISHED',
+    durationMs: 3600000,
+    updatedAt: '2026-03-15T10:00:00Z',
+    report: {
+      reportId: 101,
+      reportStatus: 'SUCCEED', // -> completedCard 렌더링
+      totalScore: 85,
+      answeredCount: 5,
+      strengths: ['React', 'TypeScript'],
+      weaknesses: ['CS 지식'],
+    },
+  },
+  {
+    interviewId: 2,
+    intvTitle: 'UI/UX 디자이너 면접 (분석 중 테스트)',
+    intvStatus: 'FINISHED',
+    durationMs: 2400000,
+    updatedAt: '2026-03-15T11:00:00Z',
+    report: {
+      reportId: 102,
+      reportStatus: 'IN_PROGRESS', // -> analysingCard 렌더링
+      totalScore: null,
+      answeredCount: 4,
+      strengths: null,
+      weaknesses: null,
+    },
+  },
+  {
+    interviewId: 3,
+    intvTitle: '백엔드 개발자 면접 (분석 실패 테스트)',
+    intvStatus: 'FINISHED',
+    durationMs: 1800000,
+    updatedAt: '2026-03-15T12:00:00Z',
+    report: {
+      reportId: 103,
+      reportStatus: 'FAILED', // -> failedCard 렌더링
+      totalScore: null,
+      answeredCount: 2,
+      strengths: null,
+      weaknesses: null,
+    },
+  },
+  {
+    interviewId: 4,
+    intvTitle: '프로젝트 매니저 면접 (일시 정지 테스트)',
+    intvStatus: 'PAUSED', // -> pendingCard 렌더링
+    durationMs: null,
+    updatedAt: '2026-03-15T13:00:00Z',
+    report: null,
+  },
+]
+
 interface HistoryContainerProps {
   records: InterviewReportItem[]
   search: string

@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 export function useQuestionPolling(
   intvId: number | null,
   isEnabled: boolean,
-  onComplete: () => void,
+  handlePollingComplete: () => void,
 ) {
   const query = useQuery({
     queryKey: ['interview-question', intvId],
@@ -31,8 +31,8 @@ export function useQuestionPolling(
   })
   useEffect(() => {
     if (query.data && query.data.length > 0) {
-      onComplete?.()
+      handlePollingComplete()
     }
-  }, [query.data, onComplete])
+  }, [query.data, handlePollingComplete])
   return query
 }

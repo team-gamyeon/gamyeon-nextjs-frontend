@@ -12,11 +12,7 @@ import { useCameraHandler } from '@/featured/interview/hooks/useCameraHandler'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
 import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
-import {
-  type InterviewFileType,
-  InterviewQuestions,
-  type StepStatus,
-} from '@/featured/interview/types'
+import { type InterviewFileType, type StepStatus } from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import {
@@ -51,21 +47,24 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const [isUploading, setIsUploading] = useState(false)
   const [isPollingActive, setIsPollingActive] = useState(false)
 
-  const camera = useCameraHandler()
-  const micPerm = useMicPermission(() => setIsPollingActive(true))
-  const micRec = useMicRecorder(micPerm.micStreamRef)
+  const cameraHandler = useCameraHandler()
+  const micPermission = useMicPermission(() => setIsPollingActive(true))
+  const micRecorder = useMicRecorder(micPermission.micStreamRef)
+
+  const handlePollingComplete = useCallback(() => {
+    setIsPollingActive(false)
+  }, [])
   const {
     data: questions,
     isLoading,
     isFetching,
-  } = useQuestionPolling(interviewId, isPollingActive, () => setIsPollingActive(false))
+  } = useQuestionPolling(interviewId, isPollingActive, handlePollingComplete)
 
   const isQuestionsReady = questions && Array.isArray(questions) && questions.length > 0
 
-  const { cleanupCamera } = camera
-  const { cleanupMic } = micPerm
+  const { cleanupCamera } = cameraHandler
+  const { cleanupMic } = micPermission
   const cleanupSetupDevices = useCallback(() => {
-    cleanupCamera()
     cleanupMic()
   }, [cleanupCamera, cleanupMic])
 
@@ -217,7 +216,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   }
 
   const handleCameraConfirm = () => {
-    camera.confirmCamera()
+    cameraHandler.confirmCamera()
     completeStep(3)
   }
 
@@ -245,31 +244,31 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       case 3:
         return (
           <CameraStep
-            cameraStatus={camera.cameraStatus}
-            cameraVideoRef={camera.cameraVideoRef}
-            isLandmarkerReady={!!camera.landmarker}
-            basePose={camera.basePose}
-            alignProgress={camera.alignProgress}
-            faceDetected={camera.faceDetected}
-            onRequest={camera.requestCamera}
+            cameraStatus={cameraHandler.cameraStatus}
+            cameraVideoRef={cameraHandler.cameraVideoRef}
+            isLandmarkerReady={!!cameraHandler.landmarker}
+            basePose={cameraHandler.basePose}
+            alignProgress={cameraHandler.alignProgress}
+            faceDetected={cameraHandler.faceDetected}
+            onRequest={cameraHandler.requestCamera}
             onConfirm={handleCameraConfirm}
           />
         )
       case 4:
         return (
           <MicStep
-            micStatus={micPerm.micStatus}
-            audioLevel={micPerm.audioLevel}
-            onRequest={micPerm.requestMic}
+            micStatus={micPermission.micStatus}
+            audioLevel={micPermission.audioLevel}
+            onRequest={micPermission.requestMic}
             onConfirm={handleMicConfirm}
-            onRetry={() => micPerm.setMicStatus('idle')}
-            recordingStatus={micRec.recordingStatus}
-            isPlaying={micRec.isPlaying}
-            recordedDuration={micRec.recordedDuration}
-            playbackProgress={micRec.playbackProgress}
-            onStartRecording={micRec.startRecording}
-            onStopRecording={micRec.stopRecording}
-            onPlayRecording={micRec.playRecording}
+            onRetry={() => micPermission.setMicStatus('idle')}
+            recordingStatus={micRecorder.recordingStatus}
+            isPlaying={micRecorder.isPlaying}
+            recordedDuration={micRecorder.recordedDuration}
+            playbackProgress={micRecorder.playbackProgress}
+            onStartRecording={micRecorder.startRecording}
+            onStopRecording={micRecorder.stopRecording}
+            onPlayRecording={micRecorder.playRecording}
           />
         )
       default:
@@ -331,11 +330,11 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                 disabled={
                   !allDone ||
                   !isQuestionsReady ||
-                  !camera.cameraStream ||
+                  !cameraHandler.cameraStream ||
                   (!isResume && (!title.trim() || !resume))
                 }
                 onClick={async () => {
-                  if (!camera.cameraStream) {
+                  if (!cameraHandler.cameraStream) {
                     console.error('카메라 스트림이 아직 준비되지 않았습니다.')
                     return
                   }
@@ -346,8 +345,8 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
                   session.handleSetupComplete({
                     title: title.trim() || '모의 면접',
-                    basePose: camera.basePose,
-                    stream: camera.cameraStream,
+                    basePose: cameraHandler.basePose,
+                    stream: cameraHandler.cameraStream,
                   })
                 }}
                 className="gap-2"

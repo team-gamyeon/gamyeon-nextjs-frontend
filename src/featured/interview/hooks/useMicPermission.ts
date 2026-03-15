@@ -10,7 +10,7 @@ export interface UseMicPermissionReturn {
   cleanupMic: () => void
 }
 
-export function useMicPermission(onStartRequest: () => void): UseMicPermissionReturn {
+export function useMicPermission(onStartPollingRequest: () => void): UseMicPermissionReturn {
   const [micStatus, setMicStatus] = useState<PermStatus>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
 
@@ -45,7 +45,6 @@ export function useMicPermission(onStartRequest: () => void): UseMicPermissionRe
 
   const requestMic = async () => {
     setMicStatus('requesting')
-    if (onStartRequest) onStartRequest()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       micStreamRef.current = stream
@@ -56,6 +55,7 @@ export function useMicPermission(onStartRequest: () => void): UseMicPermissionRe
       analyser.fftSize = 256
       ctx.createMediaStreamSource(stream).connect(analyser)
       setMicStatus('granted')
+      onStartPollingRequest()
     } catch {
       setMicStatus('denied')
     }

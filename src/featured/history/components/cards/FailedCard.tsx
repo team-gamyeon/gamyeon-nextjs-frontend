@@ -28,7 +28,8 @@ export function FailedCard({ record }: FailedCardProps) {
       <div className="flex min-h-0 flex-1 flex-col justify-between overflow-hidden px-2 py-2 @[180px]:px-3 @[180px]:py-3 @[220px]:px-4 @[220px]:py-4 @[280px]:px-6 @[280px]:py-6">
         <div className="space-y-1 @[180px]:space-y-1.5 @[220px]:space-y-2 @[280px]:space-y-3">
           <div>
-            <h3 className="mb-0.5 truncate text-[11px] font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
+            {/* 수정 부분: CompletedCard와 동일하게 라인 클램프 및 높이 고정 적용 */}
+            <h3 className="mb-0.5 line-clamp-2 h-[2.5em] text-[11px] leading-tight font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
               {record.intvTitle}
             </h3>
           </div>

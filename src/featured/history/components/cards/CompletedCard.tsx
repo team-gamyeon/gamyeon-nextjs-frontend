@@ -29,8 +29,8 @@ function CompletedCardFront({ record }: CompletedCardProps) {
       <div className="flex flex-1 flex-col justify-between px-2 py-3 @[180px]:px-3 @[180px]:py-4 @[220px]:px-4 @[220px]:py-5 @[280px]:px-6 @[280px]:py-8">
         <div className="space-y-1.5 @[180px]:space-y-2 @[220px]:space-y-3 @[280px]:space-y-4">
           <div>
-            {/* 🌟 수정 부분: line-clamp-2 min-h-[2.5em] 제거, truncate 추가 */}
-            <h3 className="mb-0.5 truncate text-[11px] font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
+            {/* 수정 부분: 높이(h)를 고정하여 1줄일 때나 2줄일 때나 레이아웃이 동일하게 유지되도록 설정, 2줄 이상은 말줄임 처리 */}
+            <h3 className="mb-0.5 line-clamp-2 h-[2.5em] text-[11px] leading-tight font-bold text-gray-900 @[180px]:text-xs @[220px]:text-sm @[280px]:mb-1 @[280px]:text-base">
               {record.intvTitle}
             </h3>
             <p className="text-[9px] text-gray-500 @[180px]:text-[10px] @[220px]:text-xs">
@@ -52,7 +52,7 @@ function CompletedCardFront({ record }: CompletedCardProps) {
     </div>
   )
 }
-
+// 뒷면 생략 (변경 없음)
 function CompletedCardBack({ record }: CompletedCardProps) {
   const strengths = record.report?.strengths ?? []
   const weaknesses = record.report?.weaknesses ?? []

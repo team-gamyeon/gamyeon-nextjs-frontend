@@ -1,4 +1,4 @@
-import { ScoreGrade, AiConfidenceLevel, ScoreRangeFeedback } from './types'
+import { ScoreGrade, AiConfidenceLevel, ScoreRangeFeedback, CompetencyScores } from './types'
 
 // 점수 구간 기준 상수
 const SCORE_THRESHOLD = {
@@ -55,4 +55,37 @@ const REPORT_API_CODE = {
   SUCCESS: 'CMMN-S000',
 } as const
 
-export { SCORE_THRESHOLD, SCORE_FEEDBACK_MAP, AI_CONFIDENCE_STYLE, REPORT_API_CODE, getScoreGrade }
+/**
+ * API의 영문 키값을 한글 라벨과 설명으로 매핑하기 위한 딕셔너리
+ */
+const COMPETENCY_MAP: Record<keyof CompetencyScores, { label: string; description: string }> = {
+  logic: {
+    label: '논리성',
+    description: '질문의 의도를 파악하고 논리적인 흐름으로 답변을 전개했는지 평가합니다.',
+  },
+  answerComposition: {
+    label: '답변 구성력',
+    description: 'PREP 기법 등 체계적인 구조를 갖추어 답변했는지 평가합니다.',
+  },
+  gaze: {
+    label: '시선 집중도',
+    description: '카메라(면접관)를 안정적으로 응시하며 자신감을 보였는지 평가합니다.',
+  },
+  timeManagement: {
+    label: '시간 관리',
+    description: '주어진 시간 내에 적절한 길이로 핵심 내용을 전달했는지 평가합니다.',
+  },
+  keyword: {
+    label: '핵심 키워드',
+    description: '직무 및 질문과 관련된 주요 키워드를 효과적으로 활용했는지 평가합니다.',
+  },
+}
+
+export {
+  SCORE_THRESHOLD,
+  SCORE_FEEDBACK_MAP,
+  AI_CONFIDENCE_STYLE,
+  REPORT_API_CODE,
+  COMPETENCY_MAP,
+  getScoreGrade,
+}

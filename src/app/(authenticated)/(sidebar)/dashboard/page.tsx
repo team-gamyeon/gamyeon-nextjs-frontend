@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* 원본 백엔드 데이터를 그대로 넘깁니다 */}
-          {/* <RecentHistorySection records={records} /> */}
+          <RecentHistorySection records={records} />
           <NoticeSection />
         </div>
       </div>

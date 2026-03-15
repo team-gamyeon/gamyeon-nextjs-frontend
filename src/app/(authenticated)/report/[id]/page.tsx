@@ -10,6 +10,7 @@ import { DeleteReportButton } from '@/featured/report/components/DeleteReportBut
 import { ScrollToTopButton } from '@/shared/components/ScrollToTopButton'
 import { getReportDetailAction } from '@/featured/report/actions/report.action'
 import { formatDateKorean } from '@/shared/lib/utils/date'
+import { AiConfidenceLevel } from '@/featured/report/types'
 
 interface ReportDetailPageProps {
   params: Promise<{ id: string }>
@@ -65,7 +66,13 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="h-full lg:col-span-1">
-            <ScoreSummaryCard overallScore={report.totalScore} />
+            <ScoreSummaryCard
+              overallScore={report.totalScore}
+              aiConfidence={report.reportAccuracy as AiConfidenceLevel}
+              avgAnswerDurationMs={report.avgAnswerDurationMs}
+              answeredCount={report.answeredCount}
+              totalQuestionCount={report.questionSummaries.length}
+            />
           </div>
           <RadarChartSection data={report.competencyScores} />
         </div>

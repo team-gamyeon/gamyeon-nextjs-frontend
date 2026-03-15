@@ -19,7 +19,7 @@ interface UseCameraModalHandlerReturn {
   cameraStream: MediaStream | null
 }
 
-export function useCameraModalHandler(): UseCameraModalHandlerReturn {
+export function useCameraHandler(): UseCameraModalHandlerReturn {
   const { landmarker } = useGazeTracker()
 
   const [cameraStatus, setCameraStatus] = useState<PermStatus>('idle')

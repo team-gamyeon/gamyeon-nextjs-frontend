@@ -5,6 +5,7 @@ import {
   CompleteFileUploadResponse,
   CreateInterviewResponse,
   FileInfo,
+  GetInterviewQuestionsResponse,
   IssuePresignedUrlRequest,
   IssuePresignedUrlResponse,
   UpdateInterviewTitleResponse,
@@ -14,6 +15,7 @@ import {
   createInterview,
   finishInterview,
   generateInterviewQuestion,
+  getInterviewQuestions,
   issuePresignedUrl,
   pauseInterview,
   resumeInterview,
@@ -62,8 +64,15 @@ export async function completeFileUploadAction(
 }
 
 // 면접 질문 생성
-export async function generateInterviewQuestionAction(intvId: number) {
+export async function generateInterviewQuestionAction(intvId: number): Promise<ApiResponse<null>> {
   return generateInterviewQuestion(intvId)
+}
+
+// 면접 질문 조회
+export async function getInterviewQuestionsAction(
+  intvId: number,
+): Promise<ApiResponse<GetInterviewQuestionsResponse>> {
+  return getInterviewQuestions(intvId)
 }
 
 // 면접 시작

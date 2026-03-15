@@ -127,3 +127,13 @@ export interface CompleteFileUploadResponse {
   preparationStatus: PreparationStatusType
   files: UploadedFileInfo[]
 }
+
+export interface InterviewQuestions {
+  questionSetId: number
+  content: string
+}
+
+export interface GetInterviewQuestionsResponse {
+  intvId: number
+  questions: InterviewQuestions[]
+}

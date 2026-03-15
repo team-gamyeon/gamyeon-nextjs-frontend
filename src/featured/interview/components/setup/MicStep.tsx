@@ -29,20 +29,6 @@ interface MicStepProps {
   onPlayRecording: () => void
 }
 
-/**
- * 인터뷰 셋업 - 마이크 권한 요청 및 녹음 테스트 단계 UI
- *
- * [상태별 화면]
- * - idle:       "마이크 권한 요청하기" 버튼
- * - requesting: 로딩 스피너
- * - granted:    VuMeter(실시간 음량) + 녹음 테스트 카드 + 확인 완료 버튼
- * - denied:     권한 차단 안내 + 재시도 / 건너뛰기 버튼
- *
- * [녹음 테스트 카드 - granted 상태에서만 표시]
- * - idle:      마이크 아이콘 버튼 → 클릭 시 녹음 시작
- * - recording: 빨간 펄스 애니메이션 버튼 → 클릭 시 녹음 중지
- * - recorded:  재생 버튼 + 프로그레스바(60fps) + 현재시간/전체길이 + 다시 녹음 링크
- */
 export function MicStep({
   micStatus,
   audioLevel,

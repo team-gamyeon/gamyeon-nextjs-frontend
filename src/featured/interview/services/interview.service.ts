@@ -3,6 +3,7 @@ import {
   CompleteFileUploadResponse,
   CreateInterviewResponse,
   FileInfo,
+  GetInterviewQuestionsResponse,
   IssuePresignedUrlRequest,
   IssuePresignedUrlResponse,
   UpdateInterviewTitleResponse,
@@ -54,6 +55,13 @@ export async function completeFileUpload(
 // 면접 질문 생성
 export async function generateInterviewQuestion(intvId: number): Promise<ApiResponse<null>> {
   return await serverApi.post(`/api/v1/intvs/${intvId}/questions`)
+}
+
+// 면접 질문 조회
+export async function getInterviewQuestions(
+  intvId: number,
+): Promise<ApiResponse<GetInterviewQuestionsResponse>> {
+  return await serverApi.get(`/api/v1/intvs/${intvId}/questions`)
 }
 
 // 면접 시작

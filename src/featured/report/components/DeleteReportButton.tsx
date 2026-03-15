@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog'
 
-export function DeleteResultButton() {
+export function DeleteReportButton() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -25,7 +25,11 @@ export function DeleteResultButton() {
 
   return (
     <>
-      <Button variant="secondary" className="cursor-pointer gap-2 bg-gray-200 text-gray-500 hover:bg-gray-300" onClick={() => setOpen(true)}>
+      <Button
+        variant="secondary"
+        className="cursor-pointer gap-2 bg-gray-200 text-gray-500 hover:bg-gray-300"
+        onClick={() => setOpen(true)}
+      >
         <Trash2 className="h-4 w-4" />
         삭제
       </Button>

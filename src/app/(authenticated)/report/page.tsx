@@ -1,25 +1,26 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { ReportHeader } from '@/featured/result/components/ReportHeader'
-import { ScoreSummaryCard } from '@/featured/result/components/ScoreSummaryCard'
-import { RadarChartSection } from '@/featured/result/components/RadarChartSection'
-import { StrengthsImprovementsSection } from '@/featured/result/components/StrengthsImprovementsSection'
-import { QuestionFeedbackSection } from '@/featured/result/components/QuestionFeedbackSection'
-import { DeleteResultButton } from '@/featured/result/components/DeleteResultButton'
+// import { ArrowLeft } from 'lucide-react'
+import { ReportHeader } from '@/featured/report/components/ReportHeader'
+import { ScoreSummaryCard } from '@/featured/report/components/ScoreSummaryCard'
+import { RadarChartSection } from '@/featured/report/components/RadarChartSection'
+import { StrengthsImprovementsSection } from '@/featured/report/components/StrengthsImprovementsSection'
+import { QuestionFeedbackSection } from '@/featured/report/components/QuestionFeedbackSection'
+import { DeleteReportButton } from '@/featured/report/components/DeleteReportButton'
 import {
   MOCK_RADAR_DATA,
   MOCK_FEEDBACKS,
   MOCK_STRENGTHS,
   MOCK_IMPROVEMENTS,
-} from '@/featured/result/types'
+} from '@/featured/report/types'
 import { ScrollToTopButton } from '@/shared/components/ScrollToTopButton'
+import { ArrowLeft } from 'lucide-react'
 
 const OVERALL_SCORE = Math.round(
   MOCK_RADAR_DATA.reduce((sum, d) => sum + d.value, 0) / MOCK_RADAR_DATA.length,
 )
 
-export default function ResultPage() {
+export default function reportPage() {
   return (
     <div className="bg-muted/20 min-h-screen">
       <ReportHeader />
@@ -57,7 +58,7 @@ export default function ResultPage() {
         <QuestionFeedbackSection feedbacks={MOCK_FEEDBACKS} />
 
         <div className="mt-10 flex justify-center">
-          <DeleteResultButton />
+          <DeleteReportButton />
         </div>
       </main>
 

@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ReportHeader } from '@/featured/report/components/ReportHeader'
 import { ScoreSummaryCard } from '@/featured/report/components/ScoreSummaryCard'
 import { RadarChartSection } from '@/featured/report/components/RadarChartSection'
-import { StrengthsImprovementsSection } from '@/featured/report/components/StrengthsImprovementsSection'
+import { StrengthsWeaknessesSection } from '@/featured/report/components/StrengthsWeaknessesSection'
 import { QuestionFeedbackSection } from '@/featured/report/components/QuestionFeedbackSection'
 import { DeleteReportButton } from '@/featured/report/components/DeleteReportButton'
 import { ScrollToTopButton } from '@/shared/components/ScrollToTopButton'
@@ -77,10 +77,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           <RadarChartSection data={report.competencyScores} />
         </div>
 
-        <StrengthsImprovementsSection
-          strengths={report.strengths}
-          improvements={report.weaknesses}
-        />
+        <StrengthsWeaknessesSection strengths={report.strengths} weaknesses={report.weaknesses} />
 
         <QuestionFeedbackSection feedbacks={report.questionSummaries} />
 

@@ -147,7 +147,11 @@ export function HistoryContainer({
   itemsPerPage,
 }: HistoryContainerProps) {
   const start = (currentPage - 1) * itemsPerPage
-  const pageRecords = records.slice(start, start + itemsPerPage)
+  
+  // 잠시 테스트를 위해 records 대신 MOCK_RECORDS를 사용하도록 변경
+  // 테스트가 끝나면 다시 records로 
+  const pageRecords = MOCK_RECORDS.slice(start, start + itemsPerPage)
+  // const pageRecords = records.slice(start, start + itemsPerPage)
 
   if (records.length === 0) {
     if (search) {

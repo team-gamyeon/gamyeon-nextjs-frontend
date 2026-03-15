@@ -16,7 +16,6 @@ interface ReportDetailPageProps {
 }
 
 export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
-  //  Promise로 감싸진 params를 await로 풀어서 id 추출 후 숫자로 변환
   const { id } = await params
   const interviewId = Number(id)
   const response = await getReportDetailAction(interviewId)

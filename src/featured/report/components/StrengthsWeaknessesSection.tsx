@@ -12,7 +12,7 @@ export function StrengthsWeaknessesSection({
   strengths,
   weaknesses,
 }: StrengthsWeaknessesSectionProps) {
-    // 백엔드 데이터 3줄로 내려줌 
+  // 백엔드 데이터 3줄로 내려줌
   const displayStrengths = strengths.slice(0, 3)
   const displayWeaknesses = weaknesses.slice(0, 3)
 
@@ -36,7 +36,7 @@ export function StrengthsWeaknessesSection({
         </CardContent>
       </Card>
 
-      {/* 2. 개선할 점 카드 */}
+      {/* 개선할 점 카드 */}
       <Card className="border-orange-100 bg-orange-50/30 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg text-orange-600">

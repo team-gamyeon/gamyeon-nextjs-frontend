@@ -118,12 +118,10 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                         첫줄: 사용자 답변 요약
                         두번째줄 : 강점 + 개선할 점 */}
                         <p className="text-foreground/80 text-[14.5px] leading-relaxed font-medium">
-                          <span className="mr-1 font-bold text-blue-600">[강점]</span>
-                          {fb.feedback.strength}
+                          <span className="mr-1 font-bold">{fb.feedback.strength}</span>
                         </p>
                         <p className="text-foreground/80 mt-1 text-[14.5px] leading-relaxed font-medium">
-                          <span className="mr-1 font-bold text-amber-600">[개선점]</span>
-                          {fb.feedback.improvement}
+                          <span className="mr-1 font-bold">{fb.feedback.improvement}</span>
                         </p>
                       </div>
                     </div>

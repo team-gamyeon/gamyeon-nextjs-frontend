@@ -17,7 +17,7 @@ export interface CustomTooltipProps {
 export interface ScoreTrendChartProps {
   weekStart: Date
   weekEnd: Date
-  history: InterviewReportItem[]
+  records: InterviewReportItem[]
 }
 
 // ==========================================

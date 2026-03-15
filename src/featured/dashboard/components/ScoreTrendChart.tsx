@@ -24,7 +24,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   )
 }
 
-export function ScoreTrendChart({ weekStart, weekEnd, records }: ScoreTrendChartProps) {
+export function ScoreTrendChart({ weekStart, weekEnd, history }: ScoreTrendChartProps) {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {

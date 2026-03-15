@@ -5,7 +5,12 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
 import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
-import { type AiConfidenceLevel, AI_CONFIDENCE_STYLE, SCORE_GRADE_STYLE, getScoreGrade } from '@/featured/result/constants'
+import {
+  type AiConfidenceLevel,
+  AI_CONFIDENCE_STYLE,
+  SCORE_GRADE_STYLE,
+  getScoreGrade,
+} from '@/featured/report/constants'
 
 interface ScoreSummaryCardProps {
   overallScore: number

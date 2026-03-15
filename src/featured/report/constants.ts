@@ -1,3 +1,7 @@
+// ==========================================
+// 리포트 상세 페이지 UI 전용 상수
+// ==========================================
+
 export type ScoreGrade = '미흡' | '보통' | '양호' | '좋음'
 
 export const SCORE_GRADE_STYLE: Record<ScoreGrade, string> = {
@@ -14,11 +18,11 @@ export function getScoreGrade(score: number): ScoreGrade {
   return '미흡'
 }
 
-export type AiConfidenceLevel = '높음' | '중간' | '낮음' | '생성 불가'
+export type AiConfidenceLevel = '높음' | '보통' | '낮음' | '생성 불가'
 
 export const AI_CONFIDENCE_STYLE: Record<AiConfidenceLevel, string> = {
   높음: 'bg-green-500/10 text-green-600',
-  중간: 'bg-yellow-500/10 text-yellow-600',
+  보통: 'bg-yellow-500/10 text-yellow-600',
   낮음: 'bg-orange-500/10 text-orange-600',
   '생성 불가': 'bg-muted text-muted-foreground',
 }

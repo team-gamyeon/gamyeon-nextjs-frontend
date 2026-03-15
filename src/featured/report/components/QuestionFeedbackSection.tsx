@@ -5,7 +5,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { ChevronDown, MessageCircleCheck, Lightbulb } from 'lucide-react'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
-import type { FeedbackItem } from '@/featured/result/types'
+import type { QuestionSummary } from '@/featured/report/types'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -41,7 +41,7 @@ const videoVariants: Variants = {
 }
 
 interface QuestionFeedbackSectionProps {
-  feedbacks: FeedbackItem[]
+  feedbacks: QuestionSummary[]
 }
 
 export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionProps) {
@@ -81,7 +81,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                     <Badge className="border-none bg-[oklch(0.55_0.15_180)] px-3 py-0.5 text-xs font-semibold text-white hover:opacity-90">
                       질문 {i + 1}
                     </Badge>
-                    {fb.feedback_badges.map((tag) => (
+                    {fb.feedbackBadges.map((tag) => (
                       <Badge
                         key={tag}
                         variant="secondary"
@@ -104,7 +104,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                         <MessageCircleCheck className="h-4 w-4 text-blue-600" />
                       </div>
                       <p className="text-muted-foreground flex-1 pt-1 text-[14.5px] leading-relaxed">
-                        {fb.answer_summary}
+                        {fb.answerSummary}
                       </p>
                     </div>
 
@@ -113,9 +113,19 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                       <div className="mt-0.5 rounded-full bg-amber-50 p-1.5">
                         <Lightbulb className="h-4 w-4 text-amber-600" />
                       </div>
-                      <p className="text-foreground/80 flex-1 pt-1 text-[14.5px] leading-relaxed font-medium">
-                        {fb.feedback}
-                      </p>
+                      <div className="flex-1 pt-1">
+                        {/*  리포트 상세조회api 연동 작업할떄 추후 다시 수정 예정 
+                        첫줄: 사용자 답변 요약
+                        두번째줄 : 강점 + 개선할 점 */}
+                        <p className="text-foreground/80 text-[14.5px] leading-relaxed font-medium">
+                          <span className="mr-1 font-bold text-blue-600">[강점]</span>
+                          {fb.feedback.strength}
+                        </p>
+                        <p className="text-foreground/80 mt-1 text-[14.5px] leading-relaxed font-medium">
+                          <span className="mr-1 font-bold text-amber-600">[개선점]</span>
+                          {fb.feedback.improvement}
+                        </p>
+                      </div>
                     </div>
                   </div>
 

@@ -64,3 +64,21 @@ export const checkIsRecent = (dateString: string): boolean => {
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
   return new Date(dateString).getTime() > Date.now() - THREE_DAYS_MS
 }
+
+/**
+ * 밀리초(ms)를 "M분 S초" 또는 "M분" 형식으로 변환합니다.
+ * @param ms 밀리초 단위 숫자
+ * @returns 예: 850000 -> "14분 10초", 60000 -> "1분"
+ */
+export const formatDuration = (ms: number | null): string => {
+  if (!ms) return '0분'
+
+  const totalSeconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  if (seconds === 0) {
+    return `${minutes}분`
+  }
+  return `${minutes}분 ${seconds}초`
+}

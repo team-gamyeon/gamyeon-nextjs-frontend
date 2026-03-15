@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card } from '@/shared/ui/card'
 import { FileText, Inbox } from 'lucide-react'
-import { InterviewRecord } from '@/featured/history/types'
+import { InterviewReportItem } from '@/featured/history/types'
+import { getReportCardType } from '@/featured/history/constants'
 import { PendingCard } from '@/featured/history/components/cards/PedingCard'
 import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
 import { CardContainer } from '@/featured/history/components/cards/CardContainer'
@@ -16,26 +17,99 @@ import {
 } from '@/featured/history/components/cards/CompletedCard'
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 
+// 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
+// const MOCK_RECORDS: InterviewReportItem[] = [
+//   {
+//     interviewId: 1,
+//     intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 3600000,
+//     updatedAt: '2026-03-15T10:00:00Z',
+//     report: {
+//       reportId: 101,
+//       reportStatus: 'SUCCEED',
+//       totalScore: 85,
+//       answeredCount: 5,
+//       strengths: ['React', 'TypeScript'],
+//       weaknesses: ['CS 지식'],
+//     },
+//   },
+//   {
+//     interviewId: 2,
+//     intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 2400000,
+//     updatedAt: '2026-03-15T11:00:00Z',
+//     report: {
+//       reportId: 102,
+//       reportStatus: 'IN_PROGRESS',
+//       totalScore: null,
+//       answeredCount: 4,
+//       strengths: null,
+//       weaknesses: null,
+//     },
+//   },
+//   {
+//     interviewId: 3,
+//     intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
+//     intvStatus: 'FINISHED',
+//     durationMs: 1800000,
+//     updatedAt: '2026-03-15T12:00:00Z',
+//     report: {
+//       reportId: 103,
+//       reportStatus: 'FAILED',
+//       totalScore: null,
+//       answeredCount: 2,
+//       strengths: null,
+//       weaknesses: null,
+//     },
+//   },
+//   {
+//     interviewId: 4,
+//     intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
+//     intvStatus: 'PAUSED',
+//     durationMs: null,
+//     updatedAt: '2026-03-15T13:00:00Z',
+//     report: null,
+//   },
+//   {
+//     // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
+//     interviewId: 5,
+//     intvTitle: 'READY 상태 테스트',
+//     intvStatus: 'READY',
+//     durationMs: null,
+//     updatedAt: '2026-03-15T13:00:00Z',
+//     report: null,
+//   },
+// ]
+
 interface HistoryContainerProps {
-  records: InterviewRecord[]
+  records: InterviewReportItem[]
   search: string
   currentPage: number
   itemsPerPage: number
 }
 
 interface FlipCardProps {
-  record: InterviewRecord
+  record: InterviewReportItem
 }
 
 function FlipCard({ record }: FlipCardProps) {
   const router = useRouter()
-  const [isFlipped, setIsFlipped] = useState(false)
+  // isFlipped 상태 자체를 아예 없애버림 마우스 호버 하나로 다 통제 가능.
+  // const [isFlipped, setIsFlipped] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const isCompleted = record.status === 'completed'
+
+  // 상태 감별사 함수로 무슨 카드 보여줄지 결정
+  const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
+  // 🌟 추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
+  if (!cardType) return null
+  const isCompleted = cardType === 'completedCard'
 
   const handleClick = () => {
+    // 분석 완료 카드만 상세 페이지로 이동 가능
     if (isCompleted) {
-      router.push(`/result/${record.id}`)
+      router.push(`/report/${record.interviewId}`)
     }
   }
 
@@ -45,23 +119,24 @@ function FlipCard({ record }: FlipCardProps) {
       onMouseEnter={() => {
         if (isCompleted) {
           setIsHovered(true)
-          setIsFlipped(true)
+          // setIsFlipped(true)
         }
       }}
       onMouseLeave={() => {
         if (isCompleted) {
           setIsHovered(false)
-          setIsFlipped(false)
+          // setIsFlipped(false)
         }
       }}
       className={`h-full w-full ${isCompleted ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      <CardContainer isFlipped={isFlipped} isHovered={isHovered}>
+      {/* <CardContainer isFlipped={isFlipped} isHovered={isHovered}> */}
+      <CardContainer isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
-          {record.status === 'completed' && <CompletedCardFront record={record} />}
-          {record.status === 'pending' && <PendingCard />}
-          {record.status === 'analysing' && <AnalysingCard interviewId={record.id} />}
-          {record.status === 'failed' && <FailedCard record={record} />}
+          {cardType === 'completedCard' && <CompletedCardFront record={record} />}
+          {cardType === 'pendingCard' && <PendingCard />}
+          {cardType === 'analysingCard' && <AnalysingCard interviewId={record.interviewId} />}
+          {cardType === 'failedCard' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (
           <Card
@@ -82,10 +157,20 @@ export function HistoryContainer({
   currentPage,
   itemsPerPage,
 }: HistoryContainerProps) {
+  // 면접 데이터 없게 들어오는지 test
+  console.log('실제 API에서 넘어온 면접 데이터:', records)
+
   const start = (currentPage - 1) * itemsPerPage
+
+  // 잠시 테스트를 위해 records 대신 MOCK_RECORDS를 사용하도록 변경
+  // const pageRecords = MOCK_RECORDS.slice(start, start + itemsPerPage)
+  // 테스트가 끝나면 다시 records로
   const pageRecords = records.slice(start, start + itemsPerPage)
 
+  // ❌ 수정 전:
   if (records.length === 0) {
+    // ✅ 수정 후: 목데이터를 기준으로 빈 화면인지 체크하도록 변경
+    // if (pageRecords.length === 0) {
     if (search) {
       return (
         <motion.div
@@ -137,7 +222,7 @@ export function HistoryContainer({
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
       {pageRecords.map((record, i) => (
         <motion.div
-          key={record.id}
+          key={record.interviewId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.4 }}

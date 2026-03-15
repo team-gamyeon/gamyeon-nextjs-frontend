@@ -5,11 +5,10 @@ import { ReactNode, useEffect } from 'react'
 
 interface CardContainerProps {
   children: ReactNode
-  isFlipped: boolean
   isHovered?: boolean
 }
 
-export function CardContainer({ children, isFlipped, isHovered = false }: CardContainerProps) {
+export function CardContainer({ children, isHovered = false }: CardContainerProps) {
   const cardControls = useAnimation()
   const shadowControls = useAnimation()
 
@@ -47,7 +46,7 @@ export function CardContainer({ children, isFlipped, isHovered = false }: CardCo
         transition: { type: 'spring', stiffness: 700, damping: 22, mass: 0.6 },
       })
     }
-  }, [isHovered, isFlipped])
+  }, [isHovered, cardControls, shadowControls])
 
   return (
     <div className="@container relative aspect-5/5.5 w-full" style={{ perspective: '900px' }}>

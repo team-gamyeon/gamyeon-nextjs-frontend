@@ -8,6 +8,11 @@ import { useActivityData } from '@/featured/dashboard/hooks/useActivityData'
 import { useRandomTip } from '@/featured/dashboard/hooks/useRandomTip'
 import { useWeekNavigation } from '@/featured/dashboard/hooks/useWeekNavigation'
 import { formatDateKorean } from '@/shared/lib/utils/date'
+import { InterviewReportItem } from '@/featured/history/types'
+
+export interface StatusSectionProps {
+  history?: InterviewReportItem[]
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -18,7 +23,7 @@ const fadeUp = {
   }),
 }
 
-export function StatusSection() {
+export function StatusSection({ history = [] }: StatusSectionProps) {
   const { tip } = useRandomTip()
   const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation()
   const { mounted, activityData, getLevelColor } = useActivityData()
@@ -72,7 +77,7 @@ export function StatusSection() {
                 </button>
               </div>
             </div>
-            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} />
+            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} history={history} />
           </CardContent>
         </Card>
 

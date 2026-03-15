@@ -1,5 +1,11 @@
 // ==========================================
-// 1. API 응답 및 데이터 모델 타입
+// 1. 공통 유니온(Union) 타입
+// ==========================================
+export type ScoreGrade = '미흡' | '보통' | '양호' | '좋음'
+export type AiConfidenceLevel = '높음' | '보통' | '낮음' | '생성 불가'
+
+// ==========================================
+// 2. API 응답 및 데이터 모델 타입
 // ==========================================
 
 export interface CompetencyScores {
@@ -27,7 +33,7 @@ export interface QuestionSummary {
 
 export interface DetailReportBody {
   totalScore: number
-  reportAccuracy: '높음' | '보통' | '낮음' | '생성 불가'
+  reportAccuracy: AiConfidenceLevel
   jobCategory: string | null
   answeredCount: number
   avgAnswerDurationMs: number
@@ -41,17 +47,13 @@ export interface DetailReportBody {
 export interface ReportDetailData {
   interviewId: number
   interviewStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
-  // 삭제된 상태를 프론트에서 처리해야 할 경우를 대비해 'DELETED' 추가 (리포트 삭제 시 필요)
   reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | 'DELETED'
   report: DetailReportBody
 }
 
 // ==========================================
-// 2. UI/컴포넌트 전용 타입
+// 3. UI/컴포넌트 전용 타입
 // ==========================================
-
-export type ScoreGrade = '미흡' | '보통' | '양호' | '좋음'
-export type AiConfidenceLevel = '높음' | '보통' | '낮음' | '생성 불가'
 
 export interface ScoreRangeFeedback {
   grade: ScoreGrade

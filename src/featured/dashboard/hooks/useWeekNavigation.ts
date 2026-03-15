@@ -2,13 +2,22 @@ import { useState, useMemo } from 'react'
 import { InterviewReportItem } from '@/featured/history/types'
 import { getMondayOf, addDays } from '@/shared/lib/utils/date'
 
-export function useWeekNavigation(records: InterviewReportItem[]) {
+export function useWeekNavigation(records: InterviewReportItem[] = []) {
   const sessions = useMemo(() => {
+    // 이제  
     return (records || [])
       .filter((r) => r.intvStatus === 'FINISHED' && r.report?.totalScore !== null)
       .map((r) => ({ ...r, dateObj: new Date(r.updatedAt) }))
       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
   }, [records])
+
+// export function useWeekNavigation(records: InterviewReportItem[]) {
+//   const sessions = useMemo(() => {
+//     return (records || [])
+//       .filter((r) => r.intvStatus === 'FINISHED' && r.report?.totalScore !== null)
+//       .map((r) => ({ ...r, dateObj: new Date(r.updatedAt) }))
+//       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
+//   }, [records])
 
   // 가장 최근 데이터의 월요일을 기준으로 잡음
   const baseMonday = useMemo(

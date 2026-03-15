@@ -43,6 +43,7 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="absolute inset-0 h-full w-full -scale-x-100 object-cover"
           />
         ) : (

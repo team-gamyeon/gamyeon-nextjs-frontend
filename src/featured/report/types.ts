@@ -1,8 +1,7 @@
 // ==========================================
-// 면접 결과 리포트 상세 API 관련 타입 (/api/v1/report/detail/{id})
+// 1. API 응답 및 데이터 모델 타입
 // ==========================================
 
-// 1. 역량별 점수 (방사형 차트용 데이터)
 export interface CompetencyScores {
   logic: number
   answerComposition: number
@@ -11,14 +10,11 @@ export interface CompetencyScores {
   keyword: number
 }
 
-// 2. 문항별 피드백 상세 객체
 export interface QuestionFeedbackDetail {
-  characteristic: string
   strength: string
   improvement: string
 }
 
-// 3. 문항별 요약 리스트 아이템
 export interface QuestionSummary {
   index: number
   question: string
@@ -27,10 +23,9 @@ export interface QuestionSummary {
   feedback: QuestionFeedbackDetail
 }
 
-// 4. 리포트 상세 본문 (data.report)
 export interface DetailReportBody {
   totalScore: number
-  reportAccuracy: string
+  reportAccuracy: '높음' | '보통' | '낮음' | '생성 불가'
   jobCategory: string | null
   answeredCount: number
   avgAnswerDurationMs: number
@@ -41,19 +36,22 @@ export interface DetailReportBody {
   questionSummaries: QuestionSummary[]
 }
 
-// 5. [최상위] 리포트 상세 API 응답 데이터 (data 객체)
 export interface ReportDetailData {
   interviewId: number
-  interviewStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS' | (string & {})
-  reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | (string & {})
+  interviewStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
+  reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED'
   report: DetailReportBody
 }
 
 // ==========================================
-// UI 컴포넌트 전용 타입 (데이터 변환용)
+// 2. UI/컴포넌트 전용 타입
 // ==========================================
-export interface RadarDataPoint {
-  label: string
-  value: number
-  description: string
+
+export type ScoreGrade = '미흡' | '보통' | '양호' | '좋음'
+export type AiConfidenceLevel = '높음' | '보통' | '낮음' | '생성 불가'
+
+export interface ScoreRangeFeedback {
+  grade: ScoreGrade
+  comment: string
+  style: string
 }

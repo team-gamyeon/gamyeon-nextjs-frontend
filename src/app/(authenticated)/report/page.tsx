@@ -1,26 +1,43 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
-// import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { ReportHeader } from '@/featured/report/components/ReportHeader'
 import { ScoreSummaryCard } from '@/featured/report/components/ScoreSummaryCard'
 import { RadarChartSection } from '@/featured/report/components/RadarChartSection'
 import { StrengthsImprovementsSection } from '@/featured/report/components/StrengthsImprovementsSection'
 import { QuestionFeedbackSection } from '@/featured/report/components/QuestionFeedbackSection'
 import { DeleteReportButton } from '@/featured/report/components/DeleteReportButton'
-import {
-  MOCK_RADAR_DATA,
-  MOCK_FEEDBACKS,
-  MOCK_STRENGTHS,
-  MOCK_IMPROVEMENTS,
-} from '@/featured/report/types'
 import { ScrollToTopButton } from '@/shared/components/ScrollToTopButton'
-import { ArrowLeft } from 'lucide-react'
+import { getReportDetailAction } from '@/featured/report/actions/report.action'
+import { formatDateKorean } from '@/shared/lib/utils/date'
 
-const OVERALL_SCORE = Math.round(
-  MOCK_RADAR_DATA.reduce((sum, d) => sum + d.value, 0) / MOCK_RADAR_DATA.length,
-)
+interface ReportPageProps {
+  params: {
+    interviewId: string
+  }
+}
 
-export default function reportPage() {
+export default async function ReportPage({ params }: ReportPageProps) {
+  const interviewId = Number(params.interviewId)
+  const response = await getReportDetailAction(interviewId)
+
+  // 데이터 조회 실패 또는 없는 경우의 예외 처리
+  if (!response.success || !response.data) {
+    return (
+      <div className="bg-muted/20 flex min-h-screen flex-col items-center justify-center">
+        <p className="text-muted-foreground mb-4 text-lg">리포트 데이터를 불러올 수 없습니다.</p>
+        <Button asChild>
+          <Link href="/history">목록으로 돌아가기</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const { report } = response.data
+
+  // 1. date.ts 유틸리티 함수를 사용하여 날짜 포맷팅
+  const formattedDate = formatDateKorean(new Date(report.createdAt))
+
   return (
     <div className="bg-muted/20 min-h-screen">
       <ReportHeader />
@@ -42,23 +59,29 @@ export default function reportPage() {
 
           <div className="text-center">
             <h1 className="text-2xl font-bold sm:text-3xl">면접 결과 리포트</h1>
-            <p className="text-muted-foreground mt-2">2026년 2월 25일 · 프론트엔드 개발자 직무</p>
+            <p className="text-muted-foreground mt-2">
+              {/* jobCategory가 존재할 때만 ' · 직무명' 텍스트를 렌더링 */}
+              {formattedDate} {report.jobCategory && `· ${report.jobCategory}`}
+            </p>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="h-full lg:col-span-1">
-            <ScoreSummaryCard overallScore={OVERALL_SCORE} />
+            <ScoreSummaryCard overallScore={report.totalScore} />
           </div>
-          <RadarChartSection data={MOCK_RADAR_DATA} />
+          <RadarChartSection data={report.competencyScores} />
         </div>
 
-        <StrengthsImprovementsSection strengths={MOCK_STRENGTHS} improvements={MOCK_IMPROVEMENTS} />
+        <StrengthsImprovementsSection
+          strengths={report.strengths}
+          improvements={report.weaknesses}
+        />
 
-        <QuestionFeedbackSection feedbacks={MOCK_FEEDBACKS} />
+        <QuestionFeedbackSection feedbacks={report.questionSummaries} />
 
         <div className="mt-10 flex justify-center">
-          <DeleteReportButton />
+          <DeleteReportButton interviewId={interviewId} />
         </div>
       </main>
 

@@ -3,11 +3,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import { TypingText } from '@/featured/interview/components/screen/TypingText'
-import { QUESTIONS } from '@/featured/interview/constants'
+import type { InterviewQuestions } from '@/featured/interview/types'
 
 interface QuestionBannerProps {
   isActive: boolean
   currentQuestion: number
+  questions: InterviewQuestions[]
   typingKey: number
   questionRevealed: boolean
   onTypingComplete: () => void
@@ -16,10 +17,13 @@ interface QuestionBannerProps {
 export function QuestionBanner({
   isActive,
   currentQuestion,
+  questions,
   typingKey,
   questionRevealed,
   onTypingComplete,
 }: QuestionBannerProps) {
+  const currentQuestionText = questions[currentQuestion]?.content ?? ''
+
   return (
     <AnimatePresence>
       {isActive && (
@@ -39,12 +43,12 @@ export function QuestionBanner({
               {!questionRevealed ? (
                 <TypingText
                   key={typingKey}
-                  text={QUESTIONS[currentQuestion]}
+                  text={currentQuestionText}
                   speed={28}
                   onComplete={onTypingComplete}
                 />
               ) : (
-                QUESTIONS[currentQuestion]
+                currentQuestionText
               )}
             </p>
             {questionRevealed && (

@@ -145,9 +145,9 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
         throw new Error('업로드할 파일이 없습니다.')
       }
 
-      const finalRes = await completeFileUploadAction(interviewId, { files: uploadedFiles })
-      if (!finalRes.success) {
-        throw new Error(finalRes.message || '파일 업로드 완료 처리 실패')
+      const completeRes = await completeFileUploadAction(interviewId, { files: uploadedFiles })
+      if (!completeRes.success) {
+        throw new Error(completeRes.message || '파일 업로드 완료 처리 실패')
       }
 
       completeStep(2)
@@ -347,6 +347,8 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                     title: title.trim() || '모의 면접',
                     basePose: cameraHandler.basePose,
                     stream: cameraHandler.cameraStream,
+                    interviewId,
+                    questions: questions ?? [],
                   })
                 }}
                 className="gap-2"

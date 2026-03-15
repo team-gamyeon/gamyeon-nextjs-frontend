@@ -2,7 +2,7 @@ async function uploadFileToS3(file: File, presignedUrl: string) {
   const response = await fetch(presignedUrl, {
     method: 'PUT',
     body: file,
-    headers: { 'Content-Type': 'application/pdf' },
+    headers: { 'Content-Type': file.type },
   })
   if (response.ok) {
     return {

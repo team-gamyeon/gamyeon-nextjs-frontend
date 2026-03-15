@@ -21,7 +21,7 @@ export interface UseMicRecorderReturn {
 }
 
 export function useMicRecorder(
-  micStreamRef: React.MutableRefObject<MediaStream | null>,
+  micStreamRef: React.RefObject<MediaStream | null>,
 ): UseMicRecorderReturn {
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle')
   const [isPlaying, setIsPlaying] = useState(false)
@@ -70,7 +70,9 @@ export function useMicRecorder(
       if (audio.duration) setPlaybackProgress(audio.currentTime / audio.duration)
       if (!audio.paused && !audio.ended) rafRef.current = requestAnimationFrame(tick)
     }
-    audio.onplay = () => { rafRef.current = requestAnimationFrame(tick) }
+    audio.onplay = () => {
+      rafRef.current = requestAnimationFrame(tick)
+    }
     audio.onended = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
       setIsPlaying(false)

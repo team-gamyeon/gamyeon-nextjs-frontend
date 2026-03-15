@@ -8,11 +8,15 @@ import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep
 import { MicStep } from '@/featured/interview/components/setup/MicStep'
 import { SetupSidebar } from '@/featured/interview/components/setup/SetupSidebar'
 import { TitleStep } from '@/featured/interview/components/setup/TitleStep'
-import { useCameraModalHandler } from '@/featured/interview/hooks/useCameraModalHandler'
+import { useCameraHandler } from '@/featured/interview/hooks/useCameraHandler'
 import type { useInterview } from '@/featured/interview/hooks/useInterview'
 import { useMicPermission } from '@/featured/interview/hooks/useMicPermission'
 import { useMicRecorder } from '@/featured/interview/hooks/useMicRecorder'
-import { type InterviewFileType, type StepStatus } from '@/featured/interview/types'
+import {
+  type InterviewFileType,
+  InterviewQuestions,
+  type StepStatus,
+} from '@/featured/interview/types'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import {
@@ -24,6 +28,7 @@ import {
   updateInterviewTitleAction,
 } from '@/featured/interview/actions/interview.action'
 import uploadFileToS3 from '@/shared/lib/utils/uploadFileToS3'
+import { useQuestionPolling } from '@/featured/interview/hooks/useQuestionPolling'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -44,10 +49,18 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const [portfolio, setPortfolio] = useState<File | null>(null)
   const [coverLetter, setCoverLetter] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isPollingActive, setIsPollingActive] = useState(false)
 
-  const camera = useCameraModalHandler()
-  const micPerm = useMicPermission()
+  const camera = useCameraHandler()
+  const micPerm = useMicPermission(() => setIsPollingActive(true))
   const micRec = useMicRecorder(micPerm.micStreamRef)
+  const {
+    data: questions,
+    isLoading,
+    isFetching,
+  } = useQuestionPolling(interviewId, isPollingActive, () => setIsPollingActive(false))
+
+  const isQuestionsReady = questions && Array.isArray(questions) && questions.length > 0
 
   const { cleanupCamera } = camera
   const { cleanupMic } = micPerm
@@ -316,7 +329,10 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
               </Button>
               <Button
                 disabled={
-                  !allDone || !camera.cameraStream || (!isResume && (!title.trim() || !resume))
+                  !allDone ||
+                  !isQuestionsReady ||
+                  !camera.cameraStream ||
+                  (!isResume && (!title.trim() || !resume))
                 }
                 onClick={async () => {
                   if (!camera.cameraStream) {
@@ -336,7 +352,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                 }}
                 className="gap-2"
               >
-                면접 시작하기
+                {!isQuestionsReady && isPollingActive ? '질문 생성 중' : '면접 시작하기'}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

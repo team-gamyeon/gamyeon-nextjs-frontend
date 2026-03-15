@@ -4,17 +4,13 @@ import { type PermStatus } from '@/featured/interview/types'
 export interface UseMicPermissionReturn {
   micStatus: PermStatus
   setMicStatus: React.Dispatch<React.SetStateAction<PermStatus>>
-  // VuMeter에 전달할 실시간 음량 (0~1)
   audioLevel: number
-  // 녹음 훅에서 사용할 마이크 스트림 ref
-  micStreamRef: React.MutableRefObject<MediaStream | null>
-  // 브라우저 마이크 권한 요청 및 AudioContext·AnalyserNode 초기화
+  micStreamRef: React.RefObject<MediaStream | null>
   requestMic: () => Promise<void>
-  // 마이크 스트림·오디오 컨텍스트 정리
   cleanupMic: () => void
 }
 
-export function useMicPermission(): UseMicPermissionReturn {
+export function useMicPermission(onStartRequest: () => void): UseMicPermissionReturn {
   const [micStatus, setMicStatus] = useState<PermStatus>('idle')
   const [audioLevel, setAudioLevel] = useState(0)
 
@@ -49,6 +45,7 @@ export function useMicPermission(): UseMicPermissionReturn {
 
   const requestMic = async () => {
     setMicStatus('requesting')
+    if (onStartRequest) onStartRequest()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       micStreamRef.current = stream

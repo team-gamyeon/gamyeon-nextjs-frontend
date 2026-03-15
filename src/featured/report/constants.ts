@@ -48,4 +48,11 @@ function getScoreGrade(score: number): ScoreGrade {
   return '미흡'
 }
 
-export { SCORE_THRESHOLD, SCORE_FEEDBACK_MAP, AI_CONFIDENCE_STYLE, getScoreGrade }
+/**
+ * 리포트 관련 API 응답 코드
+ */
+const REPORT_API_CODE = {
+  SUCCESS: 'CMMN-S000',
+} as const
+
+export { SCORE_THRESHOLD, SCORE_FEEDBACK_MAP, AI_CONFIDENCE_STYLE, REPORT_API_CODE, getScoreGrade }

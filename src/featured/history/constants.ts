@@ -32,22 +32,21 @@ const INTV_STATUS_LABEL: Record<string, string> = {
 
 export type ReportCardType = 'completedCard' | 'analysingCard' | 'failedCard' | 'pendingCard' | null
 
-// ==========================================
-// UI 카드 타입 결정 로직
-// ==========================================
-
+// 2. UI 카드 타입 결정 로직
 function getReportCardType(intvStatus: string, reportStatus?: string | null): ReportCardType {
+  // 면접이 COMPLETED인 경우, 리포트 상태에 따라 카드 분기
   if (intvStatus === INTV_STATUS.FINISHED) {
-    if (reportStatus === REPORT_STATUS.SUCCEED) return 'completedCard'
-    if (reportStatus === REPORT_STATUS.IN_PROGRESS) return 'analysingCard'
-    if (reportStatus === REPORT_STATUS.FAILED) return 'failedCard'
+    if (reportStatus === REPORT_STATUS.SUCCEED) return 'completedCard' // 활성화
+    if (reportStatus === REPORT_STATUS.IN_PROGRESS) return 'analysingCard' // ai 분석중
+    if (reportStatus === REPORT_STATUS.FAILED) return 'failedCard' // 실패 안내
   }
 
+  // 면접이 PAUSED인 경우 (report_status는 null)
   if (intvStatus === INTV_STATUS.PAUSED) {
-    return 'pendingCard'
+    return 'pendingCard' // (이어하기 카드)
   }
 
-  // 기획서에 없는 상태(IN_PROGRESS, READY 등)
+  // IN_PROGRESS 등 나머지 상태
   return null
 }
 

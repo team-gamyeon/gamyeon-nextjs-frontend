@@ -67,7 +67,7 @@ export function useCameraModalHandler(): UseCameraModalHandlerReturn {
 
       node.srcObject = stream
     },
-    [cameraStatus, hasLiveVideoTrack, resetCameraState]
+    [cameraStatus, hasLiveVideoTrack, resetCameraState],
   )
 
   useEffect(() => {
@@ -193,7 +193,7 @@ export function useCameraModalHandler(): UseCameraModalHandlerReturn {
 
     try {
       await navigator.mediaDevices.enumerateDevices()
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 
       if (!isMountedRef.current) {
         stream.getTracks().forEach((track) => track.stop())
@@ -218,7 +218,12 @@ export function useCameraModalHandler(): UseCameraModalHandlerReturn {
   }
 
   const cleanupCamera = useCallback(() => {
-    console.log('[cleanupCamera] called, stream:', cameraStreamRef.current, 'video:', cameraVideoElementRef.current)
+    console.log(
+      '[cleanupCamera] called, stream:',
+      cameraStreamRef.current,
+      'video:',
+      cameraVideoElementRef.current,
+    )
     if (poseDetectRef.current) {
       cancelAnimationFrame(poseDetectRef.current)
       poseDetectRef.current = null

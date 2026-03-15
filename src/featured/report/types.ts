@@ -55,12 +55,6 @@ export interface ReportDetailData {
 // 3. UI/컴포넌트 전용 타입
 // ==========================================
 
-export interface ScoreRangeFeedback {
-  grade: ScoreGrade
-  comment: string
-  style: string
-}
-
 export interface RadarDataPoint {
   label: string
   value: number

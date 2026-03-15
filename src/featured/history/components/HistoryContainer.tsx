@@ -67,13 +67,13 @@ const MOCK_RECORDS: InterviewReportItem[] = [
   {
     interviewId: 4,
     intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
-    intvStatus: 'READY',
+    intvStatus: 'PAUSED',
     durationMs: null,
     updatedAt: '2026-03-15T13:00:00Z',
     report: null,
   },
   {
-    // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다!
+    // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
     interviewId: 5,
     intvTitle: 'READY 상태 테스트',
     intvStatus: 'READY',

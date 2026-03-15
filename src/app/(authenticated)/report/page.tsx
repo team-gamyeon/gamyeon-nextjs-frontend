@@ -34,8 +34,6 @@ export default async function ReportPage({ params }: ReportPageProps) {
   }
 
   const { report } = response.data
-
-  // 1. date.ts 유틸리티 함수를 사용하여 날짜 포맷팅
   const formattedDate = formatDateKorean(new Date(report.createdAt))
 
   return (

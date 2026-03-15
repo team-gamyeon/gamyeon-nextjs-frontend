@@ -56,3 +56,9 @@ export interface ScoreRangeFeedback {
   comment: string
   style: string
 }
+
+export interface RadarDataPoint {
+  label: string
+  value: number
+  description: string
+}

@@ -11,7 +11,7 @@ import { formatDateKorean } from '@/shared/lib/utils/date'
 import { InterviewReportItem } from '@/featured/history/types'
 
 export interface StatusSectionProps {
-  records?: InterviewReportItem[]
+  history?: InterviewReportItem[]
 }
 
 const fadeUp = {
@@ -23,7 +23,7 @@ const fadeUp = {
   }),
 }
 
-export function StatusSection({ records = [] }: StatusSectionProps) {
+export function StatusSection({ history = [] }: StatusSectionProps) {
   const { tip } = useRandomTip()
   const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation()
   const { mounted, activityData, getLevelColor } = useActivityData()
@@ -77,7 +77,7 @@ export function StatusSection({ records = [] }: StatusSectionProps) {
                 </button>
               </div>
             </div>
-            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} records={records} />
+            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} history={history} />
           </CardContent>
         </Card>
 

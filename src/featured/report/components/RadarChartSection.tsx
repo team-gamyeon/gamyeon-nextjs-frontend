@@ -4,8 +4,9 @@ import { motion } from 'framer-motion'
 import { Info } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
-import { RadarChart } from '@/featured/report/components/RaderChart'
-import type { RadarDataPoint } from '@/featured/report/types'
+import { RadarChart } from '@/featured/report/components/RadarChart'
+import type { CompetencyScores, RadarDataPoint } from '@/featured/report/types'
+import { COMPETENCY_MAP } from '../constants'
 
 const CHART_SIZE = 360
 const CONTAINER_HEIGHT = 360
@@ -20,10 +21,20 @@ const CARD_ANIMATION_VARIANTS = {
 }
 
 interface RadarChartSectionProps {
-  data: RadarDataPoint[]
+  data: CompetencyScores
 }
 
 export function RadarChartSection({ data }: RadarChartSectionProps) {
+  // [데이터 가공 로직] 백엔드 데이터(data) + 한글/설명 사전(COMPETENCY_MAP) = 차트용 배열(chartData)
+  const chartData: RadarDataPoint[] = Object.keys(COMPETENCY_MAP).map((key) => {
+    const k = key as keyof CompetencyScores
+    return {
+      label: COMPETENCY_MAP[k].label,
+      value: data[k],
+      description: COMPETENCY_MAP[k].description,
+    }
+  })
+
   return (
     <motion.div
       initial="hidden"
@@ -46,13 +57,14 @@ export function RadarChartSection({ data }: RadarChartSectionProps) {
               justifyContent: 'center',
             }}
           >
-            <RadarChart data={data} size={CHART_SIZE} />
+            {/* 자식 컴포넌트인 RadarChart에는 변환된 배열(chartData)을 넘깁니다 */}
+            <RadarChart data={chartData} size={CHART_SIZE} />
           </div>
 
-          {/* 역량 점수 그리드 */}
           <TooltipProvider>
             <div className="mt-4 flex w-full gap-2">
-              {data.map((d) => (
+              {/* 원본 data 대신 가공된 chartData를 순회하며 UI를 그립니다 */}
+              {chartData.map((d) => (
                 <div
                   key={d.label}
                   className="bg-muted/50 flex flex-1 flex-col items-center rounded-lg px-2 py-2"

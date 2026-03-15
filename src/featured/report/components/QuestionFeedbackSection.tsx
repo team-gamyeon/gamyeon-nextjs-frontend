@@ -99,6 +99,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
 
                   {/* 요약 & 피드백 리스트 */}
                   <div className="space-y-4 pt-1">
+                    {/* 첫 번째 행: 답변 요약 행 */}
                     <div className="flex items-start gap-3.5">
                       <div className="mt-0.5 rounded-full bg-blue-50 p-1.5">
                         <MessageCircleCheck className="h-4 w-4 text-blue-600" />
@@ -108,24 +109,14 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                       </p>
                     </div>
 
-                    {/* 피드백 */}
-                    <div className="flex items-start gap-3.5">
-                      <div className="mt-0.5 rounded-full bg-amber-50 p-1.5">
+                    {/* 두 번째 행: AI 피드백 행 (강점 + 개선점 통합) */}
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 shrink-0 rounded-full bg-amber-50 p-1.5">
                         <Lightbulb className="h-4 w-4 text-amber-600" />
                       </div>
-                      <div className="flex-1 pt-1">
-                        {/*  리포트 상세조회api 연동 작업할떄 추후 다시 수정 예정 
-                        첫줄: 사용자 답변 요약
-                        두번째줄 : 강점 + 개선할 점 */}
-                        <p className="text-foreground/80 text-[14.5px] leading-relaxed font-medium">
-                          <span className="mr-1 font-bold text-blue-600">[강점]</span>
-                          {fb.feedback.strength}
-                        </p>
-                        <p className="text-foreground/80 mt-1 text-[14.5px] leading-relaxed font-medium">
-                          <span className="mr-1 font-bold text-amber-600">[개선점]</span>
-                          {fb.feedback.improvement}
-                        </p>
-                      </div>
+                      <p className="text-foreground/80 pt-1 text-[15px] leading-relaxed font-medium">
+                        {fb.feedback.strength} {fb.feedback.improvement}
+                      </p>
                     </div>
                   </div>
 
@@ -147,7 +138,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                               controls
                               className="h-full w-full object-cover"
                               preload="metadata"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e) => e.stopPropagation()} // 비디오 클릭 시 아코디언 닫히는 현상 방지
                             />
                           </div>
                         </div>

@@ -1,34 +1,44 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { ResultHeader } from '@/featured/result/components/ResultHeader'
-import { ScoreSummaryCard } from '@/featured/result/components/ScoreSummaryCard'
-import { RadarChartSection } from '@/featured/result/components/RadarChartSection'
-import { StrengthsImprovementsSection } from '@/featured/result/components/StrengthsImprovementsSection'
-import { QuestionFeedbackSection } from '@/featured/result/components/QuestionFeedbackSection'
-import { DeleteResultButton } from '@/featured/result/components/DeleteResultButton'
-import {
-  MOCK_RADAR_DATA,
-  MOCK_FEEDBACKS,
-  MOCK_STRENGTHS,
-  MOCK_IMPROVEMENTS,
-} from '@/featured/result/types'
+import { ReportHeader } from '@/featured/report/components/ReportHeader'
+import { ScoreSummaryCard } from '@/featured/report/components/ScoreSummaryCard'
+import { RadarChartSection } from '@/featured/report/components/RadarChartSection'
+import { StrengthsWeaknessesSection } from '@/featured/report/components/StrengthsWeaknessesSection'
+import { QuestionFeedbackSection } from '@/featured/report/components/QuestionFeedbackSection'
+import { DeleteReportButton } from '@/featured/report/components/DeleteReportButton'
 import { ScrollToTopButton } from '@/shared/components/ScrollToTopButton'
+import { getReportDetailAction } from '@/featured/report/actions/report.action'
+import { formatDateKorean } from '@/shared/lib/utils/date'
+import { AiConfidenceLevel } from '@/featured/report/types'
 
-interface Props {
+interface ReportDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-const OVERALL_SCORE = Math.round(
-  MOCK_RADAR_DATA.reduce((sum, d) => sum + d.value, 0) / MOCK_RADAR_DATA.length,
-)
-
-export default async function ResultDetailPage({ params }: Props) {
+export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
   const { id } = await params
+  const interviewId = Number(id)
+  const response = await getReportDetailAction(interviewId)
+
+  //  데이터 조회 실패 시 방어 코드
+  if (!response.success || !response.data) {
+    return (
+      <div className="bg-muted/20 flex min-h-screen flex-col items-center justify-center">
+        <p className="text-muted-foreground mb-4 text-lg">리포트 데이터를 불러올 수 없습니다.</p>
+        <Button asChild>
+          <Link href="/history">목록으로 돌아가기</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const { report } = response.data
+  const formattedDate = formatDateKorean(new Date(report.createdAt))
 
   return (
     <div className="bg-muted/20 min-h-screen">
-      <ResultHeader />
+      <ReportHeader />
 
       <main className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="relative mb-8 flex items-center justify-center">
@@ -47,23 +57,32 @@ export default async function ResultDetailPage({ params }: Props) {
 
           <div className="text-center">
             <h1 className="text-2xl font-bold sm:text-3xl">면접 결과 리포트</h1>
-            <p className="text-muted-foreground mt-2">2026년 2월 25일 · 프론트엔드 개발자 직무</p>
+            <p className="text-muted-foreground mt-2">
+              {/* 직무 데이터가 있을 때만 렌더링하도록 수정 */}
+              {formattedDate} {report.jobCategory && `· ${report.jobCategory}`}
+            </p>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="h-full lg:col-span-1">
-            <ScoreSummaryCard overallScore={OVERALL_SCORE} />
+            <ScoreSummaryCard
+              overallScore={report.totalScore}
+              aiConfidence={report.reportAccuracy as AiConfidenceLevel}
+              avgAnswerDurationMs={report.avgAnswerDurationMs}
+              answeredCount={report.answeredCount}
+              totalQuestionCount={report.questionSummaries.length}
+            />
           </div>
-          <RadarChartSection data={MOCK_RADAR_DATA} />
+          <RadarChartSection data={report.competencyScores} />
         </div>
 
-        <StrengthsImprovementsSection strengths={MOCK_STRENGTHS} improvements={MOCK_IMPROVEMENTS} />
+        <StrengthsWeaknessesSection strengths={report.strengths} weaknesses={report.weaknesses} />
 
-        <QuestionFeedbackSection feedbacks={MOCK_FEEDBACKS} />
+        <QuestionFeedbackSection feedbacks={report.questionSummaries} />
 
         <div className="mt-10 flex justify-center">
-          <DeleteResultButton />
+          <DeleteReportButton interviewId={interviewId} />
         </div>
       </main>
 

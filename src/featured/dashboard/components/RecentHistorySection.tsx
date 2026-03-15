@@ -68,7 +68,7 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
             history.map((item, i) => (
               <Link
                 key={i}
-                href={`/result/${item.id}`}
+                href={`/report/${item.id}`}
                 className="flex flex-1 flex-col justify-center"
               >
                 <div className="hover:bg-muted/40 flex h-full w-full items-center gap-4 px-5 transition-colors">

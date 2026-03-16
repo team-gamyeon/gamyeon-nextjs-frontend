@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { Mic, MicOff, Video, VideoOff, SkipForward, CheckCircle2, ChevronRight } from 'lucide-react'
 import type { Phase } from '@/featured/interview/types'
-import { QUESTIONS } from '@/featured/interview/constants'
 
 interface ControlBarProps {
   micOn: boolean
   cameraOn: boolean
   phase: Phase
   currentQuestion: number
+  questionCount: number
   onToggleMic: () => void
   onToggleCamera: () => void
   onStartInterview: () => void
@@ -23,12 +23,15 @@ export function ControlBar({
   cameraOn,
   phase,
   currentQuestion,
+  questionCount,
   onToggleMic,
   onToggleCamera,
   onStartInterview,
   onStartAnswering,
   onNext,
 }: ControlBarProps) {
+  const isLastQuestion = questionCount > 0 && currentQuestion >= questionCount - 1
+
   return (
     <div className="relative z-20 flex items-center justify-center gap-3 border-t border-white/10 bg-slate-900/80 px-4 py-4 backdrop-blur">
       <Button
@@ -63,7 +66,7 @@ export function ControlBar({
       )}
       {phase === 'answering' && (
         <Button variant="secondary" className="ml-4 gap-2" size="lg" onClick={onNext}>
-          {currentQuestion < QUESTIONS.length - 1 ? (
+          {!isLastQuestion ? (
             <>
               다음 질문
               <SkipForward className="h-4 w-4" />

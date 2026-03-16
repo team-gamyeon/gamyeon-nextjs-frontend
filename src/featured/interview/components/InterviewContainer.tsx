@@ -23,6 +23,7 @@ export function InterviewContainer({ session, interviewId }: InterviewPageProps)
       />
       <QuestionBanner
         currentQuestion={session.currentQuestion}
+        questions={session.interviewQuestions}
         isActive={session.isActive}
         typingKey={session.typingKey}
         questionRevealed={session.questionRevealed}
@@ -48,6 +49,7 @@ export function InterviewContainer({ session, interviewId }: InterviewPageProps)
         cameraOn={session.cameraOn}
         phase={session.phase}
         currentQuestion={session.currentQuestion}
+        questionCount={session.interviewQuestions.length}
         onToggleMic={() => session.setMicOn((v) => !v)}
         onToggleCamera={() => session.setCameraOn((v) => !v)}
         onStartInterview={session.startInterview}

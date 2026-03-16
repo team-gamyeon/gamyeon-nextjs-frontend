@@ -1,6 +1,6 @@
 'use server'
 
-import type { ApiResponse } from '@/shared/lib/api'
+import { ApiResponse } from '@/shared/lib/api'
 import {
   CompleteFileUploadResponse,
   CreateInterviewResponse,
@@ -9,15 +9,23 @@ import {
   IssuePresignedUrlRequest,
   IssuePresignedUrlResponse,
   UpdateInterviewTitleResponse,
+  IssueVideoPresignedUrlRequest,
+  VideoInfo,
+  CompleteVideoFileUploadResponse,
+  IssueVideoPresignedUrlResponse,
+  AnswerAnalysisResponse,
 } from '../types'
 import {
   completeFileUpload,
+  completeVideoFileUpload,
   createInterview,
   finishInterview,
   generateInterviewQuestion,
   getInterviewQuestions,
   issuePresignedUrl,
+  issueVideoPresignedUrl,
   pauseInterview,
+  requestAnswerAnalysis,
   resumeInterview,
   startInterview,
   updateInterviewTitle,
@@ -73,6 +81,29 @@ export async function getInterviewQuestionsAction(
   intvId: number,
 ): Promise<ApiResponse<GetInterviewQuestionsResponse>> {
   return getInterviewQuestions(intvId)
+}
+
+// 답변 영상 업로드 presignedUrl 발급
+export async function issueVideoPresignedUrlAction(
+  questionSetId: number,
+  { video }: { video: IssueVideoPresignedUrlRequest },
+): Promise<ApiResponse<IssueVideoPresignedUrlResponse>> {
+  return issueVideoPresignedUrl(questionSetId, video)
+}
+
+// 답변 영상 업로드 완료
+export async function completeVideoFileUploadAction(
+  questionSetId: number,
+  video: VideoInfo,
+): Promise<ApiResponse<CompleteVideoFileUploadResponse>> {
+  return completeVideoFileUpload(questionSetId, video)
+}
+
+// 답변 분석 요청
+export async function requestAnswerAnalysisAction(
+  answerId: number,
+): Promise<ApiResponse<AnswerAnalysisResponse>> {
+  return requestAnswerAnalysis(answerId)
 }
 
 // 면접 시작

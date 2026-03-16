@@ -88,18 +88,18 @@ export interface UpdateInterviewTitleResponse {
   status: string
 }
 
-export interface IssuePresignedUrlRequest {
-  fileType: InterviewFileType
-  originalFileName: string
-  contentType: string
-  fileSizeBytes: number
-}
-
 export interface FileInfo {
   fileType: string
   originalFileName: string
   fileKey: string
   fileUrl: string
+}
+
+export interface IssuePresignedUrlRequest {
+  fileType: InterviewFileType
+  originalFileName: string
+  contentType: string
+  fileSizeBytes: number
 }
 
 export interface IssuePresignedUrlResponse {
@@ -136,4 +136,42 @@ export interface InterviewQuestions {
 export interface GetInterviewQuestionsResponse {
   intvId: number
   questions: InterviewQuestions[]
+}
+
+export interface IssueVideoPresignedUrlRequest {
+  originalFileName: string
+  contentType: string // 테스트 후 타입 좁히기 필요
+  fileSizeBytes: number
+}
+
+export interface IssueVideoPresignedUrlResponse {
+  questionSetId: number
+  originalFileName: string
+  fileKey: string
+  presignedUrl: string
+  fileUrl: string
+  expiresInSeconds: number
+}
+
+export interface VideoInfo {
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+  contentType: string
+  fileSizeBytes: number
+}
+
+export interface CompleteVideoFileUploadResponse {
+  answerId: number
+  questionSetId: number
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+  contentType: string
+  fileSizeBytes: number
+}
+
+export interface AnswerAnalysisResponse {
+  answerId: number
+  analysisStatus: string
 }

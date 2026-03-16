@@ -6,7 +6,12 @@ import {
   GetInterviewQuestionsResponse,
   IssuePresignedUrlRequest,
   IssuePresignedUrlResponse,
+  IssueVideoPresignedUrlResponse,
   UpdateInterviewTitleResponse,
+  IssueVideoPresignedUrlRequest,
+  VideoInfo,
+  CompleteVideoFileUploadResponse,
+  AnswerAnalysisResponse,
 } from '../types'
 
 // 면접 생성(제목 추가)
@@ -62,6 +67,33 @@ export async function getInterviewQuestions(
   intvId: number,
 ): Promise<ApiResponse<GetInterviewQuestionsResponse>> {
   return await serverApi.get(`/api/v1/intvs/${intvId}/questions`)
+}
+
+// 답변 영상 업로드 presignedUrl 발급
+export async function issueVideoPresignedUrl(
+  questionSetId: number,
+  video: IssueVideoPresignedUrlRequest,
+): Promise<ApiResponse<IssueVideoPresignedUrlResponse>> {
+  return await serverApi.post(`/api/v1/intvs/${questionSetId}/answers/presigned-url`, {
+    video: video,
+  })
+}
+
+// 답변 영상 업로드 완료
+export async function completeVideoFileUpload(
+  questionSetId: number,
+  video: VideoInfo,
+): Promise<ApiResponse<CompleteVideoFileUploadResponse>> {
+  return await serverApi.post(`/api/v1/intvs/${questionSetId}/answers`, {
+    video: video,
+  })
+}
+
+// 답변 분석 요청
+export async function requestAnswerAnalysis(
+  answerId: number,
+): Promise<ApiResponse<AnswerAnalysisResponse>> {
+  return await serverApi.post(`/api/v1/answers/${answerId}/analysis`)
 }
 
 // 면접 시작

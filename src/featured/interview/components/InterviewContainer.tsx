@@ -8,10 +8,9 @@ import type { useInterview } from '@/featured/interview/hooks/useInterview'
 
 interface InterviewPageProps {
   session: ReturnType<typeof useInterview>
-  interviewId: number | null
 }
 
-export function InterviewContainer({ session, interviewId }: InterviewPageProps) {
+export function InterviewContainer({ session }: InterviewPageProps) {
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
       <ProcessBar
@@ -42,7 +41,7 @@ export function InterviewContainer({ session, interviewId }: InterviewPageProps)
           timeLeft={session.timeLeft}
           phase={session.phase}
         />
-        <FinishedOverlay phase={session.phase} intvId={interviewId!} />
+        <FinishedOverlay phase={session.phase} intvId={session.interviewId!} />
       </div>
       <ControlBar
         micOn={session.micOn}

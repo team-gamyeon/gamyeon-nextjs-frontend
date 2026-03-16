@@ -36,6 +36,7 @@ export function useInterview() {
   const cameraStreamRef = useRef<MediaStream | null>(null)
   const interviewIdRef = useRef<number | null>(null)
   const interviewQuestionsRef = useRef<InterviewQuestions[]>([])
+  const isProcessingRef = useRef(false)
 
   const isActive = phase === 'thinking' || phase === 'answering'
 
@@ -83,7 +84,9 @@ export function useInterview() {
     setInterviewTitle(config.title || 'AI 모의 면접')
     setBasePose(config.basePose ?? null)
     setCameraStream(config.stream ?? null)
-    setInterviewId(config.interviewId ?? null)
+    if (config.interviewId !== undefined) {
+      setInterviewId(config.interviewId)
+    }
     setInterviewQuestions(config.questions ?? [])
     setShowSetup(false)
     setTypingKey((prev) => prev + 1)
@@ -108,10 +111,13 @@ export function useInterview() {
   }, [startRecording])
 
   const handleNext = useCallback(async () => {
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+
     const questionIndex = currentQuestionRef.current
-    const videoBlob = (await stopRecording()) as Blob
 
     try {
+      const videoBlob = (await stopRecording()) as Blob
       const currentInterviewId = interviewIdRef.current
       const currentQuestionSet = interviewQuestionsRef.current[questionIndex]
 
@@ -171,10 +177,12 @@ export function useInterview() {
         setQuestionRevealed(false)
         setPhase('thinking')
         setTimeLeft(TOTAL_THINK_TIME)
+        isProcessingRef.current = false
       }, 600)
       return
     }
 
+    isProcessingRef.current = false
     setPhase('finished')
   }, [stopRecording])
 
@@ -231,6 +239,8 @@ export function useInterview() {
   return {
     currentQuestion,
     interviewQuestions,
+    interviewId,
+    setInterviewId,
     phase,
     timeLeft,
     micOn,

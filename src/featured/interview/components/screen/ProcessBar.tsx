@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
-import { BrainCircuit, ArrowLeft, Square, Power } from 'lucide-react'
+import { ArrowLeft, Power } from 'lucide-react'
 import { QUESTIONS } from '@/featured/interview/constants'
 import type { Phase } from '@/featured/interview/types'
 import Image from 'next/image'

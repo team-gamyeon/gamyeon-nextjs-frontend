@@ -39,7 +39,6 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   )
   const [currentStep, setCurrentStep] = useState(() => (isResume ? 3 : 1))
   const [maxReachedStep, setMaxReachedStep] = useState(() => (isResume ? 3 : 1))
-  const [interviewId, setInterviewId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
   const [resume, setResume] = useState<File | null>(null)
   const [portfolio, setPortfolio] = useState<File | null>(null)
@@ -58,7 +57,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     data: questions,
     isLoading,
     isFetching,
-  } = useQuestionPolling(interviewId, isPollingActive, handlePollingComplete)
+  } = useQuestionPolling(session.interviewId, isPollingActive, handlePollingComplete)
 
   const isQuestionsReady = questions && Array.isArray(questions) && questions.length > 0
 
@@ -66,6 +65,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const { cleanupMic } = micPermission
   const cleanupSetupDevices = useCallback(() => {
     cleanupMic()
+    cleanupCamera()
   }, [cleanupCamera, cleanupMic])
 
   const handleCancel = useCallback(() => {
@@ -96,7 +96,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const allDone = doneCount === 4
 
   const handleDocumentConfirm = async () => {
-    if (!interviewId || !resume) return
+    if (!session.interviewId || !resume) return
 
     try {
       setIsUploading(true)
@@ -115,7 +115,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       for (const target of uploadTargets) {
         if (!target.file) continue
 
-        const urlRes = await issuePresignedUrlAction(interviewId, {
+        const urlRes = await issuePresignedUrlAction(session.interviewId, {
           fileType: target.type,
           originalFileName: target.file.name,
           fileSizeBytes: target.file.size,
@@ -145,13 +145,13 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
         throw new Error('업로드할 파일이 없습니다.')
       }
 
-      const completeRes = await completeFileUploadAction(interviewId, { files: uploadedFiles })
+      const completeRes = await completeFileUploadAction(session.interviewId, { files: uploadedFiles })
       if (!completeRes.success) {
         throw new Error(completeRes.message || '파일 업로드 완료 처리 실패')
       }
 
       completeStep(2)
-      generateInterviewQuestionAction(interviewId).catch((err) => console.error(err))
+      generateInterviewQuestionAction(session.interviewId).catch((err) => console.error(err))
     } catch (error) {
       console.error('문서 업로드 중 오류:', error)
     } finally {
@@ -177,11 +177,11 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   }
 
   const syncInterviewTitle = async () => {
-    if (!interviewId) return
+    if (!session.interviewId) return
     const nextTitle = title.trim()
     if (!nextTitle) return
 
-    const result = await updateInterviewTitleAction(interviewId, nextTitle)
+    const result = await updateInterviewTitleAction(session.interviewId, nextTitle)
     if (!result.success) {
       console.error('면접 제목 수정 실패:', result.message)
     }
@@ -207,7 +207,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     const result = await createInterviewAction(title)
     if (result.success) {
       if (result.data) {
-        setInterviewId(result.data.intvId)
+        session.setInterviewId(result.data.intvId)
       }
       completeStep(1)
     } else {
@@ -339,15 +339,15 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                     return
                   }
 
-                  if (interviewId) {
-                    await startInterviewAction(interviewId)
+                  if (session.interviewId) {
+                    await startInterviewAction(session.interviewId)
                   }
 
                   session.handleSetupComplete({
                     title: title.trim() || '모의 면접',
                     basePose: cameraHandler.basePose,
                     stream: cameraHandler.cameraStream,
-                    interviewId,
+                    interviewId: session.interviewId,
                     questions: questions ?? [],
                   })
                 }}

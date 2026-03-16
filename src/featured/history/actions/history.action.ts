@@ -1,7 +1,7 @@
 'use server'
 
 import type { ApiResponse } from '@/shared/lib/api'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { withAction } from '@/shared/lib/withAction'
 import { InterviewReportItem } from '../types'
 import { getReportList } from '../services/history.service'
 
@@ -9,11 +9,6 @@ import { getReportList } from '../services/history.service'
 export async function getReportListAction(
   userId?: number,
 ): Promise<ApiResponse<InterviewReportItem[]>> {
-  try {
-    // UI에서 넘어온 userId를 서비스 함수로 그대로 전달
-    return await getReportList(userId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  // UI에서 넘어온 userId를 서비스 함수로 그대로 전달
+  return withAction(() => getReportList(userId))
 }

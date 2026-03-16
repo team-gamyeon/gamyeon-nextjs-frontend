@@ -18,6 +18,7 @@ export function InterviewContainer({ session }: InterviewPageProps) {
         currentQuestion={session.currentQuestion}
         phase={session.phase}
         isActive={session.isActive}
+        questions={session.interviewQuestions}
         onEndClick={() => session.setShowEndDialog(true)}
       />
       <QuestionBanner

@@ -8,7 +8,7 @@ export const SCORE_THRESHOLD = {
 } as const
 
 /**
- * 💡 [통합 버전] 점수를 넣으면 등급, 코멘트, CSS 스타일, 차트 색상을 한 번에 반환합니다.
+ * [통합 버전] 점수를 넣으면 등급, 코멘트, CSS 스타일, 차트 색상을 한 번에 반환합니다.
  */
 export function getScoreConfig(score: number) {
   if (score >= SCORE_THRESHOLD.EXCELLENT) {

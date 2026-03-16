@@ -18,8 +18,8 @@ interface ReportDetailPageProps {
 
 export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
   const { id } = await params
-  const interviewId = Number(id)
-  const response = await getReportDetailAction(interviewId)
+  const intvId = Number(id)
+  const response = await getReportDetailAction(intvId)
 
   //  데이터 조회 실패 시 방어 코드
   if (!response.success || !response.data) {
@@ -82,7 +82,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         <QuestionFeedbackSection feedbacks={report.questionSummaries} />
 
         <div className="mt-10 flex justify-center">
-          <DeleteReportButton interviewId={interviewId} />
+          <DeleteReportButton intvId={intvId} />
         </div>
       </main>
 

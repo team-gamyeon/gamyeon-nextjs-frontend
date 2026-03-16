@@ -8,19 +8,19 @@ import { Card } from '@/shared/ui/card'
 import { FileText, Inbox } from 'lucide-react'
 import { InterviewReportItem } from '@/featured/history/types'
 import { getReportCardType } from '@/featured/history/constants'
-import { PendingCard } from '@/featured/history/components/cards/PedingCard'
-import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
 import { CardContainer } from '@/featured/history/components/cards/CardContainer'
 import {
   CompletedCardBack,
   CompletedCardFront,
 } from '@/featured/history/components/cards/CompletedCard'
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
+import { PendingCard } from './cards/PendingCard'
+import { AnalysingCard } from './cards/AnalysingCard'
 
 // 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
 // const MOCK_RECORDS: InterviewReportItem[] = [
 //   {
-//     interviewId: 1,
+//     intvId: 1,
 //     intvTitle: '프론트엔드 직무 면접 (분석 완료 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 3600000,
@@ -35,7 +35,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     interviewId: 2,
+//     intvId: 2,
 //     intvTitle: '프론트엔드 직무 면접 (분석 중 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 2400000,
@@ -50,7 +50,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     interviewId: 3,
+//     intvId: 3,
 //     intvTitle: '프론트엔드 직무 면접 (분석 실패 테스트)',
 //     intvStatus: 'FINISHED',
 //     durationMs: 1800000,
@@ -65,7 +65,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //     },
 //   },
 //   {
-//     interviewId: 4,
+//     intvId: 4,
 //     intvTitle: '프론트엔드 직무 면접 (이어하기 UI 테스트)',
 //     intvStatus: 'PAUSED',
 //     durationMs: null,
@@ -74,7 +74,7 @@ import { FailedCard } from '@/featured/history/components/cards/FailedCard'
 //   },
 //   {
 //     // 테스트: 이 카드가 화면에서 아예 사라지는지 확인합니다
-//     interviewId: 5,
+//     intvId: 5,
 //     intvTitle: 'READY 상태 테스트',
 //     intvStatus: 'READY',
 //     durationMs: null,
@@ -96,20 +96,18 @@ interface FlipCardProps {
 
 function FlipCard({ record }: FlipCardProps) {
   const router = useRouter()
-  // isFlipped 상태 자체를 아예 없애버림 마우스 호버 하나로 다 통제 가능.
-  // const [isFlipped, setIsFlipped] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   // 상태 감별사 함수로 무슨 카드 보여줄지 결정
   const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
-  // 🌟 추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
+  //  추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
   if (!cardType) return null
   const isCompleted = cardType === 'completedCard'
 
   const handleClick = () => {
     // 분석 완료 카드만 상세 페이지로 이동 가능
     if (isCompleted) {
-      router.push(`/report/${record.interviewId}`)
+      router.push(`/report/${record.intvId}`)
     }
   }
 
@@ -119,23 +117,20 @@ function FlipCard({ record }: FlipCardProps) {
       onMouseEnter={() => {
         if (isCompleted) {
           setIsHovered(true)
-          // setIsFlipped(true)
         }
       }}
       onMouseLeave={() => {
         if (isCompleted) {
           setIsHovered(false)
-          // setIsFlipped(false)
         }
       }}
       className={`h-full w-full ${isCompleted ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      {/* <CardContainer isFlipped={isFlipped} isHovered={isHovered}> */}
       <CardContainer isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {cardType === 'completedCard' && <CompletedCardFront record={record} />}
-          {cardType === 'pendingCard' && <PendingCard />}
-          {cardType === 'analysingCard' && <AnalysingCard interviewId={record.interviewId} />}
+          {cardType === 'pendingCard' && <PendingCard intvId={record.intvId} />}
+          {cardType === 'analysingCard' && <AnalysingCard />}
           {cardType === 'failedCard' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (
@@ -222,7 +217,7 @@ export function HistoryContainer({
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
       {pageRecords.map((record, i) => (
         <motion.div
-          key={record.interviewId}
+          key={record.intvId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.4 }}

@@ -16,10 +16,10 @@ import {
 import { deleteReportAction } from '@/featured/report/actions/report.action'
 
 interface DeleteReportButtonProps {
-  interviewId: number
+  intvId: number
 }
 
-export function DeleteReportButton({ interviewId }: DeleteReportButtonProps) {
+export function DeleteReportButton({ intvId }: DeleteReportButtonProps) {
   const [open, setOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
@@ -28,7 +28,7 @@ export function DeleteReportButton({ interviewId }: DeleteReportButtonProps) {
     try {
       setIsDeleting(true)
 
-      const res = await deleteReportAction(interviewId)
+      const res = await deleteReportAction(intvId)
 
       if (res.success) {
         toast.success('리포트가 성공적으로 삭제되었습니다.')

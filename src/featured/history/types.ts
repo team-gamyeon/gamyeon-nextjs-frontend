@@ -11,10 +11,10 @@ export interface ReportSummary {
 }
 
 export interface InterviewReportItem {
-  interviewId: number
+  intvId: number
   intvTitle: string
   intvStatus: 'FINISHED' | 'PAUSED' | 'IN_PROGRESS' | (string & {})
-  durationMs: number | null 
+  durationMs: number | null
   updatedAt: string
   report: ReportSummary | null
 }

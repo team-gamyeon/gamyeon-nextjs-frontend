@@ -10,7 +10,7 @@ import { getReportDetail, deleteReport } from '../service/report.service'
  * 리포트 상세 데이터 조회 Action
  */
 export async function getReportDetailAction(
-  interviewId: number,
+  intvId: number,
 ): Promise<ApiResponse<ReportDetailData>> {
   return withAction(() => getReportDetail(interviewId))
 }

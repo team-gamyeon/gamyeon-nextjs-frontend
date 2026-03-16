@@ -114,18 +114,9 @@ export interface IssuePresignedUrlResponse {
 
 export type PreparationStatusType = 'READY'
 
-export interface UploadedFileInfo {
-  fileId: number
-  fileType: InterviewFileType
-  originalFileName: string
-  fileKey: string
-  fileUrl: string
-}
-
 export interface CompleteFileUploadResponse {
   preparationId: number
   preparationStatus: PreparationStatusType
-  files: UploadedFileInfo[]
 }
 
 export interface InterviewQuestions {
@@ -164,11 +155,6 @@ export interface VideoInfo {
 export interface CompleteVideoFileUploadResponse {
   answerId: number
   questionSetId: number
-  originalFileName: string
-  fileKey: string
-  fileUrl: string
-  contentType: string
-  fileSizeBytes: number
 }
 
 export interface AnswerAnalysisResponse {

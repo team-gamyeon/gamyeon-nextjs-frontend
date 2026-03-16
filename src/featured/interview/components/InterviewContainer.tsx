@@ -11,6 +11,8 @@ interface InterviewPageProps {
 }
 
 export function InterviewContainer({ session }: InterviewPageProps) {
+  const currentQuestionSetId = session.interviewQuestions[session.currentQuestion]?.questionSetId ?? null
+
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
       <ProcessBar
@@ -36,6 +38,8 @@ export function InterviewContainer({ session }: InterviewPageProps) {
           phase={session.phase}
           basePose={session.basePose}
           stream={session.cameraStream}
+          intvId={session.interviewId}
+          questionSetId={currentQuestionSetId}
         />
         <TimerWidget
           isActive={session.isActive}

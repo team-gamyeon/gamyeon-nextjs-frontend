@@ -12,9 +12,19 @@ interface VideoAreaProps {
   phase: Phase
   basePose?: { pitch: number; yaw: number } | null
   stream?: MediaStream | null
+  intvId: number | null
+  questionSetId: number | null
 }
 
-export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAreaProps) {
+export function VideoArea({
+  cameraOn,
+  micOn,
+  phase,
+  basePose,
+  stream,
+  intvId,
+  questionSetId,
+}: VideoAreaProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
@@ -24,6 +34,8 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
     basePose,
     canvasRef,
     videoRef,
+    intvId,
+    questionSetId,
   })
 
   useEffect(() => {
@@ -31,6 +43,16 @@ export function VideoArea({ cameraOn, micOn, phase, basePose, stream }: VideoAre
       videoRef.current.srcObject = stream
     }
   }, [stream, cameraOn])
+
+  if (intvId === null || questionSetId === null) {
+    return (
+      <div className="flex w-full max-w-175 flex-col gap-4">
+        <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-800 shadow-2xl">
+          <p className="text-sm text-white/70">면접 정보 로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex w-full max-w-175 flex-col gap-4">

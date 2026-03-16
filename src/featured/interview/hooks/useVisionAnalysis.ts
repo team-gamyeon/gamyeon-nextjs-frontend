@@ -17,6 +17,8 @@ interface UseVisionParams {
   basePose?: { pitch: number; yaw: number } | null
   canvasRef?: React.RefObject<HTMLCanvasElement | null>
   videoRef: React.RefObject<HTMLVideoElement | null>
+  intvId: number | null
+  questionSetId: number | null
 }
 
 export function useVisionAnalysis({
@@ -25,10 +27,15 @@ export function useVisionAnalysis({
   basePose,
   canvasRef,
   videoRef,
+  intvId,
+  questionSetId,
 }: UseVisionParams) {
   const { landmarker, detector } = useGazeTracker()
   const { blinkCountRef, updateBlink } = useBlinkDetector()
-  const { rawDataRef, eventsRef, lastBatchTimeRef, handleSendBatch } = useBatchSender()
+  const { rawDataRef, eventsRef, lastBatchTimeRef, handleSendBatch } = useBatchSender({
+    intvId,
+    questionSetId,
+  })
 
   const requestRef = useRef<number | null>(null)
 

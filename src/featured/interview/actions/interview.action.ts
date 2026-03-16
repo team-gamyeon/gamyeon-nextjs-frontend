@@ -14,6 +14,7 @@ import {
   CompleteVideoFileUploadResponse,
   IssueVideoPresignedUrlResponse,
   AnswerAnalysisResponse,
+  InterviewBatchPayload,
 } from '../types'
 import {
   completeFileUpload,
@@ -27,6 +28,7 @@ import {
   pauseInterview,
   requestAnswerAnalysis,
   resumeInterview,
+  sendGazeStats,
   startInterview,
   updateInterviewTitle,
 } from '@/featured/interview/services/interview.service'
@@ -106,22 +108,26 @@ export async function requestAnswerAnalysisAction(
   return withAction(() => requestAnswerAnalysis(answerId))
 }
 
+// 면접 완료
+export async function finishInterviewAction(intvId: number): Promise<ApiResponse<null>> {
+  return withAction(() => finishInterview(intvId))
+}
+
+// 시선/고개 통계 서버 전송
+export async function sendGazeStatsAction(questionSetId: number, payload: InterviewBatchPayload) {
+  return withAction(() => sendGazeStats(questionSetId, payload))
+}
+
+// MVP2
 // 면접 시작
 export async function startInterviewAction(intvId: number): Promise<ApiResponse<null>> {
   return withAction(() => startInterview(intvId))
 }
-
 // 면접 중단
 export async function pauseInterviewAction(intvId: number): Promise<ApiResponse<null>> {
   return withAction(() => pauseInterview(intvId))
 }
-
 // 면접 재개
 export async function resumeInterviewAction(intvId: number): Promise<ApiResponse<null>> {
   return withAction(() => resumeInterview(intvId))
-}
-
-// 면접 완료
-export async function finishInterviewAction(intvId: number): Promise<ApiResponse<null>> {
-  return withAction(() => finishInterview(intvId))
 }

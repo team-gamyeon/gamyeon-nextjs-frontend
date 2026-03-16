@@ -12,15 +12,15 @@ import { getReportDetail, deleteReport } from '../service/report.service'
 export async function getReportDetailAction(
   intvId: number,
 ): Promise<ApiResponse<ReportDetailData>> {
-  return withAction(() => getReportDetail(interviewId))
+  return withAction(() => getReportDetail(intvId))
 }
 
 /**
  * 리포트 삭제 Action
  */
-export async function deleteReportAction(interviewId: number): Promise<ApiResponse<null>> {
+export async function deleteReportAction(intvId: number): Promise<ApiResponse<null>> {
   return withAction(async () => {
-    const response = await deleteReport(interviewId)
+    const response = await deleteReport(intvId)
 
     // API 응답 성공 여부 확인 (명세서의 "success": true 기준)
     if (response.success) {

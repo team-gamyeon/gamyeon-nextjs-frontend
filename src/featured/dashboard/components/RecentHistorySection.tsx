@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight, Inbox } from 'lucide-react'
 import { InterviewReportItem } from '@/featured/history/types'
 import { formatDateDot } from '@/shared/lib/utils/date'
+import { getScoreConfig } from '@/featured/report/constants'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -85,14 +86,11 @@ export function RecentHistorySection({ records = [] }: RecentHistorySectionProps
                     <div
                       className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-sm font-bold ${
                         isScoreNull
-                          ? 'bg-slate-100 text-slate-500'
-                          : score >= 80
-                            ? 'bg-blue-50 text-blue-700'
-                            : score >= 70
-                              ? 'bg-green-50 text-green-700'
-                              : 'bg-red-50 text-red-700'
+                          ? 'bg-slate-100 text-slate-500' // 점수가 없을 때 (회색)
+                          : getScoreConfig(score).style // 25점 단위 컬러 및 배경색 적용
                       }`}
                     >
+                      {/* 점수가 null이면 '-', 있으면 점수 표시 */}
                       {isScoreNull ? '-' : score}
                     </div>
                     <div className="min-w-0 flex-1">

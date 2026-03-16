@@ -36,6 +36,7 @@ export function useInterview() {
   const cameraStreamRef = useRef<MediaStream | null>(null)
   const interviewIdRef = useRef<number | null>(null)
   const interviewQuestionsRef = useRef<InterviewQuestions[]>([])
+  const isProcessingRef = useRef(false)
 
   const isActive = phase === 'thinking' || phase === 'answering'
 
@@ -110,10 +111,13 @@ export function useInterview() {
   }, [startRecording])
 
   const handleNext = useCallback(async () => {
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+
     const questionIndex = currentQuestionRef.current
-    const videoBlob = (await stopRecording()) as Blob
 
     try {
+      const videoBlob = (await stopRecording()) as Blob
       const currentInterviewId = interviewIdRef.current
       const currentQuestionSet = interviewQuestionsRef.current[questionIndex]
 
@@ -173,10 +177,12 @@ export function useInterview() {
         setQuestionRevealed(false)
         setPhase('thinking')
         setTimeLeft(TOTAL_THINK_TIME)
+        isProcessingRef.current = false
       }, 600)
       return
     }
 
+    isProcessingRef.current = false
     setPhase('finished')
   }, [stopRecording])
 

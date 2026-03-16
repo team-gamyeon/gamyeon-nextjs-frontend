@@ -65,6 +65,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const { cleanupMic } = micPermission
   const cleanupSetupDevices = useCallback(() => {
     cleanupMic()
+    cleanupCamera()
   }, [cleanupCamera, cleanupMic])
 
   const handleCancel = useCallback(() => {

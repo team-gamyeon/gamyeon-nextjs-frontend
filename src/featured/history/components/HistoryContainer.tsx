@@ -8,14 +8,14 @@ import { Card } from '@/shared/ui/card'
 import { FileText, Inbox } from 'lucide-react'
 import { InterviewReportItem } from '@/featured/history/types'
 import { getReportCardType } from '@/featured/history/constants'
-import { PendingCard } from '@/featured/history/components/cards/PedingCard'
-import { AnalysingCard } from '@/featured/history/components/cards/AnalysingCard'
 import { CardContainer } from '@/featured/history/components/cards/CardContainer'
 import {
   CompletedCardBack,
   CompletedCardFront,
 } from '@/featured/history/components/cards/CompletedCard'
 import { FailedCard } from '@/featured/history/components/cards/FailedCard'
+import { PendingCard } from './cards/PendingCard'
+import { AnalysingCard } from './cards/AnalysingCard'
 
 // 3. 테스트용 목데이터 (이어하기 테스트 명확화 및 상태값 적용)
 // const MOCK_RECORDS: InterviewReportItem[] = [
@@ -102,7 +102,7 @@ function FlipCard({ record }: FlipCardProps) {
 
   // 상태 감별사 함수로 무슨 카드 보여줄지 결정
   const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
-  // 🌟 추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
+  //  추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
   if (!cardType) return null
   const isCompleted = cardType === 'completedCard'
 
@@ -134,8 +134,8 @@ function FlipCard({ record }: FlipCardProps) {
       <CardContainer isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {cardType === 'completedCard' && <CompletedCardFront record={record} />}
-          {cardType === 'pendingCard' && <PendingCard />}
-          {cardType === 'analysingCard' && <AnalysingCard intvId={record.intvId} />}
+          {cardType === 'pendingCard' && <PendingCard intvId={record.intvId} />}
+          {cardType === 'analysingCard' && <AnalysingCard />}
           {cardType === 'failedCard' && <FailedCard record={record} />}
         </Card>
         {isCompleted && (

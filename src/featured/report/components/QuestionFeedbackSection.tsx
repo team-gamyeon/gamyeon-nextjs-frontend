@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
-import { ChevronDown, MessageCircleCheck, Lightbulb } from 'lucide-react'
+import { ChevronDown, MessageCircleCheck, Lightbulb, VideoOff, AlertCircle } from 'lucide-react'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import type { QuestionSummary } from '@/featured/report/types'
@@ -38,6 +38,43 @@ const videoVariants: Variants = {
       opacity: { duration: 0.2 },
     },
   },
+}
+
+//  VideoPlayer 컴포넌트 (상태 격리 및 예외 처리용)
+function VideoPlayer({ url }: { url?: string | null }) {
+  const [hasError, setHasError] = useState(false)
+
+  // 1. 영상 주소가 아예 없는 경우 (보관 기간 만료)
+  if (!url) {
+    return (
+      <div className="bg-secondary/30 text-muted-foreground flex h-full w-full flex-col items-center justify-center gap-2">
+        <VideoOff className="h-8 w-8 opacity-50" />
+        <p className="text-[14px] font-medium">보관 기간이 만료되어 영상을 조회할 수 없습니다.</p>
+      </div>
+    )
+  }
+
+  // 2. 영상 로드 중 에러가 발생한 경우 (네트워크 오류 등)
+  if (hasError) {
+    return (
+      <div className="bg-secondary/30 text-destructive/80 flex h-full w-full flex-col items-center justify-center gap-2">
+        <AlertCircle className="h-8 w-8 opacity-50" />
+        <p className="text-[14px] font-medium">영상을 불러오는 중 오류가 발생했습니다.</p>
+      </div>
+    )
+  }
+
+  // 3. 정상적인 비디오 렌더링
+  return (
+    <video
+      src={url}
+      controls
+      preload="metadata"
+      className="h-full w-full object-cover"
+      onClick={(e) => e.stopPropagation()} // 비디오 클릭 시 아코디언이 닫히는 이벤트 버블링 방지
+      onError={() => setHasError(true)} // 에러 발생 시 상태 업데이트
+    />
+  )
 }
 
 interface QuestionFeedbackSectionProps {
@@ -92,14 +129,11 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                     ))}
                   </div>
 
-                  {/* 질문 텍스트 */}
                   <h3 className="text-foreground/90 text-[17px] leading-snug font-bold tracking-tight">
                     {fb.question}
                   </h3>
 
-                  {/* 요약 & 피드백 리스트 */}
                   <div className="space-y-4 pt-1">
-                    {/* 첫 번째 행: 답변 요약 행 */}
                     <div className="flex items-start gap-3.5">
                       <div className="mt-0.5 rounded-full bg-blue-50 p-1.5">
                         <MessageCircleCheck className="h-4 w-4 text-blue-600" />
@@ -109,7 +143,6 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                       </p>
                     </div>
 
-                    {/* 두 번째 행: AI 피드백 행 (강점 + 개선점 통합) */}
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0 rounded-full bg-amber-50 p-1.5">
                         <Lightbulb className="h-4 w-4 text-amber-600" />
@@ -120,9 +153,9 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                     </div>
                   </div>
 
-                  {/* 비디오 영역 */}
+                  {/* 비디오 영역 (mediaUrl 여부와 상관없이 아코디언이 열리면 노출) */}
                   <AnimatePresence initial={false}>
-                    {isOpen && fb.mediaUrl && (
+                    {isOpen && (
                       <motion.div
                         key="video"
                         variants={videoVariants}
@@ -131,15 +164,9 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                         exit="exit"
                         className="overflow-hidden"
                       >
-                        <div className="border-border/40 mx-auto w-full overflow-hidden rounded-xl border bg-black/5 shadow-inner">
+                        <div className="border-border/40 mx-auto w-full max-w-2xl overflow-hidden rounded-xl border bg-black/5 shadow-inner">
                           <div className="aspect-video">
-                            <video
-                              src={fb.mediaUrl}
-                              controls
-                              className="h-full w-full object-cover"
-                              preload="metadata"
-                              onClick={(e) => e.stopPropagation()} // 비디오 클릭 시 아코디언 닫히는 현상 방지
-                            />
+                            <VideoPlayer url={fb.mediaUrl} />
                           </div>
                         </div>
                       </motion.div>
@@ -147,7 +174,6 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                   </AnimatePresence>
                 </div>
 
-                {/* 아코디언 화살표 */}
                 <motion.div
                   animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}

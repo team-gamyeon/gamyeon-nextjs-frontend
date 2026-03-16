@@ -2,21 +2,13 @@ import { useState, useRef } from 'react'
 import { type RecordingStatus } from '@/featured/interview/types'
 
 export interface UseMicRecorderReturn {
-  // 녹음 상태 (idle → recording → recorded)
   recordingStatus: RecordingStatus
-  // 재생 중 여부
   isPlaying: boolean
-  // 녹음 완료 후 총 길이 (초)
   recordedDuration: number
-  // 재생 진행률 (0~1), requestAnimationFrame으로 60fps 업데이트
   playbackProgress: number
-  // MediaRecorder로 마이크 스트림 녹음 시작
   startRecording: () => void
-  // 녹음 중지
   stopRecording: () => void
-  // 녹음된 오디오 재생
   playRecording: () => void
-  // 녹음·재생 리소스 정리
   cleanupRecorder: () => void
 }
 

@@ -9,7 +9,7 @@ import { getReportListAction } from '@/featured/history/actions/history.action'
 export default async function DashboardPage() {
   // const response = await getReportListAction()
 
-  // // // API가 성공하면 데이터를, 아니면 빈 배열을 기본으로 합니다.
+  // API가 성공하면 데이터를, 아니면 빈 배열을 기본으로 합니다.
   // const records = response.success && response.data ? response.data : []
 
   return (

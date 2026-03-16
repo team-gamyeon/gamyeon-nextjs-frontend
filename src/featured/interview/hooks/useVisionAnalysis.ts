@@ -150,10 +150,6 @@ export function useVisionAnalysis({
           const isStateChanged = currentFocus !== lastLoggedStateRef.current
           if (isStateChanged) {
             const type = currentFocus === 'CENTER' ? 'AWAY_END' : 'AWAY_START'
-            const gaze = {
-              left: { x: leftGazeX, y: leftGazeY },
-              right: { x: rightGazeX, y: rightGazeY },
-            }
             eventsRef.current.push({
               type,
               offset_ms: Math.floor(now),

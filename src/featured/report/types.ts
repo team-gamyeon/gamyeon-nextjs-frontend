@@ -51,13 +51,6 @@ export interface ReportDetailData {
   report: DetailReportBody
 }
 
-export interface ReportDetailResponse {
-  success: boolean
-  code: string
-  message: string
-  data: ReportDetailData
-}
-
 // ==========================================
 // 3. UI/컴포넌트 전용 타입
 // ==========================================

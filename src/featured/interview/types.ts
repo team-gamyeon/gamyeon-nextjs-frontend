@@ -10,19 +10,6 @@ export interface InterviewSetupConfig {
   stream: MediaStream | null
 }
 
-export interface InterviewSession {
-  currentQuestion: number
-  phase: Phase
-  timeLeft: number
-  micOn: boolean
-  cameraOn: boolean
-  showEndDialog: boolean
-  typingKey: number
-  questionRevealed: boolean
-  interviewTitle: string
-  showSetup: boolean
-}
-
 export type FocusState =
   | 'CENTER'
   | 'LEFT'
@@ -62,8 +49,8 @@ export interface GazeEvent {
 
 export interface InterviewBatchPayload {
   meta: {
-    interviewId: string
-    questionId: string
+    intvId: number
+    questionSetId: number
     timestamp: number
     segmentSequence: number
   }

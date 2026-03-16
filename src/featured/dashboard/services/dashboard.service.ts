@@ -5,7 +5,7 @@ import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 /**
  * 일자별 면접 횟수 조회
  */
-export async function getInterviewStats(params?: {
+export async function getDailyIntvStats(params?: {
   startDate?: string
   endDate?: string
 }): Promise<ApiResponse<DailyIntvStat[]>> {

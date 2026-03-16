@@ -16,22 +16,21 @@ import { pauseInterviewAction } from '@/featured/interview/actions/interview.act
 
 interface EndDialogModalProps {
   session: ReturnType<typeof useInterview>
-  interviewId: number | null
 }
 
-export function EndDialogModal({ session, interviewId }: EndDialogModalProps) {
+export function EndDialogModal({ session }: EndDialogModalProps) {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
 
   const handlePause = async () => {
-    if (interviewId === null) {
+    if (session.interviewId === null) {
       router.push('/history')
       return
     }
 
     setIsPending(true)
     try {
-      await pauseInterviewAction(interviewId)
+      await pauseInterviewAction(session.interviewId)
     } finally {
       // 무조건 router를 움직여야해서 catch 사용하지 않고 바로 finally로
       setIsPending(false)

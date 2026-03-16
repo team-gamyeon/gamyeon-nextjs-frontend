@@ -83,7 +83,9 @@ export function useInterview() {
     setInterviewTitle(config.title || 'AI 모의 면접')
     setBasePose(config.basePose ?? null)
     setCameraStream(config.stream ?? null)
-    setInterviewId(config.interviewId ?? null)
+    if (config.interviewId !== undefined) {
+      setInterviewId(config.interviewId)
+    }
     setInterviewQuestions(config.questions ?? [])
     setShowSetup(false)
     setTypingKey((prev) => prev + 1)
@@ -231,6 +233,8 @@ export function useInterview() {
   return {
     currentQuestion,
     interviewQuestions,
+    interviewId,
+    setInterviewId,
     phase,
     timeLeft,
     micOn,

@@ -1,3 +1,5 @@
+import { InterviewReportItem, ReportSummary } from './types'
+
 // 1. 리포트 생성 상태 (reportStatus)
 const REPORT_STATUS = {
   SUCCEED: 'SUCCEED',
@@ -30,11 +32,14 @@ const INTV_STATUS_LABEL: Record<string, string> = {
 // UI 카드 타입
 // ==========================================
 
-export type ReportCardType = 'completedCard' | 'analysingCard' | 'failedCard' | 'pendingCard' | null
+type ReportCardType = 'completedCard' | 'analysingCard' | 'failedCard' | 'pendingCard' | null
 
 // 2. UI 카드 타입 결정 로직
-function getReportCardType(intvStatus: string, reportStatus?: string | null): ReportCardType {
-  // 면접이 COMPLETED인 경우, 리포트 상태에 따라 카드 분기
+function getReportCardType(
+  intvStatus: InterviewReportItem['intvStatus'],
+  reportStatus?: ReportSummary['reportStatus'] | null,
+): ReportCardType {
+  // 면접이 FINISHED인 경우, 리포트 상태에 따라 카드 분기
   if (intvStatus === INTV_STATUS.FINISHED) {
     if (reportStatus === REPORT_STATUS.SUCCEED) return 'completedCard' // 활성화
     if (reportStatus === REPORT_STATUS.IN_PROGRESS) return 'analysingCard' // ai 분석중
@@ -50,4 +55,11 @@ function getReportCardType(intvStatus: string, reportStatus?: string | null): Re
   return null
 }
 
-export { REPORT_STATUS, REPORT_STATUS_LABEL, INTV_STATUS, INTV_STATUS_LABEL, getReportCardType }
+export {
+  REPORT_STATUS,
+  REPORT_STATUS_LABEL,
+  INTV_STATUS,
+  INTV_STATUS_LABEL,
+  getReportCardType,
+  type ReportCardType,
+}

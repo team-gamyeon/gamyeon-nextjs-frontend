@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -41,6 +41,7 @@ export function SigninForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
   const [provider, setProvider] = useState<string | null>(null)
+  const calledRef = useRef(false)
 
   useEffect(() => {
     const error = searchParams.get('error')
@@ -53,7 +54,13 @@ export function SigninForm() {
     const currentProvider = searchParams.get('state')
     if (!code || !currentProvider) return
 
+    if (calledRef.current) return
+    calledRef.current = true
+
     setProvider(currentProvider)
+
+    const controller = new AbortController()
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     const loginWithOAuth = async () => {
       setStatus('loading')
@@ -64,6 +71,7 @@ export function SigninForm() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ authorizationCode: code }),
+          signal: controller.signal,
         })
 
         const json: ApiResponse<OAuthLoginData> = await res.json()
@@ -76,14 +84,20 @@ export function SigninForm() {
 
         signin(json.data.user, json.data.accessToken)
         setStatus('success')
-        setTimeout(() => router.replace('/dashboard'), 700)
-      } catch {
+        timeoutId = setTimeout(() => router.replace('/dashboard'), 700)
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return
         setErrorMessage('서버 연결에 실패했습니다.')
         setStatus('idle')
       }
     }
 
     loginWithOAuth()
+
+    return () => {
+      controller.abort()
+      if (timeoutId !== null) clearTimeout(timeoutId)
+    }
   }, [searchParams, signin, router])
 
   const handleKakaoLogin = () => {

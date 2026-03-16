@@ -96,8 +96,6 @@ interface FlipCardProps {
 
 function FlipCard({ record }: FlipCardProps) {
   const router = useRouter()
-  // isFlipped 상태 자체를 아예 없애버림 마우스 호버 하나로 다 통제 가능.
-  // const [isFlipped, setIsFlipped] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   // 상태 감별사 함수로 무슨 카드 보여줄지 결정
@@ -119,18 +117,15 @@ function FlipCard({ record }: FlipCardProps) {
       onMouseEnter={() => {
         if (isCompleted) {
           setIsHovered(true)
-          // setIsFlipped(true)
         }
       }}
       onMouseLeave={() => {
         if (isCompleted) {
           setIsHovered(false)
-          // setIsFlipped(false)
         }
       }}
       className={`h-full w-full ${isCompleted ? 'cursor-pointer' : 'cursor-default'}`}
     >
-      {/* <CardContainer isFlipped={isFlipped} isHovered={isHovered}> */}
       <CardContainer isHovered={isHovered}>
         <Card className="absolute inset-0 flex flex-col overflow-hidden backface-hidden">
           {cardType === 'completedCard' && <CompletedCardFront record={record} />}

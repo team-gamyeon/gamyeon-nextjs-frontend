@@ -25,6 +25,7 @@ import {
 } from '@/featured/interview/actions/interview.action'
 import uploadFileToS3 from '@/shared/lib/utils/uploadFileToS3'
 import { useQuestionPolling } from '@/featured/interview/hooks/useQuestionPolling'
+import { toast } from 'sonner'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -123,7 +124,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
         })
 
         if (!urlRes.success || !urlRes.data) {
-          throw new Error(`${target.type} presigned URL 발급 실패`)
+          throw new Error(urlRes.message || `${target.type} presigned URL 발급 실패`)
         }
 
         const { presignedUrl, fileType, originalFileName, fileKey, fileUrl } = urlRes.data
@@ -145,15 +146,22 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
         throw new Error('업로드할 파일이 없습니다.')
       }
 
-      const completeRes = await completeFileUploadAction(session.interviewId, { files: uploadedFiles })
+      const completeRes = await completeFileUploadAction(session.interviewId, {
+        files: uploadedFiles,
+      })
       if (!completeRes.success) {
         throw new Error(completeRes.message || '파일 업로드 완료 처리 실패')
       }
 
       completeStep(2)
       generateInterviewQuestionAction(session.interviewId).catch((err) => console.error(err))
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : '문서 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.'
       console.error('문서 업로드 중 오류:', error)
+      toast.error(message)
     } finally {
       setIsUploading(false)
     }
@@ -203,7 +211,6 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   }
 
   const handleTitleConfirm = async () => {
-    if (!title.trim()) return
     const result = await createInterviewAction(title)
     if (result.success) {
       if (result.data) {

@@ -33,6 +33,7 @@ import {
   updateInterviewTitle,
 } from '@/featured/interview/services/interview.service'
 import { withAction } from '@/shared/lib/withAction'
+import { validateFileSize } from '@/featured/interview/utils/validateFileUpload'
 
 // 면접 생성(제목 추가)
 export async function createInterviewAction(
@@ -54,6 +55,16 @@ export async function issuePresignedUrlAction(
   intvId: number,
   resBody: IssuePresignedUrlRequest,
 ): Promise<ApiResponse<IssuePresignedUrlResponse>> {
+  const { fileType, fileSizeBytes } = resBody
+  const validation = validateFileSize(fileType, fileSizeBytes)
+  if (!validation.valid) {
+    return {
+      success: false,
+      code: '',
+      message: validation.message || '파일 업로드 조건에 맞지 않습니다.',
+      data: null,
+    }
+  }
   return withAction(() => issuePresignedUrl(intvId, resBody))
 }
 

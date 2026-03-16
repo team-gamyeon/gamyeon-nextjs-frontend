@@ -122,7 +122,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
 
                   {/* 비디오 영역 */}
                   <AnimatePresence initial={false}>
-                    {isOpen && fb.videoUrl && (
+                    {isOpen && fb.mediaUrl && (
                       <motion.div
                         key="video"
                         variants={videoVariants}
@@ -134,7 +134,7 @@ export function QuestionFeedbackSection({ feedbacks }: QuestionFeedbackSectionPr
                         <div className="border-border/40 mx-auto w-full overflow-hidden rounded-xl border bg-black/5 shadow-inner">
                           <div className="aspect-video">
                             <video
-                              src={fb.videoUrl}
+                              src={fb.mediaUrl}
                               controls
                               className="h-full w-full object-cover"
                               preload="metadata"

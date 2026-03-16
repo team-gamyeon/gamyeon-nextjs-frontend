@@ -3,7 +3,7 @@
 // ==========================================
 export interface ReportSummary {
   reportId: number
-  reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | (string & {})
+  reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | 'DELETED'
   totalScore: number | null
   answeredCount: number | null
   strengths: string[] | null
@@ -13,7 +13,7 @@ export interface ReportSummary {
 export interface InterviewReportItem {
   intvId: number
   intvTitle: string
-  intvStatus: 'FINISHED' | 'PAUSED' | 'IN_PROGRESS' | (string & {})
+  intvStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
   durationMs: number | null
   updatedAt: string
   report: ReportSummary | null

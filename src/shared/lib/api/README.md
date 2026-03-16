@@ -200,7 +200,7 @@ if (!success) {
 import { useEffect, useState } from 'react'
 import { clientApi } from '@/shared/lib/api'
 
-export function InterviewStatus({ id }: { id: string }) {
+export function intvStatus({ id }: { id: string }) {
   const [status, setStatus] = useState<string | null>(null)
 
   useEffect(() => {

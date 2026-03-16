@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
 import { ChevronRight, Inbox } from 'lucide-react'
-import type { RecentHistoryItem } from '@/featured/dashboard/types'
+import { InterviewReportItem } from '@/featured/history/types'
+import { formatDateDot } from '@/shared/lib/utils/date'
+import { getScoreConfig } from '@/featured/report/constants'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -15,18 +17,23 @@ const fadeUp = {
   }),
 }
 
-const mockRecentHistory: RecentHistoryItem[] = [
+// 목데이터는 주석 처리
+/*
+const mockRecentHistory = [
   { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25' },
   { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22' },
-  { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18' },
+  { id: 3, 백엔드 개발자', score: 65, date: '2026.02.18' },
 ]
+*/
 
 export interface RecentHistorySectionProps {
-  history?: RecentHistoryItem[]
+  records?: InterviewReportItem[]
 }
 
-export function RecentHistorySection({ history = mockRecentHistory }: RecentHistorySectionProps) {
-  const isEmpty = history.length === 0
+export function RecentHistorySection({ records = [] }: RecentHistorySectionProps) {
+  const displayRecords = records.slice(0, 3)
+  const isEmpty = displayRecords.length === 0
+
   return (
     <motion.div
       initial="hidden"
@@ -65,32 +72,38 @@ export function RecentHistorySection({ history = mockRecentHistory }: RecentHist
               <p className="text-muted-foreground text-sm">진행된 면접 기록이 없습니다.</p>
             </div>
           ) : (
-            history.map((item, i) => (
-              <Link
-                key={i}
-                href={`/report/${item.id}`}
-                className="flex flex-1 flex-col justify-center"
-              >
-                <div className="hover:bg-muted/40 flex h-full w-full items-center gap-4 px-5 transition-colors">
-                  <div
-                    className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-sm font-bold ${
-                      item.score >= 80
-                        ? 'bg-green-50 text-green-700'
-                        : item.score >= 70
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'bg-amber-50 text-amber-700'
-                    }`}
-                  >
-                    {item.score}
+            displayRecords.map((item) => {
+              const score = item.report?.totalScore
+              const isScoreNull = score === null || score === undefined
+
+              return (
+                <Link
+                  key={item.intvId}
+                  href={`/report/${item.intvId}`}
+                  className="flex flex-1 flex-col justify-center"
+                >
+                  <div className="hover:bg-muted/40 flex h-full w-full items-center gap-4 px-5 transition-colors">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl text-sm font-bold ${
+                        isScoreNull
+                          ? 'bg-slate-100 text-slate-500' // 점수가 없을 때 (회색)
+                          : getScoreConfig(score).style // 25점 단위 컬러 및 배경색 적용
+                      }`}
+                    >
+                      {/* 점수가 null이면 '-', 있으면 점수 표시 */}
+                      {isScoreNull ? '-' : score}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{item.intvTitle}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {formatDateDot(new Date(item.updatedAt))}
+                      </p>
+                    </div>
+                    <ChevronRight className="text-muted-foreground h-4 w-4" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{item.position}</p>
-                    <p className="text-muted-foreground text-xs">{item.date}</p>
-                  </div>
-                  <ChevronRight className="text-muted-foreground h-4 w-4" />
-                </div>
-              </Link>
-            ))
+                </Link>
+              )
+            })
           )}
         </CardContent>
       </Card>

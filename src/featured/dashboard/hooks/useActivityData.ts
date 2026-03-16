@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getInterviewStatsAction } from '../actions/dashboard.action'
+import { getDailyIntvStatsAction } from '../actions/dashboard.action'
 import { addDays, formatDateDot, getMondayOf } from '@/shared/lib/utils/date'
 
 export interface ActivityDay {
@@ -15,7 +15,7 @@ export function useActivityData() {
     setMounted(true)
 
     async function fetchActivity() {
-      const result = await getInterviewStatsAction()
+      const result = await getDailyIntvStatsAction()
 
       const statMap: Record<string, number> = {}
       if (result.success && result.data) {

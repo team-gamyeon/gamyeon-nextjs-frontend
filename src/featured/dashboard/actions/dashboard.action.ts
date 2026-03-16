@@ -1,18 +1,18 @@
 'use server'
 
 import type { ApiResponse } from '@/shared/lib/api'
-import type { InterviewStat } from '../types'
+import type { DailyIntvStat } from '../types'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
-import { getInterviewStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
+import { getDailyIntvStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
 import { withAction } from '@/shared/lib/withAction'
 
 /** * 일자별 면접 횟수 조회 Action */
-export async function getInterviewStatsAction(params?: {
+export async function getDailyIntvStatsAction(params?: {
   startDate?: string
   endDate?: string
-}): Promise<ApiResponse<InterviewStat[]>> {
-  return withAction(() => getInterviewStats(params))
+}): Promise<ApiResponse<DailyIntvStat[]>> {
+  return withAction(() => getDailyIntvStats(params))
 }
 
 /** * 전체 공지사항 목록 조회 Action */

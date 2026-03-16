@@ -14,12 +14,12 @@ const fadeUp = {
 }
 
 interface QuickStartSectionProps {
-  resumeInterviewId?: string
+  resumeIntvId?: number
 }
 
-export function QuickStartSection({ resumeInterviewId }: QuickStartSectionProps = {}) {
+export function QuickStartSection({ resumeIntvId }: QuickStartSectionProps = {}) {
   // TODO: 실제 유저 상태(진행 중인 면접 여부)에 따라 이 값을 동적으로 설정해야 합니다.
-  const hasInProgressInterview = !!resumeInterviewId
+  const hasInProgressInterview = !!resumeIntvId
 
   return (
     <div>
@@ -82,7 +82,7 @@ export function QuickStartSection({ resumeInterviewId }: QuickStartSectionProps 
             icon={RotateCcw}
             iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
             iconColorStyle="text-blue-600"
-            href={resumeInterviewId ? `/interview?resume=true&id=${resumeInterviewId}` : '/screen'}
+            href={resumeIntvId ? `/interview?resume=true&id=${resumeIntvId}` : '/interview'}
             buttonText="이어서 면접보기"
             isDisabled={!hasInProgressInterview}
           />

@@ -1,15 +1,15 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
-import type { InterviewStat } from '../types'
+import type { DailyIntvStat } from '../types'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
 /**
  * 일자별 면접 횟수 조회
  */
-export async function getInterviewStats(params?: {
+export async function getDailyIntvStats(params?: {
   startDate?: string
   endDate?: string
-}): Promise<ApiResponse<InterviewStat[]>> {
-  return await serverApi.get<InterviewStat[]>('/api/v1/intvs/stats', { params })
+}): Promise<ApiResponse<DailyIntvStat[]>> {
+  return await serverApi.get<DailyIntvStat[]>('/api/v1/intvs/stats', { params })
 }
 
 // 전체 공지사항 목록 조회

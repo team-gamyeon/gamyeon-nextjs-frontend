@@ -36,7 +36,8 @@ export interface StatusCard {
   colorClass: string
 }
 
-export interface InterviewStat {
+// 일자 별 면접 횟수 조회
+export interface DailyIntvStat {
   date: string
   count: number
 }

@@ -1,7 +1,7 @@
 'use server'
 
 import type { ApiResponse } from '@/shared/lib/api'
-import type { InterviewStat } from '../types'
+import type { DailyIntvStat } from '../types'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
 import { getInterviewStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
@@ -11,7 +11,7 @@ import { withAction } from '@/shared/lib/withAction'
 export async function getInterviewStatsAction(params?: {
   startDate?: string
   endDate?: string
-}): Promise<ApiResponse<InterviewStat[]>> {
+}): Promise<ApiResponse<DailyIntvStat[]>> {
   return withAction(() => getInterviewStats(params))
 }
 

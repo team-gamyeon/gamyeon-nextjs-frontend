@@ -1,5 +1,5 @@
 import { ApiResponse, serverApi } from '@/shared/lib/api'
-import type { InterviewStat } from '../types'
+import type { DailyIntvStat } from '../types'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 
 /**
@@ -8,8 +8,8 @@ import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
 export async function getInterviewStats(params?: {
   startDate?: string
   endDate?: string
-}): Promise<ApiResponse<InterviewStat[]>> {
-  return await serverApi.get<InterviewStat[]>('/api/v1/intvs/stats', { params })
+}): Promise<ApiResponse<DailyIntvStat[]>> {
+  return await serverApi.get<DailyIntvStat[]>('/api/v1/intvs/stats', { params })
 }
 
 // 전체 공지사항 목록 조회

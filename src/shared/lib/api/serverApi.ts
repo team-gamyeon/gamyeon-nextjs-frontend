@@ -131,7 +131,15 @@ async function serverFetch<T>(
 
   if (res.status === 401) {
     const newAccessToken = await tryRefresh(cookieStore)
-    if (!newAccessToken) redirect('/signin')
+    if (!newAccessToken) {
+      try {
+        cookieStore.delete('accessToken')
+        cookieStore.delete('refreshToken')
+      } catch {
+        // RSC 컨텍스트에서는 쿠키 삭제 불가 — proxy 루프 방지 불가
+      }
+      redirect('/signin')
+    }
 
     try {
       res = await doFetch(getAccessToken(newAccessToken))

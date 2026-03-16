@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache' // 캐시 갱신을 위해 import
 import type { ApiResponse } from '@/shared/lib/api'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { withAction } from '@/shared/lib/withAction'
 import { ReportDetailData } from '../types'
 import { getReportDetail, deleteReport } from '../service/report.service'
 
@@ -12,20 +12,15 @@ import { getReportDetail, deleteReport } from '../service/report.service'
 export async function getReportDetailAction(
   intvId: number,
 ): Promise<ApiResponse<ReportDetailData>> {
-  try {
-    return await getReportDetail(intvId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  return withAction(() => getReportDetail(interviewId))
 }
 
 /**
  * 리포트 삭제 Action
  */
-export async function deleteReportAction(intvId: number): Promise<ApiResponse<null>> {
-  try {
-    const response = await deleteReport(intvId)
+export async function deleteReportAction(interviewId: number): Promise<ApiResponse<null>> {
+  return withAction(async () => {
+    const response = await deleteReport(interviewId)
 
     // API 응답 성공 여부 확인 (명세서의 "success": true 기준)
     if (response.success) {
@@ -34,8 +29,5 @@ export async function deleteReportAction(intvId: number): Promise<ApiResponse<nu
     }
 
     return response
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  })
 }

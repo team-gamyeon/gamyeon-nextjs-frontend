@@ -30,13 +30,13 @@ import {
   startInterview,
   updateInterviewTitle,
 } from '@/featured/interview/services/interview.service'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { withAction } from '@/shared/lib/withAction'
 
 // 면접 생성(제목 추가)
 export async function createInterviewAction(
   title: string,
 ): Promise<ApiResponse<CreateInterviewResponse>> {
-  return createInterview(title)
+  return withAction(() => createInterview(title))
 }
 
 // 면접 제목 수정
@@ -44,7 +44,7 @@ export async function updateInterviewTitleAction(
   intvId: number,
   title: string,
 ): Promise<ApiResponse<UpdateInterviewTitleResponse>> {
-  return updateInterviewTitle(intvId, title)
+  return withAction(() => updateInterviewTitle(intvId, title))
 }
 
 // 면접 문서 업로드 presignedUrl 발급
@@ -52,7 +52,7 @@ export async function issuePresignedUrlAction(
   intvId: number,
   resBody: IssuePresignedUrlRequest,
 ): Promise<ApiResponse<IssuePresignedUrlResponse>> {
-  return issuePresignedUrl(intvId, resBody)
+  return withAction(() => issuePresignedUrl(intvId, resBody))
 }
 
 // 면접 문서 업로드 완료
@@ -68,19 +68,19 @@ export async function completeFileUploadAction(
       data: null,
     }
   }
-  return completeFileUpload(intvId, files)
+  return withAction(() => completeFileUpload(intvId, files))
 }
 
 // 면접 질문 생성
 export async function generateInterviewQuestionAction(intvId: number): Promise<ApiResponse<null>> {
-  return generateInterviewQuestion(intvId)
+  return withAction(() => generateInterviewQuestion(intvId))
 }
 
 // 면접 질문 조회
 export async function getInterviewQuestionsAction(
   intvId: number,
 ): Promise<ApiResponse<GetInterviewQuestionsResponse>> {
-  return getInterviewQuestions(intvId)
+  return withAction(() => getInterviewQuestions(intvId))
 }
 
 // 답변 영상 업로드 presignedUrl 발급
@@ -88,7 +88,7 @@ export async function issueVideoPresignedUrlAction(
   questionSetId: number,
   { video }: { video: IssueVideoPresignedUrlRequest },
 ): Promise<ApiResponse<IssueVideoPresignedUrlResponse>> {
-  return issueVideoPresignedUrl(questionSetId, video)
+  return withAction(() => issueVideoPresignedUrl(questionSetId, video))
 }
 
 // 답변 영상 업로드 완료
@@ -96,52 +96,32 @@ export async function completeVideoFileUploadAction(
   questionSetId: number,
   video: VideoInfo,
 ): Promise<ApiResponse<CompleteVideoFileUploadResponse>> {
-  return completeVideoFileUpload(questionSetId, video)
+  return withAction(() => completeVideoFileUpload(questionSetId, video))
 }
 
 // 답변 분석 요청
 export async function requestAnswerAnalysisAction(
   answerId: number,
 ): Promise<ApiResponse<AnswerAnalysisResponse>> {
-  return requestAnswerAnalysis(answerId)
+  return withAction(() => requestAnswerAnalysis(answerId))
 }
 
 // 면접 시작
 export async function startInterviewAction(intvId: number): Promise<ApiResponse<null>> {
-  try {
-    return await startInterview(intvId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  return withAction(() => startInterview(intvId))
 }
 
 // 면접 중단
 export async function pauseInterviewAction(intvId: number): Promise<ApiResponse<null>> {
-  try {
-    return await pauseInterview(intvId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  return withAction(() => pauseInterview(intvId))
 }
 
 // 면접 재개
 export async function resumeInterviewAction(intvId: number): Promise<ApiResponse<null>> {
-  try {
-    return await resumeInterview(intvId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  return withAction(() => resumeInterview(intvId))
 }
 
 // 면접 완료
 export async function finishInterviewAction(intvId: number): Promise<ApiResponse<null>> {
-  try {
-    return await finishInterview(intvId)
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    throw error
-  }
+  return withAction(() => finishInterview(intvId))
 }

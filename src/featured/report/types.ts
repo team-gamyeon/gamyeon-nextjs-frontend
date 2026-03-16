@@ -17,18 +17,18 @@ export interface CompetencyScores {
 }
 
 export interface QuestionFeedbackDetail {
+  characteristic: string
   strength: string
   improvement: string
 }
 
-// videoUrl 명세 다시 확인해야함 (임의로 넣어둠)
 export interface QuestionSummary {
   index: number
   question: string
   answerSummary: string
   feedbackBadges: string[]
   feedback: QuestionFeedbackDetail
-  videoUrl?: string | null
+  mediaUrl?: string | null
 }
 
 export interface DetailReportBody {
@@ -49,6 +49,13 @@ export interface ReportDetailData {
   intvStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
   reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | 'DELETED'
   report: DetailReportBody
+}
+
+export interface ReportDetailResponse {
+  success: boolean
+  code: string
+  message: string
+  data: ReportDetailData
 }
 
 // ==========================================

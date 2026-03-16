@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Separator } from '@/shared/ui/separator'
 import { Award, Clock, MessageSquare, ShieldCheck } from 'lucide-react'
-import type { AiConfidenceLevel, ScoreGrade } from '@/featured/report/types'
-import { SCORE_FEEDBACK_MAP, AI_CONFIDENCE_STYLE, getScoreGrade } from '@/featured/report/constants'
-import { formatDuration } from '@/shared/lib/utils/date' 
+import type { AiConfidenceLevel } from '@/featured/report/types'
+import { getScoreConfig, AI_CONFIDENCE_STYLE } from '@/featured/report/constants'
+import { formatDuration } from '@/shared/lib/utils/date'
 
 interface ScoreSummaryCardProps {
   overallScore: number
@@ -17,14 +17,6 @@ interface ScoreSummaryCardProps {
   totalQuestionCount: number
 }
 
-// 점수 등급에 따른 차트 색상 매핑 (getScoreChartColor 함수 대체)
-const CHART_COLORS: Record<ScoreGrade, string> = {
-  미흡: '#ef4444', // red-500
-  보통: '#eab308', // yellow-500
-  양호: '#22c55e', // green-500
-  좋음: '#3b82f6', // blue-500
-}
-
 export function ScoreSummaryCard({
   overallScore,
   aiConfidence,
@@ -32,10 +24,8 @@ export function ScoreSummaryCard({
   answeredCount,
   totalQuestionCount,
 }: ScoreSummaryCardProps) {
-  // 점수를 기반으로 등급, 피드백 객체, 차트 색상을 한 번에 계산
-  const grade = getScoreGrade(overallScore)
-  const feedback = SCORE_FEEDBACK_MAP[grade] // { grade, comment, style }
-  const chartColor = CHART_COLORS[grade]
+  // 점수 기반으로 모든 설정을 한 번에 가져오기
+  const config = getScoreConfig(overallScore)
 
   return (
     <Card className="border-border/50 shadow-primary/5 flex h-full flex-col items-center justify-center gap-0 py-6 shadow-lg">
@@ -64,7 +54,7 @@ export function ScoreSummaryCard({
                 cy="100"
                 r="88"
                 fill="none"
-                stroke={chartColor} // 동적 색상 적용
+                stroke={config.chartColor}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 88}
@@ -80,7 +70,7 @@ export function ScoreSummaryCard({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
               className="text-4xl font-bold"
-              style={{ color: chartColor }} // 동적 색상 적용
+              style={{ color: config.chartColor }}
             >
               {overallScore}
             </motion.span>
@@ -89,9 +79,9 @@ export function ScoreSummaryCard({
         </div>
 
         <div className="mb-2 flex flex-wrap justify-center gap-2 py-3">
-          <Badge className={feedback.style}>
+          <Badge className={config.style}>
             <Award className="mr-1 h-4 w-4" />
-            {feedback.grade}
+            {config.grade}
           </Badge>
           <Badge className={AI_CONFIDENCE_STYLE[aiConfidence]}>
             <ShieldCheck className="mr-1 h-4 w-4" />
@@ -99,7 +89,7 @@ export function ScoreSummaryCard({
           </Badge>
         </div>
 
-        <p className="text-muted-foreground text-center text-sm break-keep">{feedback.comment}</p>
+        <p className="text-muted-foreground text-center text-sm break-keep">{config.comment}</p>
 
         <Separator className="my-4" />
 

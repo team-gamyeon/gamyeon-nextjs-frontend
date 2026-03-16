@@ -3,8 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/shared/ui/button'
 import { ArrowLeft, Power } from 'lucide-react'
-import { QUESTIONS } from '@/featured/interview/constants'
-import type { Phase } from '@/featured/interview/types'
+import type { Phase, InterviewQuestions } from '@/featured/interview/types'
 import Image from 'next/image'
 
 interface TopBarProps {
@@ -12,6 +11,7 @@ interface TopBarProps {
   currentQuestion: number
   phase: Phase
   isActive: boolean
+  questions: InterviewQuestions[]
   onEndClick: () => void
 }
 
@@ -20,6 +20,7 @@ export function ProcessBar({
   currentQuestion,
   phase,
   isActive,
+  questions,
   onEndClick,
 }: TopBarProps) {
   return (
@@ -48,7 +49,7 @@ export function ProcessBar({
       </div>
 
       <div className="flex items-center gap-1.5">
-        {QUESTIONS.map((_, i) => (
+        {questions.map((_, i) => (
           <div
             key={i}
             className={`h-2 rounded-full transition-all duration-300 ${
@@ -61,7 +62,7 @@ export function ProcessBar({
           />
         ))}
         <span className="ml-2 text-xs text-white/50">
-          {currentQuestion + 1} / {QUESTIONS.length}
+          {currentQuestion + 1} / {questions.length}
         </span>
       </div>
 

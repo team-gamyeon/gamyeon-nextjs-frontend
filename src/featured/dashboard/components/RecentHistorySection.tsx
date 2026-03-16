@@ -22,7 +22,7 @@ const fadeUp = {
 const mockRecentHistory = [
   { id: 1, position: '프론트엔드 개발자', score: 76, date: '2026.02.25' },
   { id: 2, position: '프론트엔드 개발자', score: 68, date: '2026.02.22' },
-  { id: 3, 백엔드 개발자', score: 65, date: '2026.02.18' },
+ { id: 3, position: '백엔드 개발자', score: 65, date: '2026.02.18' },
 ]
 */
 

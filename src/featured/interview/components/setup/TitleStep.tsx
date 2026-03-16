@@ -9,6 +9,8 @@ interface TitleStepProps {
 }
 
 export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
+  const isValidTitle = /^[가-힣\s]+$/.test(title) && /[가-힣]/.test(title.trim())
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,19 +19,19 @@ export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
         </div>
         <h3 className="text-lg font-bold">면접 제목 입력</h3>
         <p className="text-muted-foreground mt-1 text-sm">
-          이번 면접의 제목이나 포지션명을 입력해주세요.
+          이번 면접의 제목을 입력해주세요. (띄어쓰기 없이 한글만 가능)
         </p>
       </div>
       <div className="flex gap-2">
         <Input
-          placeholder="예: 프론트엔드 개발자 면접"
+          placeholder="예: 개발자면접"
           value={title}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && onConfirm()}
+          onKeyDown={(e) => e.key === 'Enter' && isValidTitle && onConfirm()}
           autoFocus
           className="flex-1 focus-visible:border-0 focus-visible:ring-offset-0 focus-visible:outline-none"
         />
-        <Button disabled={!title.trim()} onClick={onConfirm} className="shrink-0 gap-1">
+        <Button disabled={!isValidTitle} onClick={onConfirm} className="shrink-0 gap-1">
           확인
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>

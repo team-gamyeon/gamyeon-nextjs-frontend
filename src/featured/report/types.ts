@@ -46,7 +46,7 @@ export interface DetailReportBody {
 
 export interface ReportDetailData {
   intvId: number
-  interviewStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
+  intvStatus: 'READY' | 'FINISHED' | 'PAUSED' | 'IN_PROGRESS'
   reportStatus: 'SUCCEED' | 'IN_PROGRESS' | 'FAILED' | 'DELETED'
   report: DetailReportBody
 }

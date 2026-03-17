@@ -6,8 +6,12 @@ export function useRandomTip() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    setTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
+    const timer = setTimeout(() => {
+      setTip(INTERVIEW_TIPS[Math.floor(Math.random() * INTERVIEW_TIPS.length)])
+      setMounted(true)
+    }, 0)
+
+    return () => clearTimeout(timer)
   }, [])
 
   return { tip: mounted ? tip : INTERVIEW_TIPS[0] }

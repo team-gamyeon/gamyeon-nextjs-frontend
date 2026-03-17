@@ -11,7 +11,8 @@ interface InterviewPageProps {
 }
 
 export function InterviewContainer({ session }: InterviewPageProps) {
-  const currentQuestionSetId = session.interviewQuestions[session.currentQuestion]?.questionSetId ?? null
+  const currentQuestionSetId =
+    session.interviewQuestions[session.currentQuestion]?.questionSetId ?? null
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-slate-950 text-white">

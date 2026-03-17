@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
 import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
 import { MicStep } from '@/featured/interview/components/setup/MicStep'
@@ -245,6 +245,17 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const handleMicConfirm = () => {
     completeStep(4)
   }
+
+  const hasShownBasePoseToastRef = useRef<boolean>(false)
+  useEffect(() => {
+    if (cameraHandler.basePose && !hasShownBasePoseToastRef.current) {
+      toast.success('확인 완료 버튼을 눌러주세요.')
+      hasShownBasePoseToastRef.current = true
+    }
+    if (!cameraHandler.basePose) {
+      hasShownBasePoseToastRef.current = false
+    }
+  }, [cameraHandler.basePose])
 
   const renderStep = () => {
     switch (currentStep) {

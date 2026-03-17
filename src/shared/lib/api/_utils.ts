@@ -55,9 +55,6 @@ export const handleResponse = async <T>(
   if (!body) throw new NetworkError()
 
   if (!body.success) {
-    if (!config?.silent) {
-      toast.error(body.message || '오류가 발생했습니다.')
-    }
     const error = {
       success: false,
       code: body.code,

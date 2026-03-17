@@ -186,12 +186,17 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
   const syncInterviewTitle = async () => {
     if (!session.interviewId) return
+
+    const titleRegex = /^[가-힣]+$/
     const nextTitle = title.trim()
-    if (!nextTitle) return
+
+    if (!nextTitle || !titleRegex.test(nextTitle)) return
 
     const result = await updateInterviewTitleAction(session.interviewId, nextTitle)
     if (!result.success) {
       console.error('면접 제목 수정 실패:', result.message)
+    } else {
+      setTitle(nextTitle)
     }
   }
 
@@ -211,14 +216,27 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   }
 
   const handleTitleConfirm = async () => {
-    const result = await createInterviewAction(title)
+    const titleRegex = /^[가-힣]+$/
+    const targetTitle = title.trim()
+
+    if (!targetTitle) {
+      toast.error('면접 제목을 입력해주세요.')
+      return
+    }
+    if (!titleRegex.test(targetTitle)) {
+      toast.error('제목은 띄어쓰기 없이 한글만 가능합니다.')
+      return
+    }
+
+    const result = await createInterviewAction(targetTitle)
     if (result.success) {
       if (result.data) {
         session.setInterviewId(result.data.intvId)
       }
+      setTitle(targetTitle)
       completeStep(1)
     } else {
-      console.log(result.message)
+      toast.error(result.message || '면접 생성 실패')
     }
   }
 

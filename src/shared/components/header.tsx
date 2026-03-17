@@ -1,62 +1,64 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/shared/ui/button";
-import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/shared/ui/sheet";
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Button } from '@/shared/ui/button'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
+import { Sheet, SheetContent, SheetTrigger } from '@/shared/ui/sheet'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-import { useAuthStore } from "@/featured/auth/store";
-import {
-  Menu,
-  BrainCircuit,
-  Play,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-} from "lucide-react";
+} from '@/shared/ui/dropdown-menu'
+import { useAuthStore } from '@/featured/auth/store'
+import { logout } from '@/featured/auth/actions/auth.action'
+import Image from 'next/image'
+import { Menu, Play, LayoutDashboard, LogOut, Settings } from 'lucide-react'
 
 const navLinks = [
-  { href: "#features", label: "주요 기능" },
-  { href: "#how-it-works", label: "이용 방법" },
-  { href: "#testimonials", label: "후기" },
-];
+  { href: '#features', label: '주요 기능' },
+  { href: '#how-it-works', label: '이용 방법' },
+  { href: '#testimonials', label: '후기' },
+]
 
 export function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { isLoggedIn, user, logout } = useAuthStore();
-  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false)
+  const { isLoggedIn, user, logout: clearAuthStore } = useAuthStore()
+  const router = useRouter()
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-    setIsOpen(false);
-  };
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      clearAuthStore()
+      setIsOpen(false)
+      router.push('/signin')
+    }
+  }
 
-  const initials = user?.name ? user.name.slice(0, 1) : "U";
+  const initials = user?.nickname ? user.nickname.slice(0, 1) : 'U'
 
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl"
+      className="border-border/50 bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-xl"
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 로고 */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <BrainCircuit className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">InterviewAI</span>
+        <Link href="/dashboard" className="flex items-center">
+          <Image
+            src="/images/Gamyeon_Logo.png"
+            alt="Gamyeon logo"
+            width={1024}
+            height={768}
+            style={{ height: '32px', width: 'auto' }}
+          />
         </Link>
 
         {/* 데스크탑 네비게이션 */}
@@ -65,7 +67,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
             >
               {link.label}
             </Link>
@@ -84,9 +86,9 @@ export function Header() {
               </Button>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full outline-none ring-primary/40 transition hover:ring-2">
+                  <button className="ring-primary/40 flex items-center gap-2 rounded-full transition outline-none hover:ring-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -94,23 +96,23 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-3 py-2">
-                    <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    <p className="text-sm font-medium">{user?.nickname}</p>
+                    <p className="text-muted-foreground truncate text-xs">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="gap-2 cursor-pointer">
+                    <Link href="/dashboard" className="cursor-pointer gap-2">
                       <LayoutDashboard className="h-4 w-4" />
                       대시보드
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2 cursor-pointer">
+                  <DropdownMenuItem className="cursor-pointer gap-2">
                     <Settings className="h-4 w-4" />
                     설정
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    className="text-destructive focus:text-destructive cursor-pointer gap-2"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
@@ -122,7 +124,7 @@ export function Header() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">로그인</Link>
+                <Link href="/signin">로그인</Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/signup">무료로 시작하기</Link>
@@ -145,7 +147,7 @@ export function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className="text-lg font-medium text-foreground"
+                  className="text-foreground text-lg font-medium"
                 >
                   {link.label}
                 </Link>
@@ -153,15 +155,15 @@ export function Header() {
               <div className="mt-4 flex flex-col gap-3">
                 {isLoggedIn ? (
                   <>
-                    <div className="flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-2.5">
+                    <div className="bg-muted/50 flex items-center gap-3 rounded-xl px-3 py-2.5">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-xs text-muted-foreground">{user?.email}</p>
+                        <p className="text-sm font-medium">{user?.nickname}</p>
+                        <p className="text-muted-foreground text-xs">{user?.email}</p>
                       </div>
                     </div>
                     <Button asChild onClick={() => setIsOpen(false)}>
@@ -170,7 +172,11 @@ export function Header() {
                         면접 시작하기
                       </Link>
                     </Button>
-                    <Button variant="outline" className="gap-2 text-destructive" onClick={handleLogout}>
+                    <Button
+                      variant="outline"
+                      className="text-destructive gap-2"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="h-4 w-4" />
                       로그아웃
                     </Button>
@@ -178,10 +184,14 @@ export function Header() {
                 ) : (
                   <>
                     <Button variant="outline" asChild>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>로그인</Link>
+                      <Link href="/signin" onClick={() => setIsOpen(false)}>
+                        로그인
+                      </Link>
                     </Button>
                     <Button asChild>
-                      <Link href="/signup" onClick={() => setIsOpen(false)}>무료로 시작하기</Link>
+                      <Link href="/signup" onClick={() => setIsOpen(false)}>
+                        무료로 시작하기
+                      </Link>
                     </Button>
                   </>
                 )}
@@ -191,5 +201,5 @@ export function Header() {
         </Sheet>
       </div>
     </motion.header>
-  );
+  )
 }

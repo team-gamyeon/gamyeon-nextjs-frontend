@@ -1,25 +1,150 @@
-export type Phase = "ready" | "thinking" | "answering" | "transition" | "finished";
+export type Phase = 'ready' | 'thinking' | 'answering' | 'transition' | 'finished'
+export type StepStatus = 'pending' | 'active' | 'done'
+export type PermStatus = 'idle' | 'requesting' | 'granted' | 'denied'
+export type RecordingStatus = 'idle' | 'recording' | 'recorded'
+export type InterviewFileType = 'RESUME' | 'PORTFOLIO' | 'COVER_LETTER'
 
-export interface InterviewSession {
-  currentQuestion: number;
-  phase: Phase;
-  timeLeft: number;
-  micOn: boolean;
-  cameraOn: boolean;
-  showEndDialog: boolean;
-  typingKey: number;
-  questionRevealed: boolean;
-  interviewTitle: string;
-  showSetup: boolean;
+export interface InterviewSetupConfig {
+  title: string
+  basePose: { pitch: number; yaw: number } | null
+  stream: MediaStream | null
 }
 
-export const QUESTIONS = [
-  "자기소개를 부탁드립니다. 본인의 핵심 역량과 지원 동기를 중심으로 말씀해주세요.",
-  "이전 프로젝트에서 가장 어려웠던 기술적 도전은 무엇이었고, 어떻게 해결하셨나요?",
-  "팀 내에서 의견 충돌이 발생했을 때 어떻게 대처하시나요? 구체적인 경험을 말씀해주세요.",
-  "5년 후 본인의 커리어 목표는 무엇인가요?",
-  "마지막으로 저희에게 하고 싶은 질문이 있으신가요?",
-] as const;
+export type FocusState =
+  | 'CENTER'
+  | 'LEFT'
+  | 'RIGHT'
+  | 'TOP'
+  | 'BOTTOM'
+  | 'TOP-LEFT'
+  | 'TOP-RIGHT'
+  | 'BOTTOM-LEFT'
+  | 'BOTTOM-RIGHT'
 
-export const TOTAL_THINK_TIME = 30;
-export const TOTAL_ANSWER_TIME = 120;
+export interface RawGazeData {
+  offset_ms: number
+  confidence: number
+  gaze: {
+    left: {
+      x: number
+      y: number
+    }
+    right: {
+      x: number
+      y: number
+    }
+  }
+  head: {
+    pitch: number
+    yaw: number
+    roll: number
+  }
+}
+
+export interface GazeEvent {
+  type: 'AWAY_START' | 'AWAY_END'
+  offset_ms: number
+  direction: FocusState
+}
+
+export interface InterviewBatchPayload {
+  meta: {
+    intvId: number
+    questionSetId: number
+    timestamp: number
+    segmentSequence: number
+  }
+  metrics_summary: {
+    average_concentration: number
+    blink_count: number
+    is_away_detected: boolean
+  }
+  raw_data: RawGazeData[]
+  events: GazeEvent[]
+}
+
+export interface CreateInterviewResponse {
+  intvId: number
+  title: string
+  status: string
+}
+
+export interface UpdateInterviewTitleResponse {
+  intvId: number
+  title: string
+  status: string
+}
+
+export interface FileInfo {
+  fileType: string
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+}
+
+export interface IssuePresignedUrlRequest {
+  fileType: InterviewFileType
+  originalFileName: string
+  contentType: string
+  fileSizeBytes: number
+}
+
+export interface IssuePresignedUrlResponse {
+  preparationId: number
+  fileType: InterviewFileType
+  originalFileName: string
+  fileKey: string
+  presignedUrl: string
+  fileUrl: string
+  expiresInSeconds: number
+}
+
+export type PreparationStatusType = 'READY'
+
+export interface CompleteFileUploadResponse {
+  preparationId: number
+  preparationStatus: PreparationStatusType
+}
+
+export interface InterviewQuestions {
+  questionSetId: number
+  content: string
+}
+
+export interface GetInterviewQuestionsResponse {
+  intvId: number
+  questions: InterviewQuestions[]
+}
+
+export interface IssueVideoPresignedUrlRequest {
+  originalFileName: string
+  contentType: string // 테스트 후 타입 좁히기 필요
+  fileSizeBytes: number
+}
+
+export interface IssueVideoPresignedUrlResponse {
+  questionSetId: number
+  originalFileName: string
+  fileKey: string
+  presignedUrl: string
+  fileUrl: string
+  expiresInSeconds: number
+}
+
+export interface VideoInfo {
+  originalFileName: string
+  fileKey: string
+  fileUrl: string
+  contentType: string
+  fileSizeBytes: number
+}
+
+export interface CompleteVideoFileUploadResponse {
+  answerId: number
+  questionSetId: number
+}
+
+export interface AnswerAnalysisResponse {
+  answerId: number
+  analysisStatus: string
+}

@@ -1,27 +1,26 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import type { User, AuthState } from "./types";
-
-const MOCK_USER: User = {
-  name: "홍길동",
-  email: "hong@example.com",
-};
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import type { User, AuthState } from './types'
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      accessToken: null,
       isLoggedIn: false,
-      login: (u: User = MOCK_USER) => {
-        set({ user: u, isLoggedIn: true });
+      signin: (user: User, accessToken: string) => {
+        set({ user, accessToken, isLoggedIn: true })
+      },
+      setAccessToken: (accessToken: string) => {
+        set({ accessToken })
       },
       logout: () => {
-        set({ user: null, isLoggedIn: false });
+        set({ user: null, accessToken: null, isLoggedIn: false })
       },
     }),
     {
-      name: "ai-interview-user",
+      name: 'ai-interview-user',
       storage: createJSONStorage(() => sessionStorage),
-    }
-  )
-);
+    },
+  ),
+)

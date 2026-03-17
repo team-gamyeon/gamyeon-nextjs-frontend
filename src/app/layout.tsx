@@ -16,9 +16,40 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: '가면 | AI 가상 면접',
+  title: {
+    template: '%s | 가면',
+    default: '가면 | 가상 면접 AI',
+  },
   description:
     'AI 기반 실전 면접 연습으로 합격을 준비하세요. 실시간 피드백과 맞춤형 분석으로 면접 실력을 한 단계 끌어올립니다.',
+
+  //  SEO 검색 키워드
+  keywords: ['AI 면접', '가상 면접', '면접 연습', '취업 준비', '모의 면접', '가면', 'Gamyeon'],
+
+  //  Open Graph
+  openGraph: {
+    title: '가면 | 가상 면접 AI',
+    description: 'AI 기반 실전 면접 연습으로 합격을 준비하세요.',
+    url: 'https://gamyeon.co.kr',
+    siteName: '가면',
+    locale: 'ko_KR',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: '가면 AI 서비스 미리보기 이미지',
+      },
+    ],
+  },
+
+  // 파비콘
+  icons: {
+    icon: '/images/Gamyeon_Logo.svg',
+    shortcut: '/images/Gamyeon_Logo.svg',
+    apple: '/images/Gamyeon_Logo.svg',
+  },
 }
 
 export default function RootLayout({

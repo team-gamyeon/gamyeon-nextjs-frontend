@@ -64,14 +64,14 @@ export function StatusSection({ records = [] }: StatusSectionProps) {
                 <button
                   onClick={() => setWeekOffset((o) => o - 1)}
                   disabled={!canPrev}
-                  className="hover:bg-muted rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                  className="hover:bg-muted cursor-pointer rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => setWeekOffset((o) => o + 1)}
                   disabled={!canNext}
-                  className="hover:bg-muted rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                  className="hover:bg-muted cursor-pointer rounded p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>

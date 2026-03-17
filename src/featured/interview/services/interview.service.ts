@@ -75,18 +75,19 @@ export async function issueVideoPresignedUrl(
   questionSetId: number,
   video: IssueVideoPresignedUrlRequest,
 ): Promise<ApiResponse<IssueVideoPresignedUrlResponse>> {
-  return await serverApi.post(`/api/v1/intvs/${questionSetId}/answers/presigned-url`, {
-    video: video,
-  })
+  return await serverApi.post(`/api/v1/intvs/${questionSetId}/answers/presigned-url`, video)
 }
 
 // 답변 영상 업로드 완료
 export async function completeVideoFileUpload(
   questionSetId: number,
+  intvId: number,
   video: VideoInfo,
 ): Promise<ApiResponse<CompleteVideoFileUploadResponse>> {
+  console.log('페이로드:', questionSetId, intvId, video)
   return await serverApi.post(`/api/v1/intvs/${questionSetId}/answers`, {
-    video: video,
+    intvId,
+    ...video,
   })
 }
 

@@ -17,7 +17,7 @@ export default function NotFoundPage() {
       </div>
 
       <Button asChild>
-        <Link href="/dashboard">대시보드로 이동</Link>
+        <Link href="/">랜딩 페이지</Link>
       </Button>
     </div>
   )

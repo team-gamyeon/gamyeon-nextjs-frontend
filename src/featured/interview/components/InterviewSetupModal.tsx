@@ -187,7 +187,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
   const syncInterviewTitle = async () => {
     if (!session.interviewId) return
 
-    const titleRegex = /^[가-힣]+(\s[가-힣]+)*$/
+    const titleRegex = /^[가-힣]+$/
     const nextTitle = title.trim()
 
     if (!nextTitle || !titleRegex.test(nextTitle)) return

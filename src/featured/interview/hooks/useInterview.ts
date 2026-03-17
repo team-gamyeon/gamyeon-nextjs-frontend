@@ -134,11 +134,9 @@ export function useInterview() {
       )
 
       const urlRes = await issueVideoPresignedUrlAction(currentQuestionSet.questionSetId, {
-        video: {
-          originalFileName: videoFile.name,
-          contentType: videoFile.type,
-          fileSizeBytes: videoFile.size,
-        },
+        originalFileName: videoFile.name,
+        contentType: videoFile.type,
+        fileSizeBytes: videoFile.size,
       })
 
       if (!urlRes.success || !urlRes.data) {
@@ -150,20 +148,25 @@ export function useInterview() {
         throw new Error(s3Res.message)
       }
 
-      const completeRes = await completeVideoFileUploadAction(currentQuestionSet.questionSetId, {
-        originalFileName: urlRes.data.originalFileName,
-        fileKey: urlRes.data.fileKey,
-        fileUrl: urlRes.data.fileUrl,
-        contentType: videoFile.type,
-        fileSizeBytes: videoFile.size,
-      })
-
+      const completeRes = await completeVideoFileUploadAction(
+        currentQuestionSet.questionSetId,
+        currentInterviewId,
+        {
+          originalFileName: urlRes.data.originalFileName,
+          fileKey: urlRes.data.fileKey,
+          fileUrl: urlRes.data.fileUrl,
+          contentType: videoFile.type,
+          fileSizeBytes: videoFile.size,
+        },
+      )
+      console.log('분선 완료시:', completeRes)
       const answerId = completeRes.data?.answerId
       if (!answerId) {
         throw new Error('답변 업로드 완료 응답에 answerId가 없습니다.')
       }
-
-      await requestAnswerAnalysisAction(answerId)
+      if (completeRes.success) {
+        await requestAnswerAnalysisAction(answerId)
+      }
     } catch (error: unknown) {
       console.error(error instanceof Error ? error.message : '답변 처리 중 오류가 발생했습니다.')
     }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getReportListAction } from '@/featured/history/actions/history.action'
+import { useAuthStore } from '@/featured/auth/store'
 import { InterviewReportItem, SortBy } from '@/featured/history/types'
 import { useHistoryFilter } from '@/featured/history/hooks/useHistoryFilter'
 import { HistoryFilterBar } from '@/featured/history/components/HistoryFilterBar'
@@ -10,6 +11,7 @@ import { HistoryPagination } from '@/featured/history/components/HistoryPaginati
 import { useColumnsPerRow } from '@/featured/history/hooks/useColumnsPerRow'
 
 export function HistoryLayout() {
+  const { user } = useAuthStore()
   const [records, setRecords] = useState<InterviewReportItem[]>([])
   const { search, setSearch, sortBy, setSortBy, filtered } = useHistoryFilter(records)
   const cols = useColumnsPerRow()
@@ -19,9 +21,10 @@ export function HistoryLayout() {
   const safePage = Math.min(currentPage, totalPages)
 
   useEffect(() => {
+    if (!user?.id) return
     async function fetchData() {
       try {
-        const response = await getReportListAction()
+        const response = await getReportListAction(user!.id)
         if (response.success) {
           //  데이터가 null일 때를 대비한 방어막(?? []) 추가
           setRecords(response.data ?? [])
@@ -31,7 +34,7 @@ export function HistoryLayout() {
       }
     }
     fetchData()
-  }, [])
+  }, [user?.id])
 
   //  사용자가 검색어를 입력할 때, '검색어 변경' + '1페이지로 이동'을 동시에 해주는 함수
   const handleSearchChange = (newSearch: string) => {

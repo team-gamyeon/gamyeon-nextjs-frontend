@@ -99,7 +99,7 @@ export async function getInterviewQuestionsAction(
 // 답변 영상 업로드 presignedUrl 발급
 export async function issueVideoPresignedUrlAction(
   questionSetId: number,
-  { video }: { video: IssueVideoPresignedUrlRequest },
+  video: IssueVideoPresignedUrlRequest,
 ): Promise<ApiResponse<IssueVideoPresignedUrlResponse>> {
   return withAction(() => issueVideoPresignedUrl(questionSetId, video))
 }
@@ -107,9 +107,10 @@ export async function issueVideoPresignedUrlAction(
 // 답변 영상 업로드 완료
 export async function completeVideoFileUploadAction(
   questionSetId: number,
+  intvId: number,
   video: VideoInfo,
 ): Promise<ApiResponse<CompleteVideoFileUploadResponse>> {
-  return withAction(() => completeVideoFileUpload(questionSetId, video))
+  return withAction(() => completeVideoFileUpload(questionSetId, intvId, video))
 }
 
 // 답변 분석 요청

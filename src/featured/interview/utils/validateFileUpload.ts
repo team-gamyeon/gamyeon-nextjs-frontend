@@ -22,6 +22,5 @@ export function validateFileSize(
   ) {
     return { valid: false, message: '포트폴리오, 자기소개서는 10MB 이하만 가능합니다.' }
   }
-
   return { valid: true }
 }

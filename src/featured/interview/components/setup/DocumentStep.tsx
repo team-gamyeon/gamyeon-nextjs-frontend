@@ -73,7 +73,9 @@ export function DocumentStep({
             ) : (
               <label className="border-border hover:bg-muted/30 flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed px-4 py-2.5 transition-colors">
                 <Upload className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-                <span className="text-muted-foreground text-sm">{label} 업로드</span>
+                <span className="text-muted-foreground text-sm">
+                  {label} 업로드 <span className="text-gray-300">(.pdf 파일만 가능)</span>
+                </span>
                 <input
                   type="file"
                   className="hidden"

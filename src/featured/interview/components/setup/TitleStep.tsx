@@ -9,7 +9,8 @@ interface TitleStepProps {
 }
 
 export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
-  const isValidTitle = /^[가-힣\s]+$/.test(title) && /[가-힣]/.test(title.trim())
+  const trimmedTitle = title.trim()
+  const isValidTitle = /^[가-힣]+$/.test(trimmedTitle)
 
   return (
     <div className="space-y-6">
@@ -19,12 +20,12 @@ export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
         </div>
         <h3 className="text-lg font-bold">면접 제목 입력</h3>
         <p className="text-muted-foreground mt-1 text-sm">
-          이번 면접의 제목을 입력해주세요. (띄어쓰기 없이 한글만 가능)
+          이번 면접의 제목을 입력해주세요. (띄어쓰기 없이 한글만 가능합니다.)
         </p>
       </div>
       <div className="flex gap-2">
         <Input
-          placeholder="예: 개발자면접"
+          placeholder="예: 원티드면접"
           value={title}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && isValidTitle && onConfirm()}

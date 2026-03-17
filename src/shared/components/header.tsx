@@ -30,6 +30,22 @@ export function Header() {
   const { isLoggedIn, user, logout: clearAuthStore } = useAuthStore()
   const router = useRouter()
 
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault()
+      const targetId = href.replace('#', '')
+      const elem = document.getElementById(targetId)
+
+      if (elem) {
+        elem.scrollIntoView({
+          behavior: 'smooth', 
+          block: 'start',
+        })
+      }
+      setIsOpen(false) 
+    }
+  }
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -67,6 +83,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={(e) => handleScroll(e, link.href)}
               className="text-muted-foreground hover:text-foreground text-sm transition-colors"
             >
               {link.label}
@@ -146,7 +163,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => handleScroll(e, link.href)}
                   className="text-foreground text-lg font-medium"
                 >
                   {link.label}

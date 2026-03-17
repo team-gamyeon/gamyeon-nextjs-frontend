@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { icon: House, label: '랜딩 페이지', href: '/' },
+  { icon: House, label: '가면 AI', href: '/' },
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
   { icon: Megaphone, label: '공지사항', href: '/notices' },
   { icon: Video, label: '면접 시작', href: '/interview' },
@@ -83,7 +83,7 @@ export function DashboardSidebar() {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors"
             aria-label="사이드바 접기"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function DashboardSidebar() {
         <div className="border-border/50 flex justify-center border-b py-2">
           <button
             onClick={() => setCollapsed(false)}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg transition-colors"
             aria-label="사이드바 펼치기"
           >
             <ChevronRight className="h-4 w-4" />

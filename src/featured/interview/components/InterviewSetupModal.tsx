@@ -143,25 +143,22 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       }
 
       if (uploadedFiles.length === 0) {
-        throw new Error('업로드할 파일이 없습니다.')
+        toast.error('업로드할 파일이 없습니다.')
       }
 
       const completeRes = await completeFileUploadAction(session.interviewId, {
         files: uploadedFiles,
       })
       if (!completeRes.success) {
-        throw new Error(completeRes.message || '파일 업로드 완료 처리 실패')
+        toast.error(completeRes.message || '파일 업로드 완료 처리 실패')
+        return
       }
 
       completeStep(2)
       generateInterviewQuestionAction(session.interviewId).catch((err) => console.error(err))
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : '문서 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.'
+    } catch (error: any) {
       console.error('문서 업로드 중 오류:', error)
-      toast.error(message)
+      toast.error(error.message || '문서 업로드 중 오류 발생')
     } finally {
       setIsUploading(false)
     }
@@ -194,7 +191,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
 
     const result = await updateInterviewTitleAction(session.interviewId, nextTitle)
     if (!result.success) {
-      console.error('면접 제목 수정 실패:', result.message)
+      toast.error(result.message || '면접 제목 수정 실패')
     } else {
       setTitle(nextTitle)
     }

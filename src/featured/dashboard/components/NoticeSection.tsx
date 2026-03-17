@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/shared/ui/card'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Megaphone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getNoticesAction } from '@/featured/notice/actions/notice.action'
 import type { Notice } from '@/featured/notice/types'
@@ -54,6 +54,8 @@ export function NoticeSection() {
     fetchNotices()
   }, [])
 
+  const isEmpty = notices.length === 0 && !isLoading
+
   return (
     <motion.div
       initial="hidden"
@@ -62,7 +64,7 @@ export function NoticeSection() {
       custom={5}
       className="flex h-full flex-col"
     >
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex shrink-0 items-center justify-between">
         <h2 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
           공지사항
         </h2>
@@ -74,13 +76,25 @@ export function NoticeSection() {
         </Link>
       </div>
 
-      <Card className="border-border/50 flex h-full flex-col overflow-hidden py-4">
-        <CardContent className="flex flex-1 flex-col p-0">
+      <Card className="border-border/50 flex h-67 flex-col overflow-hidden">
+        <CardContent
+          className={
+            isEmpty || isLoading
+              ? 'flex flex-1 flex-col items-center justify-center p-5'
+              : 'flex flex-1 flex-col p-0 py-6'
+          }
+        >
           {isLoading ? (
-            <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-              공지사항을 불러오는 중입니다...
+            <div className="text-muted-foreground text-sm">공지사항을 불러오는 중입니다...</div>
+          ) : isEmpty ? (
+            <div className="flex flex-col items-center justify-center space-y-3">
+              <div className="bg-muted/30 flex h-12 w-12 items-center justify-center rounded-full">
+                <Megaphone className="text-muted-foreground h-6 w-6" />
+              </div>
+              <p className="text-muted-foreground text-sm">새로운 공지사항이 없습니다.</p>
             </div>
-          ) : notices.length > 0 ? (
+          ) : (
+            // 데이터가 있을 때 목록 렌더링
             notices.map((item) => {
               const config = NOTICE_CATEGORY[item.category] || NOTICE_CATEGORY.NOTICE
 
@@ -116,10 +130,6 @@ export function NoticeSection() {
                 </Link>
               )
             })
-          ) : (
-            <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-              새로운 공지사항이 없습니다.
-            </div>
           )}
         </CardContent>
       </Card>

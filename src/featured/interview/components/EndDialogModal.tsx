@@ -54,13 +54,18 @@ export function EndDialogModal({ session }: EndDialogModalProps) {
         <DialogFooter className="gap-2 sm:gap-0">
           <Button
             variant="ghost"
-            className="text-white/70 hover:bg-white/10 hover:text-white"
+            className="cursor-pointer text-white/70 hover:bg-white/10 hover:text-white"
             onClick={() => session.setShowEndDialog(false)}
             disabled={isPending}
           >
             계속하기
           </Button>
-          <Button variant="destructive" onClick={handlePause} disabled={isPending}>
+          <Button
+            variant="destructive"
+            className="cursor-pointer"
+            onClick={handlePause}
+            disabled={isPending}
+          >
             면접 중단
           </Button>
         </DialogFooter>

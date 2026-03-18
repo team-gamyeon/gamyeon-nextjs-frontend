@@ -38,11 +38,11 @@ export function Header() {
 
       if (elem) {
         elem.scrollIntoView({
-          behavior: 'smooth', 
+          behavior: 'smooth',
           block: 'start',
         })
       }
-      setIsOpen(false) 
+      setIsOpen(false)
     }
   }
 
@@ -67,7 +67,7 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 로고 */}
-        <Link href="/dashboard" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Image
             src="/images/Gamyeon_Logo.png"
             alt="Gamyeon logo"

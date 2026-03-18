@@ -36,7 +36,7 @@ export function DashboardSidebar() {
         className="border-border/50 bg-background flex h-screen flex-col overflow-hidden border-r"
       >
         <div className="border-border/50 flex h-16 shrink-0 items-center border-b px-4">
-          <Link href="/dashboard" aria-label="대시보드로 이동" className="flex cursor-pointer items-center">
+          <Link href="/" aria-label="대시보드로 이동" className="flex cursor-pointer items-center">
             <div className="relative">
               <motion.div
                 animate={{ opacity: collapsed ? 0 : 1 }}
@@ -54,7 +54,7 @@ export function DashboardSidebar() {
               <motion.div
                 animate={{ opacity: collapsed ? 1 : 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute left-0 top-1/2 -translate-y-1/2"
+                className="absolute top-1/2 left-0 -translate-y-1/2"
                 style={{ pointerEvents: collapsed ? 'auto' : 'none' }}
               >
                 <Image
@@ -70,49 +70,49 @@ export function DashboardSidebar() {
         </div>
 
         <nav className="flex-1 space-y-0.5 px-2 py-3">
-        {navItems.map((item) => {
-          const active = pathname === item.href
+          {navItems.map((item) => {
+            const active = pathname === item.href
 
-          const linkEl = (
-            <Link
-              href={item.href}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
-            >
-              <item.icon className="h-4.5 w-4.5 shrink-0" />
-              <AnimatePresence initial={false}>
-                {!collapsed && (
-                  <motion.span
-                    key="label"
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.16 }}
-                    className="overflow-hidden whitespace-nowrap"
-                  >
-                    {item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
-          )
-
-          if (collapsed) {
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  {item.label}
-                </TooltipContent>
-              </Tooltip>
+            const linkEl = (
+              <Link
+                href={item.href}
+                className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <item.icon className="h-4.5 w-4.5 shrink-0" />
+                <AnimatePresence initial={false}>
+                  {!collapsed && (
+                    <motion.span
+                      key="label"
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.16 }}
+                      className="overflow-hidden whitespace-nowrap"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
             )
-          }
 
-          return <div key={item.href}>{linkEl}</div>
-        })}
+            if (collapsed) {
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                  <TooltipContent side="right" sideOffset={8}>
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              )
+            }
+
+            return <div key={item.href}>{linkEl}</div>
+          })}
         </nav>
       </motion.aside>
 

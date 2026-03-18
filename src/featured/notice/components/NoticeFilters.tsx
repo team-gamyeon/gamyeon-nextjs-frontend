@@ -31,7 +31,7 @@ export function NoticeFilters({
               variant={category === c ? 'default' : 'outline'}
               size="sm"
               onClick={() => onCategoryChange(c)}
-              className="h-7 px-3 text-xs"
+              className="h-7 cursor-pointer px-3 text-xs"
             >
               {label}
             </Button>

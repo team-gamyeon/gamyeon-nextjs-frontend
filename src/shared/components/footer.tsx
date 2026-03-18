@@ -85,7 +85,7 @@ export function Footer() {
 
         <div className="border-border/50 mt-10 border-t pt-6">
           <p className="text-muted-foreground text-center text-xs">
-            &copy; 2026 InterviewAI. All rights reserved.
+            &copy; 2026 Gamyeon. All rights reserved.
           </p>
         </div>
       </div>

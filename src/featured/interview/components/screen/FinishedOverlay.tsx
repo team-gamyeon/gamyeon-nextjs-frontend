@@ -43,7 +43,11 @@ export function FinishedOverlay({ phase, intvId }: FinishedOverlayProps) {
                 분석 완료까지 <strong>약 3~5분이 소요</strong>되며, 면접 기록에서 확인 가능합니다.
               </p>
             </div>
-            <Button size="lg" className="mt-2 gap-2 px-8" onClick={handleGoToHistory}>
+            <Button
+              size="lg"
+              className="mt-2 cursor-pointer gap-2 px-8"
+              onClick={handleGoToHistory}
+            >
               나의 면접 기록 보기
               <ChevronRight className="h-4 w-4" />
             </Button>

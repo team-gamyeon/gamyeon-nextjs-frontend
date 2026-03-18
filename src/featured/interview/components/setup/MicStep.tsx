@@ -56,7 +56,7 @@ export function MicStep({
       </div>
 
       {micStatus === 'idle' && (
-        <Button variant="outline" className="gap-2" onClick={onRequest}>
+        <Button variant="outline" className="cursor-pointer gap-2" onClick={onRequest}>
           <Mic className="h-4 w-4" />
           마이크 권한 요청하기
         </Button>
@@ -84,10 +84,10 @@ export function MicStep({
             {recordingStatus === 'idle' && (
               <button onClick={onStartRecording} className="group flex w-full items-center gap-3">
                 <div className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors">
-                  <Mic className="text-primary h-5 w-5" />
+                  <Mic className="text-primary h-5 w-5 cursor-pointer" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium">녹음 시작하기</p>
+                  <p className="cursor-pointer text-sm font-medium">녹음 시작하기</p>
                   <p className="text-muted-foreground text-xs">클릭해서 마이크를 테스트해 보세요</p>
                 </div>
               </button>
@@ -158,7 +158,7 @@ export function MicStep({
             )}
           </div>
 
-          <Button size="sm" className="gap-2" onClick={onConfirm}>
+          <Button size="sm" className="cursor-pointer gap-2" onClick={onConfirm}>
             확인 완료
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>

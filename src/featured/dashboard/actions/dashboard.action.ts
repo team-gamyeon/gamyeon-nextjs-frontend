@@ -3,7 +3,6 @@
 import type { ApiResponse } from '@/shared/lib/api'
 import type { DailyIntvStat } from '../types'
 import type { Notice, NoticeDetailResponse } from '@/featured/notice/types'
-
 import { getDailyIntvStats, getNotices, getNoticeDetail } from '../services/dashboard.service'
 import { withAction } from '@/shared/lib/withAction'
 

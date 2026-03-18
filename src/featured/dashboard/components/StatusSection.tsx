@@ -77,7 +77,17 @@ export function StatusSection({ records = [] }: StatusSectionProps) {
                 </button>
               </div>
             </div>
-            <ScoreTrendChart weekStart={weekStart} weekEnd={weekEnd} records={records} />
+            <ScoreTrendChart
+              weekStart={weekStart}
+              weekEnd={weekEnd}
+              // 면접 완료(FINISHED) + 리포트 존재 + 리포트 분석 성공(SUCCEED) 조건만 필터링22
+              records={records.filter(
+                (record) =>
+                  record.intvStatus === 'FINISHED' &&
+                  record.report &&
+                  record.report.reportStatus === 'SUCCEED',
+              )}
+            />
           </CardContent>
         </Card>
 

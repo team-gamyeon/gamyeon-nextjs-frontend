@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Play, History, RotateCcw } from 'lucide-react'
+import { Play, History, RotateCw } from 'lucide-react'
 import { QuickStartCard } from '@/featured/dashboard/components/QuickStartCard'
 
 const fadeUp = {
@@ -61,6 +61,8 @@ export function QuickStartSection({ resumeIntvId }: QuickStartSectionProps = {})
             iconColorStyle="text-violet-600"
             href="/history"
             buttonText="기록 보기"
+            buttonTextStyle="text-violet-600"
+            hoverBorderStyle="hover:border-violet-300 hover:shadow-violet-600/5"
           />
         </motion.div>
 
@@ -78,12 +80,14 @@ export function QuickStartSection({ resumeIntvId }: QuickStartSectionProps = {})
                 ? '진행중인 면접이 있습니다. 이어서 진행해 보세요'
                 : '현재 진행 중인 면접이 없습니다.'
             }
-            icon={RotateCcw}
-            iconStyle="bg-blue-50 text-blue-600 group-hover:bg-blue-100"
-            iconColorStyle="text-blue-600"
+            icon={RotateCw}
+            iconStyle="bg-linear-to-br from-green-100 to-emerald-100 text-green-600 group-hover:from-green-200 group-hover:to-emerald-200"
+            iconColorStyle="text-green-600"
             href={resumeIntvId ? `/interview?resume=true&id=${resumeIntvId}` : '/interview'}
             buttonText="이어서 면접보기"
             isDisabled={!hasInProgressInterview}
+            buttonTextStyle="text-green-600"
+            hoverBorderStyle="hover:border-green-300 hover:shadow-green-600/5"
           />
         </motion.div>
       </div>

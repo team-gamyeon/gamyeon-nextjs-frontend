@@ -22,8 +22,8 @@ export function CtaSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          className="bg-primary group relative overflow-hidden rounded-3xl px-8 py-16 text-center sm:px-16 cursor-pointer"
-          onClick={() => window.location.href = '/dashboard'}
+          className="bg-primary group relative cursor-pointer overflow-hidden rounded-3xl px-8 py-16 text-center sm:px-16"
+          onClick={() => (window.location.href = '/dashboard')}
         >
           <div className="absolute inset-0 -z-10">
             <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
@@ -41,11 +41,15 @@ export function CtaSection() {
             custom={1}
             className="text-primary-foreground/80 mx-auto mt-4 max-w-lg"
           >
-            무료 체험 3회로 InterviewAI의 효과를 직접 경험해 보세요. 가입만 하면 바로 시작할 수
-            있습니다.
+            무료 체험 3회로 가면AI의 효과를 직접 경험해 보세요. 가입만 하면 바로 시작할 수 있습니다.
           </motion.p>
           <motion.div variants={fadeUp} custom={2} className="mt-8">
-            <Button size="lg" variant="secondary" className="gap-2 font-semibold pointer-events-none transition-colors group-hover:bg-secondary/80" asChild>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="group-hover:bg-secondary/80 pointer-events-none gap-2 font-semibold transition-colors"
+              asChild
+            >
               <Link href="/dashboard">
                 무료로 시작하기
                 <ArrowRight className="h-4 w-4" />

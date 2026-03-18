@@ -32,7 +32,11 @@ export function TitleStep({ title, onChange, onConfirm }: TitleStepProps) {
           autoFocus
           className="flex-1 focus-visible:border-0 focus-visible:ring-offset-0 focus-visible:outline-none"
         />
-        <Button disabled={!isValidTitle} onClick={onConfirm} className="shrink-0 gap-1">
+        <Button
+          disabled={!isValidTitle}
+          onClick={onConfirm}
+          className="shrink-0 cursor-pointer gap-1"
+        >
           확인
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>

@@ -39,7 +39,7 @@ export function ReportHeader() {
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <button className="ring-primary/40 flex items-center rounded-full transition outline-none hover:ring-2">
+            <button className="ring-primary/40 flex cursor-pointer items-center rounded-full transition outline-none hover:ring-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                   {initials}

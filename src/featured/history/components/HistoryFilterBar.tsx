@@ -40,22 +40,22 @@ export function HistoryFilterBar({
         <Button
           variant={sortBy === 'date' ? 'default' : 'outline'}
           size="sm"
-          className="gap-1.5"
+          className="cursor-pointer gap-1.5"
           onClick={() => onSortChange('date')}
         >
-          <Calendar className="h-3.5 w-3.5" />
+          <Calendar className="h-3.5 w-3.5 cursor-pointer" />
           최신순
         </Button>
         <Button
           variant={sortBy === 'score' ? 'default' : 'outline'}
           size="sm"
-          className="gap-1.5"
+          className="cursor-pointer gap-1.5"
           onClick={() => onSortChange('score')}
         >
           <ArrowUpDown className="h-3.5 w-3.5" />
           점수순
         </Button>
-        <Button size="sm" className="gap-1.5" asChild>
+        <Button size="sm" className="cursor-pointer gap-1.5" asChild>
           <Link href="/upload">
             <Plus className="h-3.5 w-3.5" />새 면접
           </Link>

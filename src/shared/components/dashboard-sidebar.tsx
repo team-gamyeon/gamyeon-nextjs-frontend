@@ -36,7 +36,7 @@ export function DashboardSidebar() {
         className="border-border/50 bg-background flex h-screen flex-col overflow-hidden border-r"
       >
         <div className="border-border/50 flex h-16 shrink-0 items-center border-b px-4">
-          <Link href="/dashboard" aria-label="대시보드로 이동" className="flex items-center">
+          <Link href="/dashboard" aria-label="대시보드로 이동" className="flex cursor-pointer items-center">
             <div className="relative">
               <motion.div
                 animate={{ opacity: collapsed ? 0 : 1 }}
@@ -76,7 +76,7 @@ export function DashboardSidebar() {
           const linkEl = (
             <Link
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'

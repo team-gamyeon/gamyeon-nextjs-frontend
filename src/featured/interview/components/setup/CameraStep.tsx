@@ -37,7 +37,7 @@ export function CameraStep({
       </div>
 
       {cameraStatus === 'idle' && (
-        <Button variant="outline" className="gap-2" onClick={onRequest}>
+        <Button variant="outline" className="cursor-pointer gap-2" onClick={onRequest}>
           <Video className="h-4 w-4" />
           카메라 권한 요청하기
         </Button>
@@ -116,7 +116,12 @@ export function CameraStep({
             </div>
           )}
 
-          <Button size="sm" className="gap-2" disabled={!basePose} onClick={onConfirm}>
+          <Button
+            size="sm"
+            className="cursor-pointer gap-2"
+            disabled={!basePose}
+            onClick={onConfirm}
+          >
             확인 완료
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>

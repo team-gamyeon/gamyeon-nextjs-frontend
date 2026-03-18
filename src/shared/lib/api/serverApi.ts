@@ -127,7 +127,8 @@ async function serverFetch<T>(
     throw new NetworkError()
   }
 
-  console.log(`[serverApi] ${method} ${url} → ${res.status}`)
+  const resText = await res.clone().text()
+  console.log(`[serverApi] ${method} ${url} → ${res.status}\n`, resText)
 
   if (res.status === 401) {
     const newAccessToken = await tryRefresh(cookieStore)

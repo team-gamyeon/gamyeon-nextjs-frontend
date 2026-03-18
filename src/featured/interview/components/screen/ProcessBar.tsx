@@ -69,7 +69,7 @@ export function ProcessBar({
       <Button
         variant="ghost"
         size="sm"
-        className="gap-1.5 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+        className="cursor-pointer gap-1.5 text-red-400 hover:bg-red-500/10 hover:text-red-300"
         onClick={onEndClick}
       >
         <Power className="h-3.5 w-3.5" />

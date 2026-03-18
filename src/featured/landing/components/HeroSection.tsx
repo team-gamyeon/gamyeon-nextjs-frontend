@@ -33,7 +33,9 @@ export function HeroSection() {
             className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           >
             <span className="block">면접, 이제</span>
-            <span className="block mt-3"><span className="text-primary">AI와 함께</span> 준비하세요</span>
+            <span className="mt-3 block">
+              <span className="text-primary">AI와 함께</span> 준비하세요
+            </span>
           </motion.h1>
 
           <motion.p
@@ -59,7 +61,7 @@ export function HeroSection() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="w-full gap-2 sm:w-auto">
+            <Button variant="outline" size="lg" className="w-full cursor-pointer gap-2 sm:w-auto">
               <Play className="h-4 w-4" />
               데모 영상 보기
             </Button>

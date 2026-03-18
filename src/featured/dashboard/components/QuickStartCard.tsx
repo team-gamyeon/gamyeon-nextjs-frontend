@@ -12,8 +12,10 @@ export interface QuickStartCardProps {
   iconColorStyle?: string
   href: string
   buttonText: string
+  buttonTextStyle?: string
+  hoverBorderStyle?: string
   isRecommended?: boolean
-  isDisabled?: boolean //유저가 꼭 눌렀으면 하는 핵심 기능(면접 시작) 하나만 시각적으로 눈에 띄게 강조하기 위한 스위치
+  isDisabled?: boolean
   onClick?: () => void
 }
 
@@ -28,13 +30,15 @@ export function QuickStartCard({
   isRecommended = false,
   isDisabled = false,
   onClick,
+  buttonTextStyle = 'text-primary',
+  hoverBorderStyle = 'hover:border-primary/30 hover:shadow-primary/5',
 }: QuickStartCardProps) {
   const CardContainer = (
     <Card
       className={`group flex h-full flex-col transition-all ${
         isDisabled
           ? 'border-border/50 cursor-not-allowed bg-slate-50'
-          : 'border-border/50 hover:border-primary/30 hover:shadow-primary/5 cursor-pointer hover:shadow-md'
+          : `border-border/50 cursor-pointer hover:shadow-md ${hoverBorderStyle}`
       } ${!isDisabled && isRecommended ? 'border-primary/20 bg-primary/5 hover:border-primary/40 hover:shadow-primary/10' : ''}`}
     >
       <CardContent className="flex flex-1 flex-col p-5">
@@ -58,10 +62,10 @@ export function QuickStartCard({
         </p>
         <div
           className={`mt-4 flex shrink-0 items-center gap-1 text-xs font-medium ${
-            isDisabled ? 'text-slate-400' : 'text-primary'
+            isDisabled ? 'text-slate-400' : buttonTextStyle
           }`}
         >
-          {buttonText} {<ArrowRight className="h-3 w-3" />}
+          {buttonText} <ArrowRight className="h-3 w-3" />
         </div>
       </CardContent>
     </Card>

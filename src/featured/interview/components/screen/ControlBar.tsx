@@ -37,7 +37,7 @@ export function ControlBar({
       <Button
         variant="ghost"
         size="icon"
-        className={`h-12 w-12 rounded-full transition-colors ${micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}
+        className={`h-12 w-12 cursor-pointer rounded-full transition-colors ${micOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}
         onClick={onToggleMic}
       >
         {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
@@ -46,26 +46,31 @@ export function ControlBar({
       <Button
         variant="ghost"
         size="icon"
-        className={`h-12 w-12 rounded-full transition-colors ${cameraOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}
+        className={`h-12 w-12 cursor-pointer rounded-full transition-colors ${cameraOn ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}
         onClick={onToggleCamera}
       >
         {cameraOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
       </Button>
 
       {phase === 'ready' && (
-        <Button className="ml-4 gap-2" size="lg" onClick={onStartInterview}>
+        <Button className="ml-4 cursor-pointer gap-2" size="lg" onClick={onStartInterview}>
           면접 시작
           <ChevronRight className="h-4 w-4" />
         </Button>
       )}
       {phase === 'thinking' && (
-        <Button className="ml-4 gap-2" size="lg" onClick={onStartAnswering}>
+        <Button className="ml-4 cursor-pointer gap-2" size="lg" onClick={onStartAnswering}>
           <Mic className="h-4 w-4" />
           답변 시작
         </Button>
       )}
       {phase === 'answering' && (
-        <Button variant="secondary" className="ml-4 gap-2" size="lg" onClick={onNext}>
+        <Button
+          variant="secondary"
+          className="ml-4 cursor-pointer gap-2"
+          size="lg"
+          onClick={onNext}
+        >
           {!isLastQuestion ? (
             <>
               다음 질문

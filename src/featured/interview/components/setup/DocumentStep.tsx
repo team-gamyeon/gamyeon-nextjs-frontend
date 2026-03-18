@@ -91,7 +91,7 @@ export function DocumentStep({
         <Button
           size="sm"
           disabled={!canComplete || isUploading}
-          className="gap-2"
+          className="cursor-pointer gap-2"
           onClick={onComplete}
         >
           {isUploading ? (

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CameraStep } from '@/featured/interview/components/setup/CameraStep'
 import { DocumentStep } from '@/featured/interview/components/setup/DocumentStep'
 import { MicStep } from '@/featured/interview/components/setup/MicStep'
@@ -246,6 +246,17 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
     completeStep(4)
   }
 
+  const hasShownBasePoseToastRef = useRef<boolean>(false)
+  useEffect(() => {
+    if (cameraHandler.basePose && !hasShownBasePoseToastRef.current) {
+      toast.success('확인 완료 버튼을 눌러주세요.')
+      hasShownBasePoseToastRef.current = true
+    }
+    if (!cameraHandler.basePose) {
+      hasShownBasePoseToastRef.current = false
+    }
+  }, [cameraHandler.basePose])
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -295,7 +306,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
         )
       default:
         return (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
               <CheckCircle2 className="h-8 w-8 text-green-500" />
             </div>
@@ -331,7 +342,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
             lockedSteps={isResume ? RESUME_LOCKED_STEPS : undefined}
           />
           <div className="flex flex-1 flex-col">
-            <div className="flex-1 overflow-y-auto px-8 py-8">
+            <div className="flex flex-1 flex-col overflow-y-auto px-8 py-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep}
@@ -339,13 +350,14 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -16 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="flex flex-1 flex-col"
                 >
                   {renderStep()}
                 </motion.div>
               </AnimatePresence>
             </div>
             <div className="border-border/50 flex items-center justify-between border-t px-8 py-4">
-              <Button variant="ghost" size="sm" onClick={handleCancel}>
+              <Button variant="ghost" size="sm" onClick={handleCancel} className="cursor-pointer">
                 취소
               </Button>
               <Button
@@ -373,7 +385,7 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
                     questions: questions ?? [],
                   })
                 }}
-                className="gap-2"
+                className="cursor-pointer gap-2"
               >
                 {!isQuestionsReady && isPollingActive ? '질문 생성 중' : '면접 시작하기'}
                 <ChevronRight className="h-4 w-4" />

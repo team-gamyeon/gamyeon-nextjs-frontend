@@ -22,6 +22,7 @@ export function HistoryPagination({
         size="sm"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
+        className="cursor-pointer"
       >
         이전
       </Button>
@@ -30,7 +31,7 @@ export function HistoryPagination({
           key={page}
           variant={page === currentPage ? 'default' : 'outline'}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 cursor-pointer p-0"
           onClick={() => onPageChange(page)}
         >
           {page}
@@ -41,6 +42,7 @@ export function HistoryPagination({
         size="sm"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
+        className="cursor-pointer"
       >
         다음
       </Button>

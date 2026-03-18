@@ -30,7 +30,7 @@ export function UserProfileButton() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button className="ring-primary/40 flex items-center rounded-full transition outline-none hover:ring-2">
+        <button className="ring-primary/40 flex cursor-pointer items-center rounded-full transition outline-none hover:ring-2">
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {initials}
@@ -43,17 +43,17 @@ export function UserProfileButton() {
           <p className="text-sm font-medium">{user?.nickname ?? '사용자'}</p>
           <p className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</p>
         </div>
-        <DropdownMenuItem className="gap-2">
+        <DropdownMenuItem className="cursor-pointer gap-2">
           <LayoutDashboard className="h-4 w-4" />
           대시보드
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
+        <DropdownMenuItem className="cursor-pointer gap-2">
           <Settings className="h-4 w-4" />
           설정
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive gap-2"
+          className="text-destructive focus:text-destructive cursor-pointer gap-2"
           onClick={handleLogout}
         >
           <LogOut className="text-destructive h-4 w-4" />

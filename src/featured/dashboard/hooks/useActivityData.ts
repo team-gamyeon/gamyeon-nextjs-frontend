@@ -12,8 +12,6 @@ export function useActivityData() {
   const [activityData, setActivityData] = useState<ActivityDay[]>([])
 
   useEffect(() => {
-    setMounted(true)
-
     async function fetchActivity() {
       const result = await getDailyIntvStatsAction()
 
@@ -47,6 +45,7 @@ export function useActivityData() {
         })
       }
       setActivityData(data)
+      setMounted(true)
     }
 
     fetchActivity()

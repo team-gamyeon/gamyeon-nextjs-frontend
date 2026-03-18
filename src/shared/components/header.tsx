@@ -30,6 +30,22 @@ export function Header() {
   const { isLoggedIn, user, logout: clearAuthStore } = useAuthStore()
   const router = useRouter()
 
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault()
+      const targetId = href.replace('#', '')
+      const elem = document.getElementById(targetId)
+
+      if (elem) {
+        elem.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      }
+      setIsOpen(false)
+    }
+  }
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -51,7 +67,7 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* 로고 */}
-        <Link href="/dashboard" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Image
             src="/images/Gamyeon_Logo.png"
             alt="Gamyeon logo"
@@ -67,7 +83,8 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              onClick={(e) => handleScroll(e, link.href)}
+              className="text-muted-foreground hover:text-foreground cursor-pointer text-sm transition-colors"
             >
               {link.label}
             </Link>
@@ -86,7 +103,7 @@ export function Header() {
               </Button>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <button className="ring-primary/40 flex items-center gap-2 rounded-full transition outline-none hover:ring-2">
+                  <button className="ring-primary/40 flex cursor-pointer items-center gap-2 rounded-full transition outline-none hover:ring-2">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                         {initials}
@@ -146,8 +163,8 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-foreground text-lg font-medium"
+                  onClick={(e) => handleScroll(e, link.href)}
+                  className="text-foreground cursor-pointer text-lg font-medium"
                 >
                   {link.label}
                 </Link>

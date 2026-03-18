@@ -37,7 +37,7 @@ export function CameraStep({
       </div>
 
       {cameraStatus === 'idle' && (
-        <Button variant="outline" className="gap-2" onClick={onRequest}>
+        <Button variant="outline" className="cursor-pointer gap-2" onClick={onRequest}>
           <Video className="h-4 w-4" />
           카메라 권한 요청하기
         </Button>
@@ -69,13 +69,13 @@ export function CameraStep({
 
             {isLandmarkerReady && (
               <Image
-                src="/images/camera_guide_line.png"
+                src="/images/camera_guide_line3.png"
                 alt=""
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="pointer-events-none absolute inset-0 h-full w-full scale-[1.3] object-contain"
                 style={{
-                  opacity: basePose ? 1 : alignProgress > 0 ? 0.8 : 0.45,
+                  opacity: basePose ? 0.8 : alignProgress > 0 ? 0.8 : 0.45,
                   transition: 'opacity 0.3s',
                 }}
               />
@@ -116,7 +116,12 @@ export function CameraStep({
             </div>
           )}
 
-          <Button size="sm" className="gap-2" disabled={!basePose} onClick={onConfirm}>
+          <Button
+            size="sm"
+            className="cursor-pointer gap-2"
+            disabled={!basePose}
+            onClick={onConfirm}
+          >
             확인 완료
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>

@@ -41,7 +41,7 @@ export function CtaSection() {
             custom={1}
             className="text-primary-foreground/80 mx-auto mt-4 max-w-lg"
           >
-            무료 체험 3회로 가면AI의 효과를 직접 경험해 보세요. 가입만 하면 바로 시작할 수 있습니다.
+            무료 체험 3회로 가면의 효과를 직접 경험해 보세요. 가입만 하면 바로 시작할 수 있습니다.
           </motion.p>
           <motion.div variants={fadeUp} custom={2} className="mt-8">
             <Button

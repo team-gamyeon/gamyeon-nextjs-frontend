@@ -23,16 +23,10 @@ export function InterviewLayout() {
       )
     }
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') sendPause()
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('beforeunload', sendPause)
     window.addEventListener('popstate', sendPause)
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('beforeunload', sendPause)
       window.removeEventListener('popstate', sendPause)
     }

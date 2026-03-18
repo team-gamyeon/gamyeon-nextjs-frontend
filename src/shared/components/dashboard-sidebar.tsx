@@ -29,45 +29,20 @@ export function DashboardSidebar() {
   const pathname = usePathname()
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 64 : 232 }}
-      transition={{ duration: 0.22, ease: 'easeInOut' }}
-      className="border-border/50 bg-background relative flex h-screen shrink-0 flex-col overflow-hidden border-r"
-    >
-      <div
-        className={`border-border/50 flex h-16 shrink-0 items-center border-b ${
-          collapsed ? 'justify-center px-0' : 'justify-between px-4'
-        }`}
+    <div className="relative shrink-0">
+      <motion.aside
+        animate={{ width: collapsed ? 64 : 232 }}
+        transition={{ duration: 0.22, ease: 'easeInOut' }}
+        className="border-border/50 bg-background flex h-screen flex-col overflow-hidden border-r"
       >
-        <AnimatePresence initial={false} mode="wait">
-          {collapsed ? (
-            <motion.div
-              key="icon-only"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Link href="/dashboard" aria-label="대시보드로 이동">
-                <Image
-                  src="/images/Gamyeon_Logo.svg"
-                  alt="Gamyeon logo"
-                  width={1024}
-                  height={768}
-                  style={{ height: '32px', width: 'auto' }}
-                />
-              </Link>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="full-logo"
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -6 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center"
-            >
-              <Link href="/dashboard" className="flex items-center">
+        <div className="border-border/50 flex h-16 shrink-0 items-center border-b px-4">
+          <Link href="/dashboard" aria-label="대시보드로 이동" className="flex items-center">
+            <div className="relative">
+              <motion.div
+                animate={{ opacity: collapsed ? 0 : 1 }}
+                transition={{ duration: 0.15 }}
+                style={{ pointerEvents: collapsed ? 'none' : 'auto' }}
+              >
                 <Image
                   src="/images/Gamyeon_Logo.png"
                   alt="Gamyeon logo"
@@ -75,44 +50,33 @@ export function DashboardSidebar() {
                   height={768}
                   style={{ height: '28px', width: 'auto' }}
                 />
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors"
-            aria-label="사이드바 접기"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
-      {collapsed && (
-        <div className="border-border/50 flex justify-center border-b py-2">
-          <button
-            onClick={() => setCollapsed(false)}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg transition-colors"
-            aria-label="사이드바 펼치기"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+              </motion.div>
+              <motion.div
+                animate={{ opacity: collapsed ? 1 : 0 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-0 top-1/2 -translate-y-1/2"
+                style={{ pointerEvents: collapsed ? 'auto' : 'none' }}
+              >
+                <Image
+                  src="/images/Gamyeon_Logo.svg"
+                  alt="Gamyeon logo"
+                  width={1024}
+                  height={768}
+                  style={{ height: '32px', width: 'auto' }}
+                />
+              </motion.div>
+            </div>
+          </Link>
         </div>
-      )}
 
-      <nav className="flex-1 space-y-0.5 px-2 py-3">
+        <nav className="flex-1 space-y-0.5 px-2 py-3">
         {navItems.map((item) => {
           const active = pathname === item.href
 
           const linkEl = (
             <Link
               href={item.href}
-              className={`flex items-center rounded-xl text-sm font-medium transition-colors ${
-                collapsed ? 'h-10 w-full justify-center' : 'gap-3 px-3 py-2.5'
-              } ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -149,7 +113,16 @@ export function DashboardSidebar() {
 
           return <div key={item.href}>{linkEl}</div>
         })}
-      </nav>
-    </motion.aside>
+        </nav>
+      </motion.aside>
+
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="bg-primary text-primary-foreground hover:bg-primary/90 absolute top-4 -right-3 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full shadow-sm transition-colors"
+        aria-label={collapsed ? '사이드바 펼치기' : '사이드바 접기'}
+      >
+        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </button>
+    </div>
   )
 }

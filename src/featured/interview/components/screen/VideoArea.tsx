@@ -44,7 +44,7 @@ export function VideoArea({
     }
   }, [stream, cameraOn])
 
-  if (intvId === null || questionSetId === null) {
+if (intvId === null || questionSetId === null) {
     return (
       <div className="flex w-full max-w-175 flex-col gap-4">
         <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-800 shadow-2xl">

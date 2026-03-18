@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { EndDialogModal } from '@/featured/interview/components/EndDialogModal'
 import { InterviewSetupModal } from '@/featured/interview/components/InterviewSetupModal'
@@ -10,6 +11,32 @@ export function InterviewLayout() {
   const session = useInterview()
   const searchParams = useSearchParams()
   const isResume = searchParams.get('resume') === 'true'
+
+  useEffect(() => {
+    const { interviewId, phase } = session
+    if (interviewId === null || phase === 'ready' || phase === 'finished') return
+
+    const sendPause = () => {
+      navigator.sendBeacon(
+        '/api/interview/pause',
+        new Blob([JSON.stringify({ intvId: interviewId })], { type: 'application/json' }),
+      )
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') sendPause()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('beforeunload', sendPause)
+    window.addEventListener('popstate', sendPause)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('beforeunload', sendPause)
+      window.removeEventListener('popstate', sendPause)
+    }
+  }, [session.interviewId, session.phase])
 
   return (
     <>

@@ -105,9 +105,7 @@ export async function finishInterview(intvId: number): Promise<ApiResponse<null>
 
 // 시선/고개 통계 서버 전송
 export async function sendGazeStats(questionSetId: number, payload: InterviewBatchPayload) {
-  return await serverApi.post(`/api/v1/intvs/${questionSetId}/gaze`, {
-    payload,
-  })
+  return await serverApi.post(`/api/v1/intvs/${questionSetId}/gaze`, payload)
 }
 
 // MVP2

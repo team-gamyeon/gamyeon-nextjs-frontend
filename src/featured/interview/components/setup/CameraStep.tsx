@@ -69,13 +69,13 @@ export function CameraStep({
 
             {isLandmarkerReady && (
               <Image
-                src="/images/camera_guide_line.png"
+                src="/images/camera_guide_line3.png"
                 alt=""
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="pointer-events-none absolute inset-0 h-full w-full scale-[1.3] object-contain"
                 style={{
-                  opacity: basePose ? 1 : alignProgress > 0 ? 0.8 : 0.45,
+                  opacity: basePose ? 0.8 : alignProgress > 0 ? 0.8 : 0.45,
                   transition: 'opacity 0.3s',
                 }}
               />

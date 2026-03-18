@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TOTAL_ANSWER_TIME, TOTAL_THINK_TIME } from '@/featured/interview/constants'
-import type { InterviewQuestions, Phase } from '@/featured/interview/types'
+import type {
+  InterviewQuestions,
+  InterviewSetupConfig,
+  Phase,
+  uploadAnswer,
+} from '@/featured/interview/types'
 import {
   completeVideoFileUploadAction,
   issueVideoPresignedUrlAction,
@@ -37,6 +42,7 @@ export function useInterview() {
   const interviewIdRef = useRef<number | null>(null)
   const interviewQuestionsRef = useRef<InterviewQuestions[]>([])
   const isProcessingRef = useRef(false)
+  const uploadQueueRef = useRef<Promise<void>>(Promise.resolve())
 
   const isActive = phase === 'thinking' || phase === 'answering'
 
@@ -74,13 +80,7 @@ export function useInterview() {
     setCameraStream(null)
   }, [])
 
-  const handleSetupComplete = (config: {
-    title?: string
-    basePose?: { pitch: number; yaw: number } | null
-    stream?: MediaStream | null
-    interviewId?: number | null
-    questions?: InterviewQuestions[]
-  }) => {
+  const handleSetupComplete = (config: InterviewSetupConfig) => {
     setInterviewTitle(config.title || 'AI 모의 면접')
     setBasePose(config.basePose ?? null)
     setCameraStream(config.stream ?? null)
@@ -110,30 +110,13 @@ export function useInterview() {
     setTimeLeft(TOTAL_ANSWER_TIME)
   }, [startRecording])
 
-  const handleNext = useCallback(async () => {
-    if (isProcessingRef.current) return
-    isProcessingRef.current = true
+  const uploadAnswer = useCallback(
+    async ({ videoBlob, questionSetId, interviewId }: uploadAnswer) => {
+      const videoFile = new File([videoBlob], `answer-${questionSetId}-${Date.now()}.webm`, {
+        type: videoBlob.type || 'video/webm',
+      })
 
-    const questionIndex = currentQuestionRef.current
-
-    try {
-      const videoBlob = (await stopRecording()) as Blob
-      const currentInterviewId = interviewIdRef.current
-      const currentQuestionSet = interviewQuestionsRef.current[questionIndex]
-
-      if (!currentInterviewId || !currentQuestionSet) {
-        throw new Error('영상 업로드에 필요한 인터뷰 정보가 없습니다.')
-      }
-
-      const videoFile = new File(
-        [videoBlob],
-        `answer-${currentQuestionSet.questionSetId}-${Date.now()}.webm`,
-        {
-          type: videoBlob.type || 'video/webm',
-        },
-      )
-
-      const urlRes = await issueVideoPresignedUrlAction(currentQuestionSet.questionSetId, {
+      const urlRes = await issueVideoPresignedUrlAction(questionSetId, {
         originalFileName: videoFile.name,
         contentType: videoFile.type,
         fileSizeBytes: videoFile.size,
@@ -145,30 +128,64 @@ export function useInterview() {
 
       const s3Res = await uploadFileToS3(videoFile, urlRes.data.presignedUrl)
       if (!s3Res.success) {
-        throw new Error(s3Res.message)
+        throw new Error(s3Res.message || 'S3 업로드 실패')
       }
 
-      const completeRes = await completeVideoFileUploadAction(
-        currentQuestionSet.questionSetId,
-        currentInterviewId,
-        {
-          originalFileName: urlRes.data.originalFileName,
-          fileKey: urlRes.data.fileKey,
-          fileUrl: urlRes.data.fileUrl,
-          contentType: videoFile.type,
-          fileSizeBytes: videoFile.size,
-        },
-      )
-      console.log('분선 완료시:', completeRes)
+      const completeRes = await completeVideoFileUploadAction(questionSetId, interviewId, {
+        originalFileName: urlRes.data.originalFileName,
+        fileKey: urlRes.data.fileKey,
+        fileUrl: urlRes.data.fileUrl,
+        contentType: videoFile.type,
+        fileSizeBytes: videoFile.size,
+      })
+      console.log('분석 완료시:', completeRes)
+
+      if (!completeRes.success) {
+        throw new Error(completeRes.message || '답변 업로드 완료 처리 실패')
+      }
+
       const answerId = completeRes.data?.answerId
       if (!answerId) {
         throw new Error('답변 업로드 완료 응답에 answerId가 없습니다.')
       }
-      if (completeRes.success) {
-        await requestAnswerAnalysisAction(answerId)
-      }
-    } catch (error: unknown) {
+
+      await requestAnswerAnalysisAction(answerId)
+    },
+    [],
+  )
+
+  const enqueueUpload = useCallback((task: () => Promise<void>) => {
+    uploadQueueRef.current = uploadQueueRef.current.then(task).catch((error: unknown) => {
       console.error(error instanceof Error ? error.message : '답변 처리 중 오류가 발생했습니다.')
+    })
+  }, [])
+
+  const handleNext = useCallback(async () => {
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+
+    const questionIndex = currentQuestionRef.current
+
+    let videoBlob: Blob | null = null
+    try {
+      videoBlob = (await stopRecording()) as Blob
+    } catch (error: unknown) {
+      console.error(error instanceof Error ? error.message : '녹화 종료 중 오류가 발생했습니다.')
+    }
+
+    const currentInterviewId = interviewIdRef.current
+    const currentQuestionSet = interviewQuestionsRef.current[questionIndex]
+
+    if (videoBlob && currentInterviewId && currentQuestionSet) {
+      enqueueUpload(() =>
+        uploadAnswer({
+          videoBlob,
+          questionSetId: currentQuestionSet.questionSetId,
+          interviewId: currentInterviewId,
+        }),
+      )
+    } else {
+      console.error('영상 업로드에 필요한 인터뷰 정보가 없습니다.')
     }
 
     const totalQuestions = interviewQuestionsRef.current.length
@@ -187,7 +204,7 @@ export function useInterview() {
 
     isProcessingRef.current = false
     setPhase('finished')
-  }, [stopRecording])
+  }, [stopRecording, uploadAnswer, enqueueUpload])
 
   useEffect(() => {
     if (phase !== 'thinking' && phase !== 'answering') return

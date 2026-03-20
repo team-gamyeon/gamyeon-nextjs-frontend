@@ -25,7 +25,13 @@ const fadeUp = {
 
 export function StatusSection({ records = [] }: StatusSectionProps) {
   const { tip } = useRandomTip()
-  const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation()
+  const filteredRecords = records.filter(
+    (record) =>
+      record.intvStatus === 'FINISHED' &&
+      record.report &&
+      record.report.reportStatus === 'SUCCEED',
+  )
+  const { weekStart, weekEnd, weekLabel, setWeekOffset, canPrev, canNext } = useWeekNavigation(filteredRecords)
   const { mounted, activityData, getLevelColor } = useActivityData()
 
   return (
@@ -80,13 +86,7 @@ export function StatusSection({ records = [] }: StatusSectionProps) {
             <ScoreTrendChart
               weekStart={weekStart}
               weekEnd={weekEnd}
-              // 면접 완료(FINISHED) + 리포트 존재 + 리포트 분석 성공(SUCCEED) 조건만 필터링22
-              records={records.filter(
-                (record) =>
-                  record.intvStatus === 'FINISHED' &&
-                  record.report &&
-                  record.report.reportStatus === 'SUCCEED',
-              )}
+              records={filteredRecords}
             />
           </CardContent>
         </Card>

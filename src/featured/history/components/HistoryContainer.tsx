@@ -135,7 +135,7 @@ function FlipCard({ record }: FlipCardProps) {
         </Card>
         {isCompleted && (
           <Card
-            className="absolute inset-0 antialiased backface-hidden"
+            className="absolute inset-0 overflow-hidden antialiased backface-hidden"
             style={{ transform: 'rotateY(180deg) translateZ(1px)' }}
           >
             <CompletedCardBack record={record} />

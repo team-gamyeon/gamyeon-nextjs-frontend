@@ -8,6 +8,8 @@ export interface InterviewSetupConfig {
   title: string
   basePose: { pitch: number; yaw: number } | null
   stream: MediaStream | null
+  interviewId: number | null
+  questions: InterviewQuestions[]
 }
 
 export type FocusState =
@@ -147,4 +149,10 @@ export interface CompleteVideoFileUploadResponse {
 export interface AnswerAnalysisResponse {
   answerId: number
   analysisStatus: string
+}
+
+export interface uploadAnswer {
+  videoBlob: Blob
+  questionSetId: number
+  interviewId: number
 }

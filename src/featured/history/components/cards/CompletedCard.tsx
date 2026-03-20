@@ -60,29 +60,29 @@ function CompletedCardBack({ record }: CompletedCardProps) {
   return (
     <div className="flex h-full flex-col p-2 @[180px]:p-3 @[220px]:p-4 @[280px]:p-6">
       <div className="flex flex-1 flex-col gap-1.5 @[180px]:gap-2 @[220px]:gap-2.5 @[280px]:gap-4">
-        {/* 강점 */}
+        {/* 잘한 점 */}
         <div className="flex flex-1 flex-col rounded-md bg-green-50 p-2 @[180px]:p-3 @[220px]:rounded-lg @[220px]:p-3.5 @[280px]:p-5">
           <div className="mb-1 flex items-center gap-1 @[180px]:gap-1.5 @[220px]:mb-1.5 @[220px]:gap-2">
             <div className="rounded-full bg-green-500 p-0.5 @[220px]:p-1">
               <TrendingUp className="h-2 w-2 text-white @[220px]:h-2.5 @[220px]:w-2.5 @[280px]:h-3 @[280px]:w-3" />
             </div>
             <p className="text-[9px] font-semibold text-green-900 @[180px]:text-[10px] @[220px]:text-xs @[280px]:text-sm">
-              강점
+              잘한 점
             </p>
           </div>
-          <ul className="space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
+          <ul className="overflow-hidden space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
             {strengths.length > 0 ? (
               strengths.map((strength: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-1 @[180px]:gap-1.5">
                   <span className="mt-1 h-0.5 w-0.5 shrink-0 rounded-full bg-green-600 @[180px]:h-1 @[180px]:w-1" />
-                  <span className="text-[9px] text-green-800 @[180px]:text-[10px] @[220px]:text-xs">
+                  <span className="line-clamp-1 text-[9px] text-green-800 @[180px]:text-[10px] @[220px]:text-xs">
                     {strength}
                   </span>
                 </li>
               ))
             ) : (
               <li className="text-[9px] text-green-700/70 @[180px]:text-[10px] @[220px]:text-xs">
-                분석된 강점이 없습니다
+                분석된 잘한 점이 없습니다
               </li>
             )}
           </ul>
@@ -97,12 +97,12 @@ function CompletedCardBack({ record }: CompletedCardProps) {
               개선점
             </p>
           </div>
-          <ul className="space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
+          <ul className="overflow-hidden space-y-0.5 @[180px]:space-y-1 @[220px]:space-y-1.5">
             {weaknesses.length > 0 ? (
               weaknesses.map((weakness: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-1 @[180px]:gap-1.5">
                   <span className="mt-1 h-0.5 w-0.5 shrink-0 rounded-full bg-orange-600 @[180px]:h-1 @[180px]:w-1" />
-                  <span className="text-[9px] text-orange-800 @[180px]:text-[10px] @[220px]:text-xs">
+                  <span className="line-clamp-1 text-[9px] text-orange-800 @[180px]:text-[10px] @[220px]:text-xs">
                     {weakness}
                   </span>
                 </li>

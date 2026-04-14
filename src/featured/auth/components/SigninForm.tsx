@@ -12,17 +12,9 @@ import Image from 'next/image'
 import { useAuthStore } from '@/featured/auth/store'
 import type { OAuthLoginData } from '@/featured/auth/types'
 import type { ApiResponse } from '@/shared/lib/api/types'
+import { generateCodeVerifier, generateCodeChallenge } from '@/shared/lib/utils/pkce'
 
-const GOOGLE_AUTH_URL = (() => {
-  const params = new URLSearchParams({
-    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-    redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI!,
-    response_type: process.env.NEXT_PUBLIC_GOOGLE_RESPONSE_TYPE!,
-    scope: process.env.NEXT_PUBLIC_GOOGLE_SCOPE!,
-    state: 'google',
-  })
-  return `${process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL}?${params.toString()}`
-})()
+const PKCE_VERIFIER_KEY = 'pkce_code_verifier'
 
 const KAKAO_AUTH_URL = (() => {
   const params = new URLSearchParams({
@@ -67,10 +59,13 @@ export function SigninForm() {
       setErrorMessage(null)
 
       try {
+        const codeVerifier = sessionStorage.getItem(PKCE_VERIFIER_KEY)
+        sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+
         const res = await fetch(`/api/auth/${currentProvider}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ authorizationCode: code }),
+          body: JSON.stringify({ authorizationCode: code, codeVerifier }),
           signal: controller.signal,
         })
 
@@ -104,8 +99,23 @@ export function SigninForm() {
     window.location.href = KAKAO_AUTH_URL
   }
 
-  const handleGoogleLogin = () => {
-    window.location.href = GOOGLE_AUTH_URL
+  const handleGoogleLogin = async () => {
+    const verifier = generateCodeVerifier()
+    const challenge = await generateCodeChallenge(verifier)
+
+    sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier)
+
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI!,
+      response_type: process.env.NEXT_PUBLIC_GOOGLE_RESPONSE_TYPE!,
+      scope: process.env.NEXT_PUBLIC_GOOGLE_SCOPE!,
+      state: 'google',
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+    })
+
+    window.location.href = `${process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL}?${params.toString()}`
   }
 
   if (status === 'loading') {

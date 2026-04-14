@@ -9,7 +9,10 @@ type Provider = (typeof SUPPORTED_PROVIDERS)[number]
  * OAuth authorizationCode를 받아 백엔드로 전달하고 토큰을 반환.
  * 브라우저 → Next.js 서버(동일 출처) → 백엔드(서버 간 요청) 구조로 CORS 우회.
  */
-export async function POST(request: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ provider: string }> },
+) {
   try {
     const { provider } = await params
 
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const body = await request.json()
-    const { authorizationCode } = body
+    const { authorizationCode, codeVerifier } = body
 
     if (!authorizationCode) {
       return NextResponse.json(
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const res = await fetch(`${apiUrl}/api/v1/auth/login/${provider}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ authorizationCode }),
+      body: JSON.stringify({ authorizationCode, codeVerifier }),
     })
 
     const data = await res.json()

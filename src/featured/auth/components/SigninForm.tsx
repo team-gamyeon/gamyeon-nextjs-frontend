@@ -16,16 +16,6 @@ import { generateCodeVerifier, generateCodeChallenge } from '@/shared/lib/utils/
 
 const PKCE_VERIFIER_KEY = 'pkce_code_verifier'
 
-const KAKAO_AUTH_URL = (() => {
-  const params = new URLSearchParams({
-    client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,
-    redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!,
-    response_type: process.env.NEXT_PUBLIC_KAKAO_RESPONSE_TYPE!,
-    state: 'kakao',
-  })
-  return `${process.env.NEXT_PUBLIC_KAKAO_AUTH_URL}?${params.toString()}`
-})()
-
 export function SigninForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -95,8 +85,22 @@ export function SigninForm() {
     }
   }, [searchParams, signin, router])
 
-  const handleKakaoLogin = () => {
-    window.location.href = KAKAO_AUTH_URL
+  const handleKakaoLogin = async () => {
+    const verifier = generateCodeVerifier()
+    const challenge = await generateCodeChallenge(verifier)
+
+    sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier)
+
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID!,
+      redirect_uri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!,
+      response_type: process.env.NEXT_PUBLIC_KAKAO_RESPONSE_TYPE!,
+      state: 'kakao',
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+    })
+
+    window.location.href = `${process.env.NEXT_PUBLIC_KAKAO_AUTH_URL}?${params.toString()}`
   }
 
   const handleGoogleLogin = async () => {

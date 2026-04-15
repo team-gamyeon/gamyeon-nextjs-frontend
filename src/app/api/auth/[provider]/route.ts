@@ -33,6 +33,13 @@ export async function POST(
       )
     }
 
+    if (!codeVerifier) {
+      return NextResponse.json(
+        { success: false, code: 'CMMN-V001', message: 'codeVerifier가 없습니다.' },
+        { status: 400 },
+      )
+    }
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
     const res = await fetch(`${apiUrl}/api/v1/auth/login/${provider}`, {
       method: 'POST',

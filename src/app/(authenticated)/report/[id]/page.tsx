@@ -77,7 +77,9 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           <RadarChartSection data={report.competencyScores} />
         </div>
 
-        <StrengthsWeaknessesSection strengths={report.strengths} weaknesses={report.weaknesses} />
+        <div className="mt-6">
+          <StrengthsWeaknessesSection strengths={report.strengths} weaknesses={report.weaknesses} />
+        </div>
 
         <QuestionFeedbackSection feedbacks={report.questionSummaries} />
 

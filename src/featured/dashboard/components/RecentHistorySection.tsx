@@ -31,7 +31,9 @@ export interface RecentHistorySectionProps {
 }
 
 export function RecentHistorySection({ records = [] }: RecentHistorySectionProps) {
-  const displayRecords = records.slice(0, 3)
+  const displayRecords = [...records]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 3)
   const isEmpty = displayRecords.length === 0
 
   return (

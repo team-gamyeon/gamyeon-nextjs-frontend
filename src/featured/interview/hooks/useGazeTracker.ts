@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react'
 import { FaceDetector, FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
+// 전역 변수로 선언 -> 컴포넌트가 나타나든 사라지든 메모리에 딱 한 번만 유지
+let globalLandmarker: FaceLandmarker | null = null
+let globalDetector: FaceDetector | null = null
+let initPromise: Promise<void> | null = null
+
 export const useGazeTracker = () => {
-  const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(null)
-  const [detector, setDetector] = useState<FaceDetector | null>(null)
+  const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(globalLandmarker)
+  const [detector, setDetector] = useState<FaceDetector | null>(globalDetector)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // 지역변수 선언: 클린업에서 참조하기 위해
-    let landmarkerInstance: FaceLandmarker | null = null
-    let detectorInstance: FaceDetector | null = null
+    if (globalLandmarker && globalDetector) {
+      return
+    }
 
-    const initModels = async () => {
-      try {
-        // 1. WASM 파일 로더 설정
+    if (!initPromise) {
+      initPromise = (async () => {
         const filesetResolver = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm',
         )
 
-        // 2. 두 모델 병렬로 초기화
         const [lm, fd] = await Promise.all([
           FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
@@ -37,27 +40,33 @@ export const useGazeTracker = () => {
             runningMode: 'VIDEO',
           }),
         ])
-        landmarkerInstance = lm
-        detectorInstance = fd
 
-        setLandmarker(landmarkerInstance)
-        setDetector(detectorInstance)
-      } catch (err) {
-        console.error('두 모델 초기화 실패:', err)
-        setError(err instanceof Error ? err : new Error(String(err)))
-      }
+        globalLandmarker = lm
+        globalDetector = fd
+      })()
     }
 
-    initModels()
+    // 지역변수로 선언 -> useEffect 가 실행될 때마다 새로 생김
+    let cancelled = false
 
-    // 3. 컴포넌트 언마운트 시 메모리 해제: 사용자가 면접 화면이나 카메라 뷰를 벗어났을 때, MediaPipe 인스턴스를 즉각적으로 종료하여 메모리를 반환
+    initPromise
+      .then(() => {
+        if (!cancelled && globalLandmarker && globalDetector) {
+          setLandmarker(globalLandmarker)
+          setDetector(globalDetector)
+        }
+      })
+      .catch((err) => {
+        initPromise = null
+        console.error('두 모델 초기화 실패:', err)
+
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error(String(err)))
+        }
+      })
+
     return () => {
-      if (landmarkerInstance) {
-        landmarkerInstance.close()
-      }
-      if (detectorInstance) {
-        detectorInstance.close()
-      }
+      cancelled = true
     }
   }, [])
 

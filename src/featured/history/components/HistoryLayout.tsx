@@ -24,7 +24,7 @@ export function HistoryLayout() {
     if (!user?.id) return
     async function fetchData() {
       try {
-        const response = await getReportListAction(user!.id)
+        const response = await getReportListAction()
         if (response.success) {
           //  데이터가 null일 때를 대비한 방어막(?? []) 추가
           setRecords(response.data ?? [])

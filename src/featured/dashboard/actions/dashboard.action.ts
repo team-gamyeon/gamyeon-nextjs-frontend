@@ -7,11 +7,8 @@ import { getDailyIntvStats, getNotices, getNoticeDetail } from '../services/dash
 import { withAction } from '@/shared/lib/withAction'
 
 /** * 일자별 면접 횟수 조회 Action */
-export async function getDailyIntvStatsAction(params?: {
-  startDate?: string
-  endDate?: string
-}): Promise<ApiResponse<DailyIntvStat[]>> {
-  return withAction(() => getDailyIntvStats(params))
+export async function getDailyIntvStatsAction(): Promise<ApiResponse<DailyIntvStat[]>> {
+  return withAction(() => getDailyIntvStats())
 }
 
 /** * 전체 공지사항 목록 조회 Action */

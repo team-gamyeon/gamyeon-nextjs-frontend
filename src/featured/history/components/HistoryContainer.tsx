@@ -100,6 +100,23 @@ function FlipCard({ record }: FlipCardProps) {
 
   // 상태 감별사 함수로 무슨 카드 보여줄지 결정
   const cardType = getReportCardType(record.intvStatus, record.report?.reportStatus)
+
+  const prevCardType = useRef(cardType)
+  
+  useEffect(() => {
+    // 1. 카드가 처음 'analysingCard(분석 중)'로 화면에 떴을 때 (Start)
+    if (cardType === 'analysingCard' && prevCardType.current !== 'analysingCard') {
+      sendGAEvent('event', 'report_gen_start', { category: 'ai_report' })
+    }
+    
+    // 2. '분석 중' 카드를 보며 기다리다가 'completedCard(분석 완료)'로 상태가 바뀌었을 때 (Complete)
+    if (prevCardType.current === 'analysingCard' && cardType === 'completedCard') {
+      sendGAEvent('event', 'report_gen_complete', { category: 'ai_report' })
+    }
+    
+    prevCardType.current = cardType
+  }, [cardType])
+
   //  추가할 부분: 보여줄 카드 타입이 없으면(null) 렌더링을 중단하고 아무것도 안 그림!
   if (!cardType) return null
   const isCompleted = cardType === 'completedCard'

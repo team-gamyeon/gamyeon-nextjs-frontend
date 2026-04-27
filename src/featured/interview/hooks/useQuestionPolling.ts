@@ -31,6 +31,9 @@ export function useQuestionPolling(
   })
   useEffect(() => {
     if (query.data && query.data.length > 0) {
+
+      sendGAEvent('event', 'question_gen_complete', { category: 'ai_interview' })
+
       handlePollingComplete()
     }
   }, [query.data, handlePollingComplete])

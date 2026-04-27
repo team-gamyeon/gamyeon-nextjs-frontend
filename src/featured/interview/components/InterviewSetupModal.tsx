@@ -26,6 +26,7 @@ import {
 import uploadFileToS3 from '@/shared/lib/utils/uploadFileToS3'
 import { useQuestionPolling } from '@/featured/interview/hooks/useQuestionPolling'
 import { toast } from 'sonner'
+import { sendGAEvent } from '@next/third-parties/google'
 
 interface InterviewSetupModalProps {
   session: ReturnType<typeof useInterview>
@@ -155,6 +156,8 @@ export function InterviewSetupModal({ session, isResume = false }: InterviewSetu
       }
 
       completeStep(2)
+      // 👉 [추가할 코드] 질문 생성이 시작되는 시점 (Start)
+      sendGAEvent('event', 'question_gen_start', { category: 'ai_interview' })
       generateInterviewQuestionAction(session.interviewId).catch((err) => console.error(err))
     } catch (error: any) {
       console.error('문서 업로드 중 오류:', error)

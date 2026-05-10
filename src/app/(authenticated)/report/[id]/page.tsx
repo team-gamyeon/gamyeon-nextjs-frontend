@@ -39,11 +39,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   if (!report) {
     return (
       <div className="bg-muted/20 flex min-h-screen flex-col items-center justify-center">
-        <h2 className="mb-4 text-2xl font-bold">리포트를 찾을 수 없습니다 😢</h2>
+        <h2 className="mb-4 text-2xl font-bold">리포트를 찾을 수 없습니다</h2>
         <p className="mb-8 text-gray-600">
           면접이 정상적으로 완료되지 않았거나, 분석 중 오류가 발생했습니다.
         </p>
-        {/* 필요하다면 홈으로 돌아가기 버튼 등을 추가하세요 */}
       </div>
     )
   }

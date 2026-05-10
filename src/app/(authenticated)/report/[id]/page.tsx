@@ -34,14 +34,24 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   }
 
   const { report } = response.data
-  // const formattedDate = formatDateKorean(new Date(report.createdAt))
-  // 1. 여기서 먼저 report 존재 여부를 검증하고, 없을 경우의 화면/로직을 처리합니다.
+
+  // 방어 로직 추가: report가 null이거나 undefined일 때의 처리
   if (!report) {
-    return <div>리포트 데이터를 불러올 수 없거나 아직 분석 중입니다.</div> // 혹은 적절한 404/에러 컴포넌트
+    return (
+      <div className="bg-muted/20 flex min-h-screen flex-col items-center justify-center">
+        <h2 className="mb-4 text-2xl font-bold">리포트를 찾을 수 없습니다 😢</h2>
+        <p className="mb-8 text-gray-600">
+          면접이 정상적으로 완료되지 않았거나, 분석 중 오류가 발생했습니다.
+        </p>
+        {/* 필요하다면 홈으로 돌아가기 버튼 등을 추가하세요 */}
+      </div>
+    )
   }
 
-  // 2. report가 존재함이 보장된 이후에 데이터를 가공합니다.
-  const formattedDate = formatDateKorean(new Date(report.createdAt))
+  // 데이터가 있으면 포맷팅을 하고, 없으면 임시로 '날짜 정보 없음'이나 null 등으로 처리
+  const formattedDate = report.createdAt
+    ? formatDateKorean(new Date(report.createdAt))
+    : '날짜 정보 없음'
 
   return (
     <div className="bg-muted/20 min-h-screen">

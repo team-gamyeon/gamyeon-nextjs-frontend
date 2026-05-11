@@ -5,6 +5,7 @@ import ReactQueryProvider from '@/shared/lib/ReactQueryProvider'
 import { Toaster } from 'sonner'
 import './globals.css'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import ClarityProvider from '@/shared/lib/ClarityProvider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -65,6 +66,7 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
+        <ClarityProvider />
         <ReactQueryProvider>
           <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
         </ReactQueryProvider>

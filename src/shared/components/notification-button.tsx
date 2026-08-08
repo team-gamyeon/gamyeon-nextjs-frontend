@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
 import { Bell } from 'lucide-react'
-import { NotifItem } from '@/featured/notif/components/NotifItem'
+import { NotifList } from '@/featured/notif/components/NotifList'
 import { MOCK_NOTIFS } from '@/featured/notif/constants'
 import type { Notif } from '@/featured/notif/types'
 
 export function NotificationButton() {
+  const router = useRouter()
   const [notifs, setNotifs] = useState<Notif[]>(MOCK_NOTIFS)
   const unreadCount = notifs.filter((notif) => !notif.isRead).length
 
@@ -21,6 +23,23 @@ export function NotificationButton() {
         notif.notifId === selectedNotif.notifId ? { ...notif, isRead: true } : notif,
       ),
     )
+  }
+
+  const handleNotifClick = (notif: Notif) => {
+    markAsRead(notif)
+
+    switch (notif.notifType) {
+      case 'NOTICE':
+        router.push('/notices')
+        break
+      case 'REPORT_SUCCESS':
+        router.push(`/report/${notif.targetId}`)
+        break
+      case 'REPORT_PROCESSING':
+      case 'REPORT_FAILED':
+        router.push('/history')
+        break
+    }
   }
 
   return (
@@ -50,16 +69,7 @@ export function NotificationButton() {
             </button>
           )}
         </div>
-
-        {notifs.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center text-sm">알림이 없어요.</div>
-        ) : (
-          <ul>
-            {notifs.map((notif) => (
-              <NotifItem key={notif.notifId} notif={notif} onClick={markAsRead} />
-            ))}
-          </ul>
-        )}
+        <NotifList notifs={notifs} onNotifClick={handleNotifClick} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

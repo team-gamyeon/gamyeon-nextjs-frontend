@@ -2,17 +2,10 @@
 
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
-import { Bell, CheckCircle2, CircleAlert, Loader2, Megaphone } from 'lucide-react'
+import { Bell } from 'lucide-react'
+import { NotifItem } from '@/featured/notif/components/NotifItem'
 import { MOCK_NOTIFS } from '@/featured/notif/constants'
-import type { Notif, NotifType } from '@/featured/notif/types'
-import { cn } from '@/shared/lib/utils'
-
-const typeConfig: Record<NotifType, { icon: React.ElementType; color: string }> = {
-  NOTICE: { icon: Megaphone, color: 'text-blue-500' },
-  REPORT_PROCESSING: { icon: Loader2, color: 'text-primary' },
-  REPORT_SUCCESS: { icon: CheckCircle2, color: 'text-green-500' },
-  REPORT_FAILED: { icon: CircleAlert, color: 'text-red-500' },
-}
+import type { Notif } from '@/featured/notif/types'
 
 export function NotificationButton() {
   const [notifs, setNotifs] = useState<Notif[]>(MOCK_NOTIFS)
@@ -20,6 +13,14 @@ export function NotificationButton() {
 
   const markAllRead = () => {
     setNotifs((prev) => prev.map((notif) => ({ ...notif, isRead: true })))
+  }
+
+  const markAsRead = (selectedNotif: Notif) => {
+    setNotifs((prev) =>
+      prev.map((notif) =>
+        notif.notifId === selectedNotif.notifId ? { ...notif, isRead: true } : notif,
+      ),
+    )
   }
 
   return (
@@ -54,59 +55,9 @@ export function NotificationButton() {
           <div className="text-muted-foreground py-8 text-center text-sm">알림이 없어요.</div>
         ) : (
           <ul>
-            {notifs.map((notif, idx) => {
-              const { icon: Icon, color } = typeConfig[notif.notifType]
-              return (
-                <li
-                  key={notif.notifId}
-                  className={cn(
-                    'flex cursor-pointer gap-3 px-4 py-3 transition',
-                    'hover:bg-muted/60',
-                    idx !== notifs.length - 1 && 'border-border/40 border-b',
-                    !notif.isRead && 'bg-primary/5',
-                  )}
-                  onClick={() =>
-                    setNotifs((prev) =>
-                      prev.map((item) =>
-                        item.notifId === notif.notifId ? { ...item, isRead: true } : item,
-                      ),
-                    )
-                  }
-                >
-                  <div className={cn('mt-0.5 shrink-0', color)}>
-                    <Icon
-                      className={cn(
-                        'h-4 w-4',
-                        notif.notifType === 'REPORT_PROCESSING' && 'animate-spin',
-                      )}
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{notif.title}</p>
-                      {!notif.isRead && (
-                        <span className="bg-primary h-1.5 w-1.5 shrink-0 rounded-full" />
-                      )}
-                    </div>
-                    <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                      {notif.content}
-                    </p>
-                    <time
-                      dateTime={notif.createdAt}
-                      className="text-muted-foreground/70 mt-1 block text-[11px]"
-                    >
-                      {new Date(notif.createdAt).toLocaleString('ko-KR', {
-                        timeZone: 'Asia/Seoul',
-                        month: 'numeric',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </time>
-                  </div>
-                </li>
-              )
-            })}
+            {notifs.map((notif) => (
+              <NotifItem key={notif.notifId} notif={notif} onClick={markAsRead} />
+            ))}
           </ul>
         )}
       </DropdownMenuContent>

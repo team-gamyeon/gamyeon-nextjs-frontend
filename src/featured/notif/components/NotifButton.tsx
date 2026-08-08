@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
 import { Bell } from 'lucide-react'
-import { NotifList } from '@/featured/notif/components/NotifList'
-import { MOCK_NOTIFS } from '@/featured/notif/constants'
-import type { Notif } from '@/featured/notif/types'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
+import { MOCK_NOTIFS } from '../constants'
+import type { Notif } from '../types'
+import { NotifList } from './NotifList'
 
-export function NotificationButton() {
+export function NotifButton() {
   const router = useRouter()
   const [notifs, setNotifs] = useState<Notif[]>(MOCK_NOTIFS)
   const unreadCount = notifs.filter((notif) => !notif.isRead).length

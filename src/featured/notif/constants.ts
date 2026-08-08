@@ -1,5 +1,7 @@
 import type { Notif } from './types'
 
+export const NOTIF_LIST_SCROLL = 5
+
 export const MOCK_NOTIFS = [
   {
     notifId: 105,
@@ -45,5 +47,14 @@ export const MOCK_NOTIFS = [
     targetId: 201,
     isRead: true,
     createdAt: '2026-08-05T16:00:00+09:00',
+  },
+  {
+    notifId: 100,
+    notifType: 'NOTICE',
+    title: '공지사항',
+    content: '가면 서비스 점검 안내입니다.',
+    targetId: 51,
+    isRead: true,
+    createdAt: '2026-08-04T09:00:00+09:00',
   },
 ] satisfies Notif[]

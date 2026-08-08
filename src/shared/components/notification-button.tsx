@@ -73,7 +73,7 @@ export function NotificationButton() {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
-          className="text-muted-foreground hover:bg-muted hover:text-foreground relative flex h-9 w-9 items-center justify-center rounded-xl transition-colors outline-none"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors outline-none"
           aria-label="알림"
         >
           <Bell className="h-4.5 w-4.5" />

@@ -2,75 +2,71 @@
 
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
-import { Bell, CheckCircle2, Loader2, Megaphone } from 'lucide-react'
+import { Bell, CheckCircle2, CircleAlert, Loader2, Megaphone } from 'lucide-react'
+import type { Notif, NotifType } from '@/featured/notif/types'
 import { cn } from '@/shared/lib/utils'
 
-type NotificationType = 'notice' | 'analysis_complete' | 'analysis_in_progress'
-
-interface Notification {
-  id: string
-  type: NotificationType
-  title: string
-  description: string
-  time: string
-  read: boolean
-}
-
-const MOCK_NOTIFICATIONS: Notification[] = [
+const MOCK_NOTIFS = [
   {
-    id: '1',
-    type: 'analysis_in_progress',
+    notifId: 105,
+    notifType: 'REPORT_PROCESSING',
     title: '면접 분석 중',
-    description: '2026.03.09 프론트엔드 개발자 면접을 분석하고 있어요.',
-    time: '방금 전',
-    read: false,
+    content: '2026.08.08 프론트엔드 개발자 면접을 분석하고 있어요.',
+    targetId: 205,
+    isRead: false,
+    createdAt: '2026-08-08T14:35:00+09:00',
   },
   {
-    id: '2',
-    type: 'analysis_complete',
+    notifId: 104,
+    notifType: 'REPORT_SUCCESS',
     title: '면접 분석 완료',
-    description: '2026.03.08 백엔드 개발자 면접 분석이 완료됐어요.',
-    time: '1시간 전',
-    read: false,
+    content: '2026.08.08 백엔드 개발자 면접 분석이 완료됐어요.',
+    targetId: 204,
+    isRead: false,
+    createdAt: '2026-08-08T13:30:00+09:00',
   },
   {
-    id: '3',
-    type: 'notice',
+    notifId: 103,
+    notifType: 'REPORT_FAILED',
+    title: '면접 분석 실패',
+    content: '2026.08.07 풀스택 개발자 면접 분석에 실패했어요.',
+    targetId: 203,
+    isRead: false,
+    createdAt: '2026-08-07T18:20:00+09:00',
+  },
+  {
+    notifId: 102,
+    notifType: 'NOTICE',
     title: '공지사항',
-    description: '가면 서비스 업데이트 안내 (v1.2.0)',
-    time: '2일 전',
-    read: true,
+    content: '가면 서비스 업데이트 안내 (v1.2.0)',
+    targetId: 52,
+    isRead: true,
+    createdAt: '2026-08-06T10:00:00+09:00',
   },
   {
-    id: '4',
-    type: 'analysis_complete',
+    notifId: 101,
+    notifType: 'REPORT_SUCCESS',
     title: '면접 분석 완료',
-    description: '2026.03.06 풀스택 개발자 면접 분석이 완료됐어요.',
-    time: '3일 전',
-    read: true,
+    content: '2026.08.05 프론트엔드 개발자 면접 분석이 완료됐어요.',
+    targetId: 201,
+    isRead: true,
+    createdAt: '2026-08-05T16:00:00+09:00',
   },
-  {
-    id: '5',
-    type: 'notice',
-    title: '공지사항',
-    description: '가면 서비스 점검 안내 (3월 10일 02:00 ~ 04:00)',
-    time: '4일 전',
-    read: true,
-  },
-]
+] satisfies Notif[]
 
-const typeConfig: Record<NotificationType, { icon: React.ElementType; color: string }> = {
-  notice: { icon: Megaphone, color: 'text-blue-500' },
-  analysis_complete: { icon: CheckCircle2, color: 'text-green-500' },
-  analysis_in_progress: { icon: Loader2, color: 'text-primary' },
+const typeConfig: Record<NotifType, { icon: React.ElementType; color: string }> = {
+  NOTICE: { icon: Megaphone, color: 'text-blue-500' },
+  REPORT_PROCESSING: { icon: Loader2, color: 'text-primary' },
+  REPORT_SUCCESS: { icon: CheckCircle2, color: 'text-green-500' },
+  REPORT_FAILED: { icon: CircleAlert, color: 'text-red-500' },
 }
 
 export function NotificationButton() {
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
-  const unreadCount = notifications.filter((notification) => !notification.read).length
+  const [notifs, setNotifs] = useState<Notif[]>(MOCK_NOTIFS)
+  const unreadCount = notifs.filter((notif) => !notif.isRead).length
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
+    setNotifs((prev) => prev.map((notif) => ({ ...notif, isRead: true })))
   }
 
   return (
@@ -101,25 +97,25 @@ export function NotificationButton() {
           )}
         </div>
 
-        {notifications.length === 0 ? (
+        {notifs.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center text-sm">알림이 없어요.</div>
         ) : (
           <ul>
-            {notifications.map((notification, idx) => {
-              const { icon: Icon, color } = typeConfig[notification.type]
+            {notifs.map((notif, idx) => {
+              const { icon: Icon, color } = typeConfig[notif.notifType]
               return (
                 <li
-                  key={notification.id}
+                  key={notif.notifId}
                   className={cn(
                     'flex cursor-pointer gap-3 px-4 py-3 transition',
                     'hover:bg-muted/60',
-                    idx !== notifications.length - 1 && 'border-border/40 border-b',
-                    !notification.read && 'bg-primary/5',
+                    idx !== notifs.length - 1 && 'border-border/40 border-b',
+                    !notif.isRead && 'bg-primary/5',
                   )}
                   onClick={() =>
-                    setNotifications((prev) =>
+                    setNotifs((prev) =>
                       prev.map((item) =>
-                        item.id === notification.id ? { ...item, read: true } : item,
+                        item.notifId === notif.notifId ? { ...item, isRead: true } : item,
                       ),
                     )
                   }
@@ -128,21 +124,32 @@ export function NotificationButton() {
                     <Icon
                       className={cn(
                         'h-4 w-4',
-                        notification.type === 'analysis_in_progress' && 'animate-spin',
+                        notif.notifType === 'REPORT_PROCESSING' && 'animate-spin',
                       )}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{notification.title}</p>
-                      {!notification.read && (
+                      <p className="text-sm font-medium">{notif.title}</p>
+                      {!notif.isRead && (
                         <span className="bg-primary h-1.5 w-1.5 shrink-0 rounded-full" />
                       )}
                     </div>
                     <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                      {notification.description}
+                      {notif.content}
                     </p>
-                    <p className="text-muted-foreground/70 mt-1 text-[11px]">{notification.time}</p>
+                    <time
+                      dateTime={notif.createdAt}
+                      className="text-muted-foreground/70 mt-1 block text-[11px]"
+                    >
+                      {new Date(notif.createdAt).toLocaleString('ko-KR', {
+                        timeZone: 'Asia/Seoul',
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+                    </time>
                   </div>
                 </li>
               )

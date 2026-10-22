@@ -62,11 +62,10 @@ export interface NotifState {
   prependNotif: (notif: Notif) => number[]
   beginNotifRead: (notifId: number) => Notif | null
   confirmNotifRead: (notifId: number) => void
-  rollbackNotifRead: (notif: Notif) => void
-  markNotifAsReadInPlace: (notifId: number) => void
+  rollbackNotifRead: (notif: Notif) => number[]
   confirmSuppressedNotifRead: (notifId: number) => void
   beginAllNotifsRead: () => NotifReadAllSnapshot | null
   confirmAllNotifsRead: (snapshot: NotifReadAllSnapshot) => void
-  rollbackAllNotifsRead: (snapshot: NotifReadAllSnapshot) => void
+  rollbackAllNotifsRead: (snapshot: NotifReadAllSnapshot) => number[]
   resetNotifs: () => void
 }

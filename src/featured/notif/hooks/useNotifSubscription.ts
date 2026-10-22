@@ -40,7 +40,7 @@ type SseAuthRecoveryResult = 'refreshed' | 'invalid' | 'unavailable'
 
 interface NotifSubscription {
   sessionKey: string
-  onConnected?: (isReconnect: boolean) => void
+  onConnected?: () => void
   onNotif: (notif: Notif) => void
   onAuthRequired?: () => Promise<SseAuthRecoveryResult>
 }
@@ -109,7 +109,6 @@ function startConnection(): void {
   const controller = new AbortController()
   const generation = ++connectionGeneration
   let hasConnectedForCurrentRequest = false
-  let hasConnectedOnce = false
   let hasAttemptedAuthRecovery = false
 
   activeController = controller
@@ -127,6 +126,7 @@ function startConnection(): void {
 
       if (response.status === 401) {
         await cancelResponseBody(response)
+        if (!isCurrentConnection(controller, generation) || controller.signal.aborted) return
 
         if (hasAttemptedAuthRecovery) {
           throw new FatalSseError('인증 갱신 후에도 알림 SSE 연결이 거부되었습니다.')
@@ -148,6 +148,10 @@ function startConnection(): void {
           console.error('알림 SSE 인증 갱신 요청을 수행하지 못했습니다.', error)
           throw new FatalSseError('알림 SSE 인증 갱신 요청에 실패했습니다.')
         }
+
+        // Authentication can finish after logout or a user switch. The old
+        // connection must not retry or stop the replacement connection.
+        if (!isCurrentConnection(controller, generation) || controller.signal.aborted) return
 
         if (recoveryResult === 'refreshed') {
           throw new RetrySseError(0)
@@ -179,9 +183,7 @@ function startConnection(): void {
       if (event.event === 'connect') {
         if (event.data === 'connected' && !hasConnectedForCurrentRequest) {
           hasConnectedForCurrentRequest = true
-          const isReconnect = hasConnectedOnce
-          hasConnectedOnce = true
-          dispatchToSubscriptions((subscription) => subscription.onConnected?.(isReconnect))
+          dispatchToSubscriptions((subscription) => subscription.onConnected?.())
         }
         return
       }
@@ -281,7 +283,7 @@ export function useNotifSubscription({
 }: UseNotifSubscriptionOptions = {}): void {
   const userId = useAuthStore((state) => state.user?.id)
   const logout = useAuthStore((state) => state.logout)
-  const { fetchInitialNotifs, receiveNotif } = useNotifActions()
+  const { fetchInitialNotifs, resyncNotifs, receiveNotif } = useNotifActions()
   const previousSessionKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -297,22 +299,22 @@ export function useNotifSubscription({
 
     let isActive = true
 
-    const requestSync = () => {
-      void fetchInitialNotifs(sessionKey).catch((error: unknown) => {
+    const requestSync = (afterConnection = false) => {
+      const request = afterConnection ? resyncNotifs(sessionKey) : fetchInitialNotifs(sessionKey)
+      void request.catch((error: unknown) => {
         if (isActive) {
           console.error('알림 목록을 불러오지 못했습니다.', error)
         }
       })
     }
 
-    // 최초 목록 조회와 SSE 재연결 후 누락 보정을 같은 in-flight 요청으로 합친다.
+    // 연결에 실패해도 목록은 조회한다. 연결 전 시작된 요청만으로는 연결 사이의
+    // 누락을 알 수 없으므로, 최초 연결과 재연결 후에는 새 조회를 보장한다.
     requestSync()
 
     const cleanupSubscription = subscribeToNotifs({
       sessionKey,
-      onConnected: (isReconnect) => {
-        if (isReconnect) requestSync()
-      },
+      onConnected: () => requestSync(true),
       onNotif: (notif) => {
         if (isActive) {
           receiveNotif(notif)
@@ -338,5 +340,5 @@ export function useNotifSubscription({
       isActive = false
       cleanupSubscription()
     }
-  }, [fetchInitialNotifs, logout, receiveNotif, unauthorizedBehavior, userId])
+  }, [fetchInitialNotifs, resyncNotifs, logout, receiveNotif, unauthorizedBehavior, userId])
 }

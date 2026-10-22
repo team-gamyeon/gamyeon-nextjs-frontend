@@ -301,47 +301,36 @@ export const useNotifStore = create<NotifState>((set, get) => ({
   },
 
   rollbackNotifRead: (notif) => {
+    let newlyUnsyncedNotifIds: number[] = []
+
     set((state) => {
       if (!state.pendingReadNotifIds.has(notif.notifId)) return {}
 
       const pendingReadNotifIds = new Set(state.pendingReadNotifIds)
       pendingReadNotifIds.delete(notif.notifId)
+      // A terminal report event may have hidden this processing notification
+      // while its read request was pending. Rollback must keep it hidden.
+      const reconciled = reconcileReportNotifs(
+        mergeNotifsByCreatedAt([notif], state.notifs),
+        state.suppressedProcessingNotifIds,
+        state.unsyncedSuppressedNotifIds,
+      )
+      newlyUnsyncedNotifIds = reconciled.newlyUnsyncedNotifIds
 
       return {
-        notifs: mergeNotifsByCreatedAt([notif], state.notifs),
-        unreadCount: notif.isRead ? state.unreadCount : state.unreadCount + 1,
-        pendingReadNotifIds,
-        mutationRevision: state.mutationRevision + 1,
-      }
-    })
-  },
-
-  markNotifAsReadInPlace: (notifId) => {
-    set((state) => {
-      const currentNotif = state.notifs.find((notif) => notif.notifId === notifId)
-
-      if (!currentNotif) {
-        if (!state.unsyncedSuppressedNotifIds.has(notifId)) return {}
-
-        const unsyncedSuppressedNotifIds = new Set(state.unsyncedSuppressedNotifIds)
-        unsyncedSuppressedNotifIds.delete(notifId)
-
-        return {
-          unsyncedSuppressedNotifIds,
-          mutationRevision: state.mutationRevision + 1,
-        }
-      }
-
-      if (currentNotif.isRead) return {}
-
-      return {
-        notifs: state.notifs.map((notif) =>
-          notif.notifId === notifId ? { ...notif, isRead: true } : notif,
+        notifs: reconciled.notifs,
+        unreadCount: Math.max(
+          0,
+          state.unreadCount + (notif.isRead ? 0 : 1) - newlyUnsyncedNotifIds.length,
         ),
-        unreadCount: Math.max(0, state.unreadCount - 1),
+        pendingReadNotifIds,
+        suppressedProcessingNotifIds: reconciled.suppressedProcessingNotifIds,
+        unsyncedSuppressedNotifIds: reconciled.unsyncedSuppressedNotifIds,
         mutationRevision: state.mutationRevision + 1,
       }
     })
+
+    return newlyUnsyncedNotifIds
   },
 
   confirmSuppressedNotifRead: (notifId) => {
@@ -427,28 +416,45 @@ export const useNotifStore = create<NotifState>((set, get) => ({
   },
 
   rollbackAllNotifsRead: (snapshot) => {
+    const newlyUnsyncedNotifIds: number[] = []
+
     set((state) => {
       if (!state.isMarkingAllAsRead) return {}
 
       const unreadNotifIds = new Set(snapshot.unreadNotifIds)
       const pendingReadNotifIds = new Set(state.pendingReadNotifIds)
+      const unsyncedSuppressedNotifIds = new Set(state.unsyncedSuppressedNotifIds)
 
       // Keep reads that were already pending before the all-read transaction.
       // Only IDs added by beginAllNotifsRead belong to this rollback.
       for (const notifId of unreadNotifIds) {
         pendingReadNotifIds.delete(notifId)
+
+        if (
+          state.suppressedProcessingNotifIds.has(notifId) &&
+          !unsyncedSuppressedNotifIds.has(notifId)
+        ) {
+          unsyncedSuppressedNotifIds.add(notifId)
+          newlyUnsyncedNotifIds.push(notifId)
+        }
       }
 
       return {
         notifs: state.notifs.map((notif) =>
           unreadNotifIds.has(notif.notifId) ? { ...notif, isRead: false } : notif,
         ),
-        unreadCount: state.unreadCount + snapshot.unreadCount,
+        unreadCount: Math.max(
+          0,
+          state.unreadCount + snapshot.unreadCount - newlyUnsyncedNotifIds.length,
+        ),
         pendingReadNotifIds,
+        unsyncedSuppressedNotifIds,
         isMarkingAllAsRead: false,
         mutationRevision: state.mutationRevision + 1,
       }
     })
+
+    return newlyUnsyncedNotifIds
   },
 
   resetNotifs: () => set(initialNotifState),

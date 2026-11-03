@@ -388,21 +388,16 @@ export function useNotifActions() {
     resyncIfPendingSettled(session)
   }, [])
 
-  const markProcessingAsRead = useCallback(async (notifId: number) => {
-    const session = getCurrentNotifSession()
-    if (!session) return
+  const markProcessingAsRead = useCallback(
+    async (notifId: number) => {
+      const targetNotif = useNotifStore.getState().notifs.find((notif) => notif.notifId === notifId)
 
-    const targetNotif = useNotifStore.getState().notifs.find((notif) => notif.notifId === notifId)
+      if (!targetNotif || targetNotif.notifType !== 'REPORT_PROCESSING') return
 
-    if (!targetNotif || targetNotif.notifType !== 'REPORT_PROCESSING' || targetNotif.isRead) return
-
-    const response = await markNotifAsReadAction(notifId)
-    assertNotifActionSuccess(response, '알림을 읽음 처리하지 못했습니다.')
-
-    if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
-
-    useNotifStore.getState().markNotifAsReadInPlace(notifId)
-  }, [])
+      await markAsRead(notifId)
+    },
+    [markAsRead],
+  )
 
   const markAllAsRead = useCallback(async () => {
     const session = getCurrentNotifSession()

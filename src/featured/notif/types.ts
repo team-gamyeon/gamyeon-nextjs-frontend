@@ -63,7 +63,6 @@ export interface NotifState {
   beginNotifRead: (notifId: number) => Notif | null
   confirmNotifRead: (notifId: number) => void
   rollbackNotifRead: (notif: Notif) => void
-  markNotifAsReadInPlace: (notifId: number) => void
   confirmSuppressedNotifRead: (notifId: number) => void
   beginAllNotifsRead: () => NotifReadAllSnapshot | null
   confirmAllNotifsRead: (snapshot: NotifReadAllSnapshot) => void

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/featured/auth/store'
 import type { Notif } from '../types'
 import { isNotif } from '../utils/validateNotif'
 import { clearNotifClientSession, registerNotifDisconnectHandler } from './notifClientSession'
-import { useNotifActions } from './useNotifActions'
+import { cancelNotifResync, useNotifActions } from './useNotifActions'
 
 const USE_DIRECT_NOTIF_SSE = Boolean(process.env.NEXT_PUBLIC_NOTIF_SSE_TRANSPORT?.trim())
 
@@ -40,7 +40,7 @@ type SseAuthRecoveryResult = 'refreshed' | 'invalid' | 'unavailable'
 
 interface NotifSubscription {
   sessionKey: string
-  onConnected?: (isReconnect: boolean) => void
+  onConnected?: () => void
   onNotif: (notif: Notif) => void
   onAuthRequired?: () => Promise<SseAuthRecoveryResult>
 }
@@ -71,6 +71,7 @@ function isCurrentConnection(controller: AbortController, generation: number): b
 
 function stopConnection(clearSubscriptions: boolean): void {
   cancelScheduledDisconnect()
+  cancelNotifResync()
 
   const controller = activeController
   activeController = null
@@ -109,7 +110,6 @@ function startConnection(): void {
   const controller = new AbortController()
   const generation = ++connectionGeneration
   let hasConnectedForCurrentRequest = false
-  let hasConnectedOnce = false
   let hasAttemptedAuthRecovery = false
 
   activeController = controller
@@ -179,9 +179,7 @@ function startConnection(): void {
       if (event.event === 'connect') {
         if (event.data === 'connected' && !hasConnectedForCurrentRequest) {
           hasConnectedForCurrentRequest = true
-          const isReconnect = hasConnectedOnce
-          hasConnectedOnce = true
-          dispatchToSubscriptions((subscription) => subscription.onConnected?.(isReconnect))
+          dispatchToSubscriptions((subscription) => subscription.onConnected?.())
         }
         return
       }
@@ -281,7 +279,7 @@ export function useNotifSubscription({
 }: UseNotifSubscriptionOptions = {}): void {
   const userId = useAuthStore((state) => state.user?.id)
   const logout = useAuthStore((state) => state.logout)
-  const { fetchInitialNotifs, receiveNotif } = useNotifActions()
+  const { fetchInitialNotifs, resyncNotifs, receiveNotif } = useNotifActions()
   const previousSessionKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -298,21 +296,19 @@ export function useNotifSubscription({
     let isActive = true
 
     const requestSync = () => {
-      void fetchInitialNotifs(sessionKey).catch((error: unknown) => {
-        if (isActive) {
-          console.error('알림 목록을 불러오지 못했습니다.', error)
-        }
-      })
+      if (isActive) void resyncNotifs(sessionKey)
     }
 
-    // 최초 목록 조회와 SSE 재연결 후 누락 보정을 같은 in-flight 요청으로 합친다.
-    requestSync()
+    // 초기 표시는 바로 조회하고, 연결 완료 후 별도 조회로 연결 전 누락을 보정한다.
+    void fetchInitialNotifs(sessionKey).catch((error: unknown) => {
+      if (!isActive) return
+      console.error('알림 목록을 불러오지 못했습니다.', error)
+      requestSync()
+    })
 
     const cleanupSubscription = subscribeToNotifs({
       sessionKey,
-      onConnected: (isReconnect) => {
-        if (isReconnect) requestSync()
-      },
+      onConnected: requestSync,
       onNotif: (notif) => {
         if (isActive) {
           receiveNotif(notif)
@@ -338,5 +334,5 @@ export function useNotifSubscription({
       isActive = false
       cleanupSubscription()
     }
-  }, [fetchInitialNotifs, logout, receiveNotif, unauthorizedBehavior, userId])
+  }, [fetchInitialNotifs, resyncNotifs, logout, receiveNotif, unauthorizedBehavior, userId])
 }

@@ -316,34 +316,6 @@ export const useNotifStore = create<NotifState>((set, get) => ({
     })
   },
 
-  markNotifAsReadInPlace: (notifId) => {
-    set((state) => {
-      const currentNotif = state.notifs.find((notif) => notif.notifId === notifId)
-
-      if (!currentNotif) {
-        if (!state.unsyncedSuppressedNotifIds.has(notifId)) return {}
-
-        const unsyncedSuppressedNotifIds = new Set(state.unsyncedSuppressedNotifIds)
-        unsyncedSuppressedNotifIds.delete(notifId)
-
-        return {
-          unsyncedSuppressedNotifIds,
-          mutationRevision: state.mutationRevision + 1,
-        }
-      }
-
-      if (currentNotif.isRead) return {}
-
-      return {
-        notifs: state.notifs.map((notif) =>
-          notif.notifId === notifId ? { ...notif, isRead: true } : notif,
-        ),
-        unreadCount: Math.max(0, state.unreadCount - 1),
-        mutationRevision: state.mutationRevision + 1,
-      }
-    })
-  },
-
   confirmSuppressedNotifRead: (notifId) => {
     set((state) => {
       if (!state.unsyncedSuppressedNotifIds.has(notifId)) return {}

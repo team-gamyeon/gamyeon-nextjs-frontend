@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuthStore } from '@/featured/auth/store'
 import { useNotifStore } from '../store'
 import { invalidateNotifSession } from './useNotifActions'
 
@@ -16,3 +17,11 @@ export function clearNotifClientSession(): void {
   invalidateNotifSession()
   useNotifStore.getState().resetNotifs()
 }
+
+// React effect 정리보다 먼저 인증 경계를 무효화한다. 여러 구독 훅이 있어도
+// 한 번만 초기화하며, 렌더 사이의 A → B → A 전환도 서로 다른 세션으로 취급한다.
+useAuthStore.subscribe((state, previous) => {
+  if (state.isLoggedIn !== previous.isLoggedIn || state.user?.id !== previous.user?.id) {
+    clearNotifClientSession()
+  }
+})

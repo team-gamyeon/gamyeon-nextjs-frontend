@@ -19,6 +19,7 @@ vi.mock('react', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react')>()),
   useCallback: (callback: unknown) => callback,
   useMemo: (factory: () => unknown) => factory(),
+  useSyncExternalStore: (_subscribe: unknown, getSnapshot: () => unknown) => getSnapshot(),
   useRef: (current: unknown) => ({ current }),
   useEffect: (effect: () => (() => void) | undefined) => {
     const cleanup = effect()
@@ -29,7 +30,7 @@ vi.mock('react', async (importOriginal) => ({
 vi.mock('@/featured/auth/store', () => ({
   useAuthStore: Object.assign(
     (selector: (state: typeof mocks.auth) => unknown) => selector(mocks.auth),
-    { getState: () => mocks.auth },
+    { getState: () => mocks.auth, subscribe: vi.fn() },
   ),
 }))
 

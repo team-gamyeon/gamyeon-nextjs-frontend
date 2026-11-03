@@ -1,13 +1,19 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
 import { refreshAuthSession } from '@/featured/auth/actions/auth.action'
 import { useAuthStore } from '@/featured/auth/store'
 import type { Notif } from '../types'
 import { isNotif } from '../utils/validateNotif'
 import { clearNotifClientSession, registerNotifDisconnectHandler } from './notifClientSession'
-import { cancelNotifResync, useNotifActions } from './useNotifActions'
+import {
+  cancelNotifResync,
+  getCurrentNotifSession,
+  getNotifSessionGeneration,
+  isCurrentNotifSession,
+  useNotifActions,
+} from './useNotifActions'
 
 const USE_DIRECT_NOTIF_SSE = Boolean(process.env.NEXT_PUBLIC_NOTIF_SSE_TRANSPORT?.trim())
 
@@ -127,6 +133,7 @@ function startConnection(): void {
 
       if (response.status === 401) {
         await cancelResponseBody(response)
+        if (!isCurrentConnection(controller, generation) || controller.signal.aborted) return
 
         if (hasAttemptedAuthRecovery) {
           throw new FatalSseError('인증 갱신 후에도 알림 SSE 연결이 거부되었습니다.')
@@ -145,9 +152,11 @@ function startConnection(): void {
         try {
           recoveryResult = await authSubscription.onAuthRequired()
         } catch (error) {
+          if (!isCurrentConnection(controller, generation) || controller.signal.aborted) return
           console.error('알림 SSE 인증 갱신 요청을 수행하지 못했습니다.', error)
           throw new FatalSseError('알림 SSE 인증 갱신 요청에 실패했습니다.')
         }
+        if (!isCurrentConnection(controller, generation) || controller.signal.aborted) return
 
         if (recoveryResult === 'refreshed') {
           throw new RetrySseError(0)
@@ -277,31 +286,32 @@ registerNotifDisconnectHandler(disconnectNotifsImmediately)
 export function useNotifSubscription({
   unauthorizedBehavior = 'redirect-to-signin',
 }: UseNotifSubscriptionOptions = {}): void {
-  const userId = useAuthStore((state) => state.user?.id)
+  const userId = useAuthStore((state) => (state.isLoggedIn ? state.user?.id : undefined))
+  // 렌더 사이에 A → B → A로 바뀌어도 사용자 ID가 같은 이전 effect를 재사용하지 않는다.
+  const sessionGeneration = useSyncExternalStore(
+    useAuthStore.subscribe,
+    getNotifSessionGeneration,
+    getNotifSessionGeneration,
+  )
   const logout = useAuthStore((state) => state.logout)
   const { fetchInitialNotifs, resyncNotifs, receiveNotif } = useNotifActions()
-  const previousSessionKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     const sessionKey = userId === undefined ? null : String(userId)
-
-    if (previousSessionKeyRef.current && previousSessionKeyRef.current !== sessionKey) {
-      clearNotifClientSession()
-    }
-
-    previousSessionKeyRef.current = sessionKey
-
-    if (!sessionKey) return
+    const session = getCurrentNotifSession()
+    if (!sessionKey || session?.sessionKey !== sessionKey) return
 
     let isActive = true
+    const isCurrentSession = () =>
+      isActive && isCurrentNotifSession(session.sessionKey, session.generation)
 
     const requestSync = () => {
-      if (isActive) void resyncNotifs(sessionKey)
+      if (isCurrentSession()) void resyncNotifs(sessionKey)
     }
 
     // 초기 표시는 바로 조회하고, 연결 완료 후 별도 조회로 연결 전 누락을 보정한다.
     void fetchInitialNotifs(sessionKey).catch((error: unknown) => {
-      if (!isActive) return
+      if (!isCurrentSession()) return
       console.error('알림 목록을 불러오지 못했습니다.', error)
       requestSync()
     })
@@ -310,16 +320,16 @@ export function useNotifSubscription({
       sessionKey,
       onConnected: requestSync,
       onNotif: (notif) => {
-        if (isActive) {
+        if (isCurrentSession()) {
           receiveNotif(notif)
         }
       },
       onAuthRequired: async () => {
+        if (!isCurrentSession()) return 'unavailable'
         const result = await refreshAuthSession()
-        if (result.status !== 'invalid' || !isActive) return result.status
+        if (result.status !== 'invalid' || !isCurrentSession()) return result.status
 
         isActive = false
-        previousSessionKeyRef.current = null
         clearNotifClientSession()
         logout()
         if (unauthorizedBehavior === 'redirect-to-signin') {
@@ -334,5 +344,13 @@ export function useNotifSubscription({
       isActive = false
       cleanupSubscription()
     }
-  }, [fetchInitialNotifs, resyncNotifs, logout, receiveNotif, unauthorizedBehavior, userId])
+  }, [
+    fetchInitialNotifs,
+    resyncNotifs,
+    logout,
+    receiveNotif,
+    unauthorizedBehavior,
+    userId,
+    sessionGeneration,
+  ])
 }

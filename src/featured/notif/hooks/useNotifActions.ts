@@ -93,7 +93,11 @@ function waitForDelay(delayMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delayMs))
 }
 
-function getCurrentNotifSession(): NotifSessionSnapshot | null {
+export function getNotifSessionGeneration(): number {
+  return notifSessionGeneration
+}
+
+export function getCurrentNotifSession(): NotifSessionSnapshot | null {
   const authState = useAuthStore.getState()
 
   if (!authState.isLoggedIn || authState.user === null) return null
@@ -104,7 +108,7 @@ function getCurrentNotifSession(): NotifSessionSnapshot | null {
   }
 }
 
-function isCurrentNotifSession(sessionKey: string, generation: number): boolean {
+export function isCurrentNotifSession(sessionKey: string, generation: number): boolean {
   const authState = useAuthStore.getState()
 
   return (
@@ -240,7 +244,11 @@ function resyncIfPendingSettled(session: NotifSessionSnapshot, isRetry = false):
   }
 
   void requestNotifResync(session)
-    .then(clearUnreadCountResyncRetry)
+    .then(() => {
+      if (isCurrentNotifSession(session.sessionKey, session.generation)) {
+        clearUnreadCountResyncRetry()
+      }
+    })
     .catch((error: unknown) => {
       if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
 
@@ -332,6 +340,7 @@ async function performInitialNotifLoad(
 
 function requestInitialNotifs(sessionKey: string, catchUp = false): Promise<void> {
   const generation = notifSessionGeneration
+  if (!isCurrentNotifSession(sessionKey, generation)) return Promise.resolve()
 
   if (
     initialNotifLoad?.sessionKey === sessionKey &&
@@ -341,7 +350,9 @@ function requestInitialNotifs(sessionKey: string, catchUp = false): Promise<void
     return initialNotifLoad.promise
   }
 
-  if (initialNotifLoad) {
+  // 같은 세션의 일반 조회 뒤에만 누락 보정을 직렬화한다.
+  // 다른 세션의 미완료 요청은 새 세션 조회를 막으면 안 된다.
+  if (initialNotifLoad?.sessionKey === sessionKey && initialNotifLoad.generation === generation) {
     return initialNotifLoad.promise
       .catch(() => undefined)
       .then(() => {
@@ -361,6 +372,7 @@ function requestInitialNotifs(sessionKey: string, catchUp = false): Promise<void
 }
 
 function requestNotifResync(session: NotifSessionSnapshot): Promise<void> {
+  if (!isCurrentNotifSession(session.sessionKey, session.generation)) return Promise.resolve()
   const activeLoad = initialNotifLoad
 
   if (
@@ -403,7 +415,10 @@ async function performNotifCatchUp(sync: NotifCatchUp): Promise<void> {
   while (isCurrentCatchUp(sync)) {
     // 연결 전에 시작한 요청의 성공/실패와 무관하게 그 이후 새 조회를 수행한다.
     // 같은 연결 이벤트를 받은 여러 구독자의 요청도 이 대기 중 하나로 합친다.
-    await initialNotifLoad?.promise.catch(() => undefined)
+    const activeLoad = initialNotifLoad
+    await (activeLoad?.sessionKey === sync.sessionKey && activeLoad.generation === sync.generation
+      ? activeLoad.promise.catch(() => undefined)
+      : undefined)
     if (!isCurrentCatchUp(sync)) return
 
     const revision = sync.revision
@@ -460,6 +475,7 @@ export function invalidateNotifSession(): void {
   clearUnreadCountResyncRetry()
   clearSuppressedReadRetries()
   notifSessionGeneration += 1
+  initialNotifLoad = null
   lastSyncedNotifIds = null
 }
 

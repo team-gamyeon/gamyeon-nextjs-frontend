@@ -29,7 +29,6 @@ interface NotifSessionSnapshot {
 
 let initialNotifLoad: InitialNotifLoad | null = null
 let notifSessionGeneration = 0
-let listLoadGeneration = 0
 let unreadCountResyncRetryTimer: ReturnType<typeof setTimeout> | null = null
 const activeSuppressedReadKeys = new Set<string>()
 const suppressedReadRetryAttempts = new Map<string, number>()
@@ -225,11 +224,7 @@ function resyncIfPendingSettled(session: NotifSessionSnapshot, isRetry = false):
   }
 
   void requestNotifResync(session)
-    .then(() => {
-      if (isCurrentNotifSession(session.sessionKey, session.generation)) {
-        clearUnreadCountResyncRetry()
-      }
-    })
+    .then(clearUnreadCountResyncRetry)
     .catch((error: unknown) => {
       if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
 
@@ -252,9 +247,6 @@ async function performInitialNotifLoad(sessionKey: string, generation: number): 
     return
   }
 
-  // A fresh first-page load supersedes any older pagination request.
-  listLoadGeneration += 1
-
   try {
     while (isCurrentNotifSession(sessionKey, generation)) {
       const revisionAtRequestStart = useNotifStore.getState().mutationRevision
@@ -274,17 +266,12 @@ async function performInitialNotifLoad(sessionKey: string, generation: number): 
       if (!hasSettled) return
     }
   } finally {
-    if (isCurrentNotifSession(sessionKey, generation)) {
-      useNotifStore.getState().finishInitialLoad()
-    }
+    useNotifStore.getState().finishInitialLoad()
   }
 }
 
-function requestInitialNotifs(
-  sessionKey: string,
-  generation = notifSessionGeneration,
-): Promise<void> {
-  if (!isCurrentNotifSession(sessionKey, generation)) return Promise.resolve()
+function requestInitialNotifs(sessionKey: string): Promise<void> {
+  const generation = notifSessionGeneration
 
   if (initialNotifLoad?.sessionKey === sessionKey && initialNotifLoad.generation === generation) {
     return initialNotifLoad.promise
@@ -293,7 +280,7 @@ function requestInitialNotifs(
   if (initialNotifLoad) {
     return initialNotifLoad.promise
       .catch(() => undefined)
-      .then(() => requestInitialNotifs(sessionKey, generation))
+      .then(() => requestInitialNotifs(sessionKey))
   }
 
   const promise = performInitialNotifLoad(sessionKey, generation).finally(() => {
@@ -307,8 +294,6 @@ function requestInitialNotifs(
 }
 
 function requestNotifResync(session: NotifSessionSnapshot): Promise<void> {
-  if (!isCurrentNotifSession(session.sessionKey, session.generation)) return Promise.resolve()
-
   const activeLoad = initialNotifLoad
 
   if (
@@ -331,19 +316,11 @@ export function invalidateNotifSession(): void {
   clearUnreadCountResyncRetry()
   clearSuppressedReadRetries()
   notifSessionGeneration += 1
-  // A previous session's network request may never settle. New sessions must
-  // start independently; session guards keep late responses from touching them.
-  initialNotifLoad = null
 }
 
 export function useNotifActions() {
   const fetchInitialNotifs = useCallback(
     (sessionKey: string) => requestInitialNotifs(sessionKey),
-    [],
-  )
-
-  const resyncNotifs = useCallback(
-    (sessionKey: string) => requestNotifResync({ sessionKey, generation: notifSessionGeneration }),
     [],
   )
 
@@ -356,7 +333,6 @@ export function useNotifActions() {
     if (cursorId === null) return
 
     const revisionAtRequestStart = useNotifStore.getState().mutationRevision
-    const listGenerationAtRequestStart = listLoadGeneration
 
     try {
       const response = await getNotifsAction({ cursorId })
@@ -365,7 +341,6 @@ export function useNotifActions() {
       if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
 
       if (useNotifStore.getState().mutationRevision !== revisionAtRequestStart) return
-      if (listLoadGeneration !== listGenerationAtRequestStart) return
 
       const newlySuppressedNotifIds = useNotifStore.getState().appendNotifs(data)
       syncSuppressedNotifReads(newlySuppressedNotifIds, session)
@@ -400,8 +375,7 @@ export function useNotifActions() {
       assertNotifActionSuccess(response, '알림을 읽음 처리하지 못했습니다.')
     } catch (error) {
       if (isCurrentNotifSession(session.sessionKey, session.generation)) {
-        const newlySuppressedNotifIds = useNotifStore.getState().rollbackNotifRead(removedNotif)
-        syncSuppressedNotifReads(newlySuppressedNotifIds, session)
+        useNotifStore.getState().rollbackNotifRead(removedNotif)
         resyncIfPendingSettled(session)
       }
 
@@ -414,15 +388,21 @@ export function useNotifActions() {
     resyncIfPendingSettled(session)
   }, [])
 
-  const markProcessingAsRead = useCallback(
-    async (notifId: number) => {
-      const targetNotif = useNotifStore.getState().notifs.find((notif) => notif.notifId === notifId)
-      if (targetNotif?.notifType !== 'REPORT_PROCESSING') return
+  const markProcessingAsRead = useCallback(async (notifId: number) => {
+    const session = getCurrentNotifSession()
+    if (!session) return
 
-      await markAsRead(notifId)
-    },
-    [markAsRead],
-  )
+    const targetNotif = useNotifStore.getState().notifs.find((notif) => notif.notifId === notifId)
+
+    if (!targetNotif || targetNotif.notifType !== 'REPORT_PROCESSING' || targetNotif.isRead) return
+
+    const response = await markNotifAsReadAction(notifId)
+    assertNotifActionSuccess(response, '알림을 읽음 처리하지 못했습니다.')
+
+    if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
+
+    useNotifStore.getState().markNotifAsReadInPlace(notifId)
+  }, [])
 
   const markAllAsRead = useCallback(async () => {
     const session = getCurrentNotifSession()
@@ -436,8 +416,7 @@ export function useNotifActions() {
       assertNotifActionSuccess(response, '알림을 모두 읽음 처리하지 못했습니다.')
     } catch (error) {
       if (isCurrentNotifSession(session.sessionKey, session.generation)) {
-        const newlySuppressedNotifIds = useNotifStore.getState().rollbackAllNotifsRead(snapshot)
-        syncSuppressedNotifReads(newlySuppressedNotifIds, session)
+        useNotifStore.getState().rollbackAllNotifsRead(snapshot)
         resyncIfPendingSettled(session)
       }
 
@@ -453,7 +432,6 @@ export function useNotifActions() {
   return useMemo(
     () => ({
       fetchInitialNotifs,
-      resyncNotifs,
       fetchMoreNotifs,
       receiveNotif,
       markAsRead,
@@ -462,7 +440,6 @@ export function useNotifActions() {
     }),
     [
       fetchInitialNotifs,
-      resyncNotifs,
       fetchMoreNotifs,
       markAllAsRead,
       markAsRead,

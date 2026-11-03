@@ -29,6 +29,7 @@ interface NotifSessionSnapshot {
 
 let initialNotifLoad: InitialNotifLoad | null = null
 let notifSessionGeneration = 0
+let listLoadGeneration = 0
 let unreadCountResyncRetryTimer: ReturnType<typeof setTimeout> | null = null
 const activeSuppressedReadKeys = new Set<string>()
 const suppressedReadRetryAttempts = new Map<string, number>()
@@ -247,6 +248,9 @@ async function performInitialNotifLoad(sessionKey: string, generation: number): 
     return
   }
 
+  // A fresh first-page load supersedes any older pagination request.
+  listLoadGeneration += 1
+
   try {
     while (isCurrentNotifSession(sessionKey, generation)) {
       const revisionAtRequestStart = useNotifStore.getState().mutationRevision
@@ -333,15 +337,17 @@ export function useNotifActions() {
     if (cursorId === null) return
 
     const revisionAtRequestStart = useNotifStore.getState().mutationRevision
+    const listGenerationAtRequestStart = listLoadGeneration
 
     try {
       const response = await getNotifsAction({ cursorId })
-      const data = getNotifListData(response, '알림 목록을 추가로 불러오지 못했습니다.')
 
       if (!isCurrentNotifSession(session.sessionKey, session.generation)) return
 
+      if (listLoadGeneration !== listGenerationAtRequestStart) return
       if (useNotifStore.getState().mutationRevision !== revisionAtRequestStart) return
 
+      const data = getNotifListData(response, '알림 목록을 추가로 불러오지 못했습니다.')
       const newlySuppressedNotifIds = useNotifStore.getState().appendNotifs(data)
       syncSuppressedNotifReads(newlySuppressedNotifIds, session)
     } finally {

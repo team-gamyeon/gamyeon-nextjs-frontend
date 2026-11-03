@@ -563,7 +563,8 @@ export function useNotifActions() {
       assertNotifActionSuccess(response, '알림을 모두 읽음 처리하지 못했습니다.')
     } catch (error) {
       if (isCurrentNotifSession(session.sessionKey, session.generation)) {
-        useNotifStore.getState().rollbackAllNotifsRead(snapshot)
+        const newlySuppressedNotifIds = useNotifStore.getState().rollbackAllNotifsRead(snapshot)
+        syncSuppressedNotifReads(newlySuppressedNotifIds, session)
         resyncIfPendingSettled(session)
       }
 

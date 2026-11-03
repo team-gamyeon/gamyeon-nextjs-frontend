@@ -66,6 +66,6 @@ export interface NotifState {
   confirmSuppressedNotifRead: (notifId: number) => void
   beginAllNotifsRead: () => NotifReadAllSnapshot | null
   confirmAllNotifsRead: (snapshot: NotifReadAllSnapshot) => void
-  rollbackAllNotifsRead: (snapshot: NotifReadAllSnapshot) => void
+  rollbackAllNotifsRead: (snapshot: NotifReadAllSnapshot) => number[]
   resetNotifs: () => void
 }
